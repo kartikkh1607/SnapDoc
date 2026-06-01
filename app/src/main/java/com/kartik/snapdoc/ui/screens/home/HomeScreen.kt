@@ -1,0 +1,636 @@
+package com.kartik.snapdoc.ui.screens.home
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Wallet
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kartik.snapdoc.data.specs.model.DocumentSpec
+import com.kartik.snapdoc.ui.components.DocKind
+import com.kartik.snapdoc.ui.components.DocPreview
+import com.kartik.snapdoc.ui.components.ShoulderArt
+import com.kartik.snapdoc.ui.theme.Amber
+import com.kartik.snapdoc.ui.theme.AmberDark
+import com.kartik.snapdoc.ui.theme.AmberSoft
+import com.kartik.snapdoc.ui.theme.Hairline
+import com.kartik.snapdoc.ui.theme.Hairline2
+import com.kartik.snapdoc.ui.theme.Ink3
+import com.kartik.snapdoc.ui.theme.Ink4
+import com.kartik.snapdoc.ui.theme.Primary
+import com.kartik.snapdoc.ui.theme.PrimaryDark
+import com.kartik.snapdoc.ui.theme.PrimaryFaint
+import com.kartik.snapdoc.ui.theme.PrimarySoft
+import com.kartik.snapdoc.ui.theme.Success
+import com.kartik.snapdoc.ui.theme.s1
+import com.kartik.snapdoc.ui.theme.sGreen
+
+@Composable
+fun HomeScreen(
+    onDocClick: (String) -> Unit,
+    onSettingsClick: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 44.dp, bottom = 96.dp),
+        ) {
+            PersonalisedHeader(onSettingsClick = onSettingsClick)
+            Spacer(modifier = Modifier.height(8.dp))
+            ContinueHero(
+                onClick = {
+                    state.documents.firstOrNull { it.id.contains("aadhaar", ignoreCase = true) }
+                        ?.let { onDocClick(it.id) }
+                        ?: state.documents.firstOrNull()?.let { onDocClick(it.id) }
+                },
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            StatsRow()
+            Spacer(modifier = Modifier.height(14.dp))
+            SmartReminder()
+            Spacer(modifier = Modifier.height(14.dp))
+            SearchPill(query = state.query)
+            Spacer(modifier = Modifier.height(14.dp))
+            CategoryChips(
+                categories = listOf(null to "All") + state.categories.map { it.id to it.displayName },
+                selected = state.selectedCategoryId,
+                onSelect = viewModel::onCategorySelect,
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+            SuggestedHeader()
+            Spacer(modifier = Modifier.height(8.dp))
+            DocumentGrid(documents = state.documents, onDocClick = onDocClick)
+        }
+        BottomTabBar(modifier = Modifier.align(Alignment.BottomCenter))
+    }
+}
+
+@Composable
+private fun PersonalisedHeader(onSettingsClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp, vertical = 12.dp),
+    ) {
+        AvatarTile()
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Good morning",
+                style = MaterialTheme.typography.labelMedium,
+                color = Ink3,
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Text(
+                    text = "Riya",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = "👋",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+        }
+        NotificationBell(onClick = onSettingsClick)
+    }
+}
+
+@Composable
+private fun AvatarTile() {
+    Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(Primary, PrimaryDark),
+                        start = Offset(0f, 0f),
+                        end = Offset(120f, 120f),
+                    ),
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = "RS",
+                color = Color.White,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            )
+        }
+        // Online dot
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .offset(x = (-2).dp, y = (-2).dp)
+                .size(12.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+                .padding(2.dp)
+                .clip(CircleShape)
+                .background(Success),
+        )
+    }
+}
+
+@Composable
+private fun NotificationBell(onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .s1(14.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Notifications,
+            contentDescription = "Notifications",
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(19.dp),
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = (-9).dp, y = 9.dp)
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+                .padding(1.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.error),
+        )
+    }
+}
+
+@Composable
+private fun ContinueHero(onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp)
+            .sGreen(22.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(Primary, PrimaryDark),
+                    start = Offset(0f, 0f),
+                    end = Offset(500f, 500f),
+                ),
+            )
+            .clickable(onClick = onClick)
+            .padding(14.dp),
+    ) {
+        // Mini preview card.
+        Box(
+            modifier = Modifier
+                .size(width = 56.dp, height = 72.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.White)
+                .padding(4.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color(0xFFFFF8EC)),
+        ) {
+            ShoulderArt(
+                modifier = Modifier.fillMaxSize(),
+                shirtColor = Color(0xFF5C4633),
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(Amber)
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            ) {
+                Text(
+                    text = "1 STEP LEFT",
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 9.sp,
+                    ),
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Continue Aadhaar photo",
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            )
+            Text(
+                text = "Pay ₹49 · ready for download",
+                color = Color.White.copy(alpha = 0.75f),
+                style = MaterialTheme.typography.labelMedium,
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White.copy(alpha = 0.18f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatsRow() {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp),
+    ) {
+        StatCell(value = "12", label = "Photos made", icon = Icons.Outlined.Image, modifier = Modifier.weight(1f))
+        StatCell(value = "₹480", label = "Saved", icon = Icons.Outlined.Wallet, modifier = Modifier.weight(1f))
+        StatCell(value = "100%", label = "Approved", icon = Icons.Outlined.Shield, modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun StatCell(value: String, label: String, icon: ImageVector, modifier: Modifier = Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
+            .s1(14.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(RoundedCornerShape(9.dp))
+                .background(PrimaryFaint),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Primary,
+                modifier = Modifier.size(14.dp),
+            )
+        }
+        Column {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = Ink3,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SmartReminder() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(AmberSoft)
+            .border(1.dp, AmberDark.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+            .padding(start = 10.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(9.dp))
+                .background(Amber),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Notifications,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(15.dp),
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Passport expires Mar 2027",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = AmberDark,
+            )
+            Text(
+                text = "Renew in 10 months · get fresh photos ready",
+                style = MaterialTheme.typography.labelMedium,
+                color = AmberDark.copy(alpha = 0.85f),
+            )
+        }
+        Text(
+            text = "Plan",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+            color = AmberDark,
+        )
+    }
+}
+
+@Composable
+private fun SearchPill(query: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp)
+            .height(46.dp)
+            .s1(14.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable { /* opens search — query state managed by VM */ }
+            .padding(horizontal = 14.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Search,
+            contentDescription = null,
+            tint = Ink4,
+            modifier = Modifier.size(18.dp),
+        )
+        Text(
+            text = if (query.isBlank()) "Search 90+ Indian docs…" else query,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (query.isBlank()) Ink4 else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(Hairline2)
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+        ) {
+            Text(
+                text = "⌘K",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = Ink3,
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryChips(
+    categories: List<Pair<String?, String>>,
+    selected: String?,
+    onSelect: (String?) -> Unit,
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
+        contentPadding = PaddingValues(horizontal = 22.dp),
+    ) {
+        items(categories) { (id, name) ->
+            val active = selected == id || (id == null && selected == null && name == "All")
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(99.dp))
+                    .let { mod ->
+                        if (active) mod.background(MaterialTheme.colorScheme.onSurface)
+                        else mod.s1(99.dp).background(MaterialTheme.colorScheme.surface)
+                    }
+                    .clickable { onSelect(id) }
+                    .padding(horizontal = 12.dp, vertical = 7.dp),
+            ) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = if (active) Color.White else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SuggestedHeader() {
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp),
+    ) {
+        Text(
+            text = "Suggested for Riya",
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = "See all",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            color = Primary,
+        )
+    }
+}
+
+@Composable
+private fun DocumentGrid(documents: List<DocumentSpec>, onDocClick: (String) -> Unit) {
+    val rows = documents.take(4).chunked(2)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp),
+    ) {
+        rows.forEachIndexed { rowIdx, row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                row.forEachIndexed { colIdx, doc ->
+                    val featured = rowIdx == 0 && colIdx == 0
+                    DocCardLarge(
+                        doc = doc,
+                        featured = featured,
+                        onClick = { onDocClick(doc.id) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                if (row.size < 2) Spacer(modifier = Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+@Composable
+private fun DocCardLarge(
+    doc: DocumentSpec,
+    featured: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .s1(18.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(onClick = onClick)
+            .height(132.dp)
+            .padding(12.dp),
+    ) {
+        Column {
+            DocPreview(
+                kind = kindFor(doc),
+                modifier = Modifier.size(width = 54.dp, height = 66.dp),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = doc.displayName,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+            )
+            Text(
+                text = "${doc.dimensions.widthMm.toInt()}×${doc.dimensions.heightMm.toInt()} mm",
+                style = MaterialTheme.typography.labelMedium,
+                color = Ink3,
+            )
+        }
+        if (featured) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(PrimarySoft)
+                    .padding(horizontal = 7.dp, vertical = 2.dp),
+            ) {
+                Text(
+                    text = "FOR YOU",
+                    color = Primary,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 9.sp,
+                    ),
+                )
+            }
+        }
+    }
+}
+
+private fun kindFor(doc: DocumentSpec): DocKind {
+    val cat = doc.categoryId.lowercase()
+    val name = doc.displayName.lowercase()
+    return when {
+        "passport" in name || "passport" in cat -> DocKind.Passport
+        "aadhaar" in name -> DocKind.Aadhaar
+        "pan" in name -> DocKind.Pan
+        "upsc" in name || "exam" in cat -> DocKind.Upsc
+        "visa" in name || "visa" in cat -> DocKind.Visa
+        "ssc" in name -> DocKind.Ssc
+        else -> DocKind.Passport
+    }
+}
+
+@Composable
+private fun BottomTabBar(modifier: Modifier = Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(78.dp)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+            .border(width = 1.dp, color = Hairline, shape = RoundedCornerShape(0.dp))
+            .padding(start = 22.dp, end = 22.dp, bottom = 18.dp),
+    ) {
+        TabItem(label = "Home", icon = Icons.Outlined.Home, active = true)
+        TabItem(label = "History", icon = Icons.Outlined.History, active = false)
+        TabItem(label = "Documents", icon = Icons.Outlined.Folder, active = false)
+        TabItem(label = "Profile", icon = Icons.Outlined.Person, active = false)
+    }
+}
+
+@Composable
+private fun TabItem(label: String, icon: ImageVector, active: Boolean) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = if (active) Primary else Ink4,
+            modifier = Modifier.size(22.dp),
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = if (active) FontWeight.SemiBold else FontWeight.Medium,
+            ),
+            color = if (active) Primary else Ink4,
+        )
+    }
+}
