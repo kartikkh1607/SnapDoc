@@ -35,7 +35,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -55,23 +58,37 @@ private data class SettingsRow(
     val subtitle: String? = null,
     val icon: ImageVector,
     val toggle: Boolean = false,
+    val onClick: (() -> Unit)? = null,
 )
 
 private data class SettingsGroup(val title: String, val rows: List<SettingsRow>)
 
-private val Groups = listOf(
+private fun buildGroups(state: SettingsUiState, onRestore: () -> Unit): List<SettingsGroup> = listOf(
     SettingsGroup(
-        title = "Account",
+        title = "Purchases",
         rows = listOf(
-            SettingsRow("Purchases & receipts", "4 photos exported", Icons.Outlined.Wallet),
-            SettingsRow("Restore purchase", null, Icons.Outlined.Refresh),
+            SettingsRow(
+                label = "Photo Export",
+                subtitle = if (state.entitlement.canExport) "Unlocked" else "₹49 · tap export from any photo",
+                icon = Icons.Outlined.Wallet,
+            ),
+            SettingsRow(
+                label = "Studio Bundle",
+                subtitle = if (state.entitlement.studioBundleUnlocked) "Unlocked · print sheets enabled" else "₹99 · adds print sheets",
+                icon = Icons.Outlined.Image,
+            ),
+            SettingsRow(
+                label = if (state.restoring) "Restoring…" else "Restore purchase",
+                subtitle = state.restoreMessage,
+                icon = Icons.Outlined.Refresh,
+                onClick = onRestore,
+            ),
         ),
     ),
     SettingsGroup(
         title = "Preferences",
         rows = listOf(
             SettingsRow("Language", "English (India)", Icons.Outlined.Language),
-            SettingsRow("Save to gallery", "On", Icons.Outlined.Image, toggle = true),
             SettingsRow("On-device processing", "Always", Icons.Outlined.Bolt),
         ),
     ),
@@ -88,13 +105,22 @@ private val Groups = listOf(
         rows = listOf(
             SettingsRow("Privacy policy", null, Icons.Outlined.Shield),
             SettingsRow("Terms of service", null, Icons.Outlined.Book),
-            SettingsRow("About", "v 4.2.1", Icons.Outlined.Info),
+            SettingsRow(
+                label = "About",
+                subtitle = "v${state.versionName} (${state.versionCode})",
+                icon = Icons.Outlined.Info,
+            ),
         ),
     ),
 )
 
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(
+    onBack: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val groups = buildGroups(state, onRestore = viewModel::restore)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -142,14 +168,14 @@ fun SettingsScreen(onBack: () -> Unit) {
 
             Spacer(modifier = Modifier.height(18.dp))
             Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                Groups.forEach { group ->
+                groups.forEach { group ->
                     GroupCard(group = group)
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Made in Bengaluru · v 4.2.1 (build 4210)",
+                text = "Made in India · v${state.versionName} (build ${state.versionCode})",
                 color = Ink4,
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
@@ -253,11 +279,13 @@ private fun GroupCard(group: SettingsGroup) {
 
 @Composable
 private fun SettingsRowItem(row: SettingsRow) {
+    val clickable = row.onClick
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .let { if (clickable != null) it.clickable(onClick = clickable) else it }
             .padding(vertical = 12.dp),
     ) {
         Box(

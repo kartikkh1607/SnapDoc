@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,13 +38,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.kartik.snapdoc.domain.pipeline.ValidationCheck
 import com.kartik.snapdoc.ui.components.DocPreviewHero
-import com.kartik.snapdoc.ui.navigation.Routes
 import com.kartik.snapdoc.ui.theme.Amber
 import com.kartik.snapdoc.ui.theme.AmberDark
 import com.kartik.snapdoc.ui.theme.AmberSoft
+import com.kartik.snapdoc.ui.theme.ErrorRed
 import com.kartik.snapdoc.ui.theme.Hairline2
 import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Ink4
@@ -51,25 +53,6 @@ import com.kartik.snapdoc.ui.theme.Primary
 import com.kartik.snapdoc.ui.theme.s1
 import com.kartik.snapdoc.ui.theme.s3
 import com.kartik.snapdoc.ui.theme.sGreen
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-
-@HiltViewModel
-class PreviewViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-    val docId: String = savedStateHandle.get<String>(Routes.Args.DOC_ID).orEmpty()
-    val imageUri: String = savedStateHandle.get<String>(Routes.Args.IMAGE_URI).orEmpty()
-}
-
-private data class CheckItem(val label: String, val detail: String)
-
-private val Checks = listOf(
-    CheckItem("Correct dimensions", "51 × 51 mm"),
-    CheckItem("Correct background", "Pure white #FFFFFF"),
-    CheckItem("File size verified", "87 KB · within 10–240 KB"),
-    CheckItem("Face aligned", "78% head height · centered"),
-)
 
 @Composable
 fun PreviewScreen(
@@ -78,6 +61,7 @@ fun PreviewScreen(
     onPrintSheet: (docId: String, imageUri: String) -> Unit,
     viewModel: PreviewViewModel = hiltViewModel(),
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -89,7 +73,6 @@ fun PreviewScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(top = 56.dp, bottom = 160.dp),
         ) {
-            // Top bar
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -107,10 +90,11 @@ fun PreviewScreen(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            WatermarkedPreview()
+            WatermarkedPreview(state = state)
 
             Spacer(modifier = Modifier.height(22.dp))
             VerificationChecklist(
+                checks = state.checks,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp),
@@ -126,6 +110,7 @@ fun PreviewScreen(
         }
 
         ExportCta(
+            entitled = state.entitlement.canExport,
             onClick = { onExport(viewModel.docId, viewModel.imageUri) },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -135,47 +120,61 @@ fun PreviewScreen(
 }
 
 @Composable
-private fun WatermarkedPreview() {
+private fun WatermarkedPreview(state: PreviewUiState) {
+    val doc = state.doc
+    val aspect = if (doc != null) doc.dimensions.widthPx.toFloat() / doc.dimensions.heightPx else 0.82f
+    val frameHeight = 260.dp
+    val frameWidth = (frameHeight.value * aspect).dp
+
     Box(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
-                .size(width = 196.dp, height = 240.dp)
+                .size(width = frameWidth, height = frameHeight)
                 .s3(22.dp)
                 .clip(RoundedCornerShape(22.dp))
                 .background(Color.White)
                 .padding(10.dp),
         ) {
-            DocPreviewHero(modifier = Modifier.fillMaxSize())
-            // Diagonal watermark
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .rotate(-22f),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = "SNAPDOC · SNAPDOC",
-                    color = Primary.copy(alpha = 0.10f),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            if (state.processedUri != null) {
+                AsyncImage(
+                    model = state.processedUri,
+                    contentDescription = "Processed photo",
+                    modifier = Modifier.fillMaxSize(),
                 )
+            } else {
+                DocPreviewHero(modifier = Modifier.fillMaxSize())
+            }
+            if (state.watermarked) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .rotate(-22f),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "SNAPDOC · SNAPDOC",
+                        color = Primary.copy(alpha = 0.10f),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    )
+                }
             }
         }
-        // READY chip — top-right.
+        val chipColor = if (state.allPassed) Primary else ErrorRed
+        val chipLabel = if (state.allPassed) "READY" else "REVIEW"
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(end = 16.dp)
                 .sGreen(99.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(Primary)
+                .background(chipColor)
                 .padding(horizontal = 10.dp, vertical = 6.dp),
         ) {
             Text(
-                text = "READY",
+                text = chipLabel,
                 color = Color.White,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
             )
@@ -184,7 +183,10 @@ private fun WatermarkedPreview() {
 }
 
 @Composable
-private fun VerificationChecklist(modifier: Modifier = Modifier) {
+private fun VerificationChecklist(checks: List<ValidationCheck>, modifier: Modifier = Modifier) {
+    val items = checks.ifEmpty {
+        listOf(ValidationCheck("Processing", "—", "Loading…", true))
+    }
     Column(
         modifier = modifier
             .s1(20.dp)
@@ -192,7 +194,7 @@ private fun VerificationChecklist(modifier: Modifier = Modifier) {
             .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp),
     ) {
-        Checks.forEachIndexed { idx, item ->
+        items.forEachIndexed { idx, item ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -204,7 +206,7 @@ private fun VerificationChecklist(modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .size(26.dp)
                         .clip(CircleShape)
-                        .background(Primary),
+                        .background(if (item.passed) Primary else ErrorRed),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -216,18 +218,18 @@ private fun VerificationChecklist(modifier: Modifier = Modifier) {
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = item.label,
+                        text = item.name,
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                     )
                     Text(
-                        text = item.detail,
-                        color = Ink3,
+                        text = "${item.actual} · expected ${item.expected}",
+                        color = if (item.passed) Ink3 else ErrorRed,
                         style = MaterialTheme.typography.labelMedium,
                     )
                 }
             }
-            if (idx != Checks.lastIndex) {
+            if (idx != items.lastIndex) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -292,7 +294,7 @@ private fun LockedPrintSheetCard(onClick: () -> Unit, modifier: Modifier = Modif
 }
 
 @Composable
-private fun ExportCta(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ExportCta(entitled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -308,27 +310,29 @@ private fun ExportCta(onClick: () -> Unit, modifier: Modifier = Modifier) {
         ) {
             Column {
                 Text(
-                    text = "Export photo",
+                    text = if (entitled) "Save & export" else "Export photo",
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
                 Text(
-                    text = "One-time · no subscription",
+                    text = if (entitled) "Save to gallery · share" else "One-time · no subscription",
                     color = Color.White.copy(alpha = 0.75f),
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.18f))
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-            ) {
-                Text(
-                    text = "₹49",
-                    color = Color.White,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                )
+            if (!entitled) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.18f))
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                ) {
+                    Text(
+                        text = "₹49",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(10.dp))

@@ -1,0 +1,51 @@
+package com.kartik.snapdoc.ui.screens.preview
+
+import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.kartik.snapdoc.data.billing.PurchaseRepository
+import com.kartik.snapdoc.data.specs.SpecCatalogRepository
+import com.kartik.snapdoc.domain.pipeline.ProcessingResultStore
+import com.kartik.snapdoc.ui.navigation.Routes
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.net.URLDecoder
+import javax.inject.Inject
+
+@HiltViewModel
+class PreviewViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    repo: SpecCatalogRepository,
+    resultStore: ProcessingResultStore,
+    purchases: PurchaseRepository,
+) : ViewModel() {
+
+    val docId: String = savedStateHandle.get<String>(Routes.Args.DOC_ID).orEmpty()
+    val imageUri: String = savedStateHandle.get<String>(Routes.Args.IMAGE_URI).orEmpty()
+    private val decodedUri: String = runCatching { URLDecoder.decode(imageUri, "UTF-8") }.getOrDefault(imageUri)
+
+    private val _state = MutableStateFlow(PreviewUiState())
+    val state: StateFlow<PreviewUiState> = _state.asStateFlow()
+
+    init {
+        val doc = repo.byId(docId)
+        val entry = resultStore.get(decodedUri)
+        _state.value = PreviewUiState(
+            doc = doc,
+            processedUri = Uri.parse(decodedUri),
+            checks = entry?.validation?.checks.orEmpty(),
+            allPassed = entry?.validation?.passed ?: false,
+            sizeKb = entry?.sizeKb ?: 0,
+            widthPx = entry?.widthPx ?: 0,
+            heightPx = entry?.heightPx ?: 0,
+        )
+        viewModelScope.launch {
+            purchases.entitlement.collect { e -> _state.update { it.copy(entitlement = e) } }
+        }
+    }
+}

@@ -1,5 +1,7 @@
 package com.kartik.snapdoc.ui.screens.export
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,18 +22,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.kartik.snapdoc.data.billing.ProductIds
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -49,10 +56,8 @@ import com.kartik.snapdoc.ui.theme.PrimaryFaint
 import com.kartik.snapdoc.ui.theme.PrimarySoft
 import com.kartik.snapdoc.ui.theme.sGreen
 
-// "Export" is the paywall sheet from the design — a bottom-sheet
-// with product comparison cards, trust row, and a UPI CTA.
-
 private data class Plan(
+    val productId: String,
     val title: String,
     val subtitle: String,
     val price: String,
@@ -62,29 +67,28 @@ private data class Plan(
 
 private val Plans = listOf(
     Plan(
-        title = "Digital photo",
-        subtitle = "Spec-perfect JPG · re-downloadable",
+        productId = ProductIds.PHOTO_EXPORT,
+        title = "Photo Export",
+        subtitle = "Remove watermark · export unlimited photos",
         price = "₹49",
     ),
     Plan(
-        title = "Photo + Print sheet",
-        subtitle = "Digital JPG + A4 with 8 copies, cut-line ready",
-        price = "₹79",
-        strike = "₹109",
-        badge = "MOST POPULAR" to Primary,
-    ),
-    Plan(
-        title = "Family pack · 5 photos",
-        subtitle = "Any 5 documents · Photo + Print sheets",
-        price = "₹199",
-        strike = "₹395",
-        badge = "BEST VALUE" to Amber,
+        productId = ProductIds.STUDIO_BUNDLE,
+        title = "Studio Bundle",
+        subtitle = "Photo Export + multi-copy print sheets (4×6 / A4)",
+        price = "₹99",
+        strike = "₹149",
+        badge = "BEST VALUE" to Primary,
     ),
 )
 
 @Composable
-fun ExportScreen(onDone: () -> Unit) {
-    var selected by remember { mutableIntStateOf(1) }
+fun ExportScreen(
+    onDone: () -> Unit,
+    viewModel: ExportViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -148,8 +152,45 @@ fun ExportScreen(onDone: () -> Unit) {
             }
 
             Spacer(modifier = Modifier.height(18.dp))
-            Plans.forEachIndexed { idx, plan ->
-                PlanCard(plan = plan, selected = idx == selected, onSelect = { selected = idx })
+
+            if (state.phase == ExportPhase.Saved) {
+                SavedSuccessCard(
+                    savedUri = state.savedUri,
+                    onShare = { uri ->
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "image/jpeg"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Share photo"))
+                    },
+                    onDone = onDone,
+                )
+                return@Column
+            }
+
+            if (state.entitlement.canExport && state.phase == ExportPhase.Saving) {
+                SavingCard()
+                return@Column
+            }
+
+            if (state.error != null) {
+                Text(
+                    text = state.error ?: "",
+                    color = Amber,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                )
+            }
+
+            Plans.forEach { plan ->
+                PlanCard(
+                    plan = plan,
+                    selected = plan.productId == state.selectedProductId,
+                    onSelect = { viewModel.selectProduct(plan.productId) },
+                )
                 Spacer(modifier = Modifier.height(10.dp))
             }
 
@@ -170,7 +211,7 @@ fun ExportScreen(onDone: () -> Unit) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            // CTA
+            val selectedPlan = Plans.firstOrNull { it.productId == state.selectedProductId } ?: Plans.first()
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -178,24 +219,176 @@ fun ExportScreen(onDone: () -> Unit) {
                     .sGreen(18.dp)
                     .clip(RoundedCornerShape(18.dp))
                     .background(Primary)
-                    .clickable(onClick = onDone),
+                    .clickable(enabled = state.phase != ExportPhase.Purchasing) {
+                        (context as? Activity)?.let { viewModel.pay(it) }
+                    },
                 contentAlignment = Alignment.Center,
             ) {
+                val ctaText = when (state.phase) {
+                    ExportPhase.Purchasing -> "Opening Play Billing…"
+                    else -> "Pay ${selectedPlan.price}"
+                }
                 Text(
-                    text = "Pay ${Plans[selected].price} with UPI",
+                    text = ctaText,
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "UPI · Cards · Net banking · Wallets",
+                text = "Google Play · UPI · Cards · Wallets",
                 color = Ink4,
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
             )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Restore purchase",
+                color = Primary,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .clickable { viewModel.restore() }
+                    .padding(6.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SavingCard() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 32.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(PrimarySoft),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Photo,
+                contentDescription = null,
+                tint = Primary,
+                modifier = Modifier.size(32.dp),
+            )
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+        Text(
+            text = "Saving to your gallery…",
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+        )
+    }
+}
+
+@Composable
+private fun SavedSuccessCard(
+    savedUri: android.net.Uri?,
+    onShare: (android.net.Uri) -> Unit,
+    onDone: () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(PrimarySoft)
+                .padding(14.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(Primary),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Check,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Saved to Pictures/SnapDoc",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                )
+                Text(
+                    text = "Watermark removed · ready to upload",
+                    color = Ink3,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+        }
+
+        if (savedUri != null) {
+            Spacer(modifier = Modifier.height(14.dp))
+            AsyncImage(
+                model = savedUri,
+                contentDescription = "Saved photo",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .size(width = 180.dp, height = 224.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color.White),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(PrimaryFaint)
+                    .clickable(enabled = savedUri != null) { savedUri?.let(onShare) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Share,
+                        contentDescription = null,
+                        tint = Primary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        text = "Share",
+                        color = Primary,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp)
+                    .sGreen(16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Primary)
+                    .clickable(onClick = onDone),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "Done",
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                )
+            }
         }
     }
 }

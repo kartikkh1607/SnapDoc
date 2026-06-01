@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.kartik.snapdoc.ui.components.ShoulderArt
 import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Ink4
@@ -66,9 +67,13 @@ private val Slides = listOf(
 )
 
 @Composable
-fun OnboardingScreen(onFinish: () -> Unit) {
+fun OnboardingScreen(
+    onFinish: () -> Unit,
+    viewModel: OnboardingViewModel = hiltViewModel(),
+) {
     var index by remember { mutableIntStateOf(0) }
     val slide = Slides[index]
+    val complete: () -> Unit = { viewModel.finish(onFinish) }
 
     Box(
         modifier = Modifier
@@ -91,7 +96,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                     text = "Skip",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Ink3,
-                    modifier = Modifier.clickable(onClick = onFinish),
+                    modifier = Modifier.clickable(onClick = complete),
                 )
             }
 
@@ -117,7 +122,7 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             FooterControls(
                 index = index,
                 onNext = {
-                    if (index == Slides.lastIndex) onFinish()
+                    if (index == Slides.lastIndex) complete()
                     else index++
                 },
             )

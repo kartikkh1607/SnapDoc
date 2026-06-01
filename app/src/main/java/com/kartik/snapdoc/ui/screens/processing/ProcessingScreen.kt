@@ -32,9 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,9 +42,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import com.kartik.snapdoc.ui.navigation.Routes
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kartik.snapdoc.domain.pipeline.ProcessingStage
 import com.kartik.snapdoc.ui.theme.Hairline
 import com.kartik.snapdoc.ui.theme.Hairline2
 import com.kartik.snapdoc.ui.theme.Ink3
@@ -56,28 +52,32 @@ import com.kartik.snapdoc.ui.theme.Primary
 import com.kartik.snapdoc.ui.theme.PrimarySoft
 import com.kartik.snapdoc.ui.theme.s1
 import com.kartik.snapdoc.ui.theme.s2
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import javax.inject.Inject
-
-@HiltViewModel
-class ProcessingViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
-) : ViewModel() {
-    val docId: String = savedStateHandle.get<String>(Routes.Args.DOC_ID).orEmpty()
-    val imageUri: String = savedStateHandle.get<String>(Routes.Args.IMAGE_URI).orEmpty()
-}
 
 private data class Step(val label: String, val state: StepState, val detail: String? = null)
 private enum class StepState { Done, Active, Idle }
 
-private val Steps = listOf(
-    Step("Detecting face", StepState.Done),
-    Step("Removing background", StepState.Done),
-    Step("Applying specifications", StepState.Active, detail = "Resizing to 600×600 px…"),
-    Step("Compressing file", StepState.Idle),
-    Step("Verifying compliance", StepState.Idle),
+private val PipelineLabels = listOf(
+    ProcessingStage.DetectingFace to "Detecting face",
+    ProcessingStage.RemovingBackground to "Removing background",
+    ProcessingStage.ApplyingBackground to "Applying background",
+    ProcessingStage.Cropping to "Cropping to size",
+    ProcessingStage.Resizing to "Resizing to spec",
+    ProcessingStage.Compressing to "Compressing file",
+    ProcessingStage.Validating to "Verifying compliance",
 )
+
+private fun buildSteps(current: ProcessingStage): List<Step> {
+    val currentIdx = PipelineLabels.indexOfFirst { it.first == current }.coerceAtLeast(0)
+    return PipelineLabels.mapIndexed { idx, (_, label) ->
+        val state = when {
+            current == ProcessingStage.Done -> StepState.Done
+            idx < currentIdx -> StepState.Done
+            idx == currentIdx -> StepState.Active
+            else -> StepState.Idle
+        }
+        Step(label, state)
+    }
+}
 
 @Composable
 fun ProcessingScreen(
@@ -85,18 +85,20 @@ fun ProcessingScreen(
     onError: () -> Unit,
     viewModel: ProcessingViewModel = hiltViewModel(),
 ) {
-    var progress by remember { mutableFloatStateOf(0f) }
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val animated by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = tween(durationMillis = 2200),
+        targetValue = state.progress,
+        animationSpec = tween(durationMillis = 600),
         label = "processing-progress",
     )
-    LaunchedEffect(Unit) {
-        progress = 0.66f
-        delay(2600)
-        onDone(viewModel.docId, viewModel.imageUri)
+
+    LaunchedEffect(state.resultUri, state.error) {
+        val uri = state.resultUri
+        if (uri != null) onDone(viewModel.docId, uri)
+        else if (state.error != null) onError()
     }
-    @Suppress("UNUSED_EXPRESSION") onError
+
+    val steps = buildSteps(state.stage)
 
     Box(
         modifier = Modifier
@@ -137,8 +139,10 @@ fun ProcessingScreen(
                         modifier = Modifier.size(20.dp),
                     )
                 }
+                val currentIdx = (steps.indexOfFirst { it.state == StepState.Active } + 1)
+                    .coerceAtLeast(1)
                 Text(
-                    text = "Step 3 of 5",
+                    text = "Step $currentIdx of ${steps.size}",
                     color = Ink3,
                     style = MaterialTheme.typography.labelMedium,
                 )
@@ -169,6 +173,7 @@ fun ProcessingScreen(
 
             Spacer(modifier = Modifier.height(36.dp))
             Timeline(
+                steps = steps,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp),
@@ -255,7 +260,7 @@ private fun MorphingLoader(progress: Float) {
 }
 
 @Composable
-private fun Timeline(modifier: Modifier = Modifier) {
+private fun Timeline(steps: List<Step>, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .s1(22.dp)
@@ -263,12 +268,12 @@ private fun Timeline(modifier: Modifier = Modifier) {
             .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 18.dp),
     ) {
-        Steps.forEachIndexed { idx, step ->
+        steps.forEachIndexed { idx, step ->
             TimelineRow(
                 step = step,
-                isLast = idx == Steps.lastIndex,
+                isLast = idx == steps.lastIndex,
             )
-            if (idx != Steps.lastIndex) {
+            if (idx != steps.lastIndex) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

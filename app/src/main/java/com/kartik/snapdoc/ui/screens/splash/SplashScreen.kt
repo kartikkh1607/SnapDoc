@@ -41,6 +41,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kartik.snapdoc.ui.theme.Amber
 import com.kartik.snapdoc.ui.theme.AmberDark
 import com.kartik.snapdoc.ui.theme.AmberSoft
@@ -59,17 +61,24 @@ import kotlinx.coroutines.delay
 fun SplashScreen(
     onFirstLaunch: () -> Unit,
     onReturning: () -> Unit,
+    viewModel: SplashViewModel = hiltViewModel(),
 ) {
+    val destination by viewModel.destination.collectAsStateWithLifecycle()
     var progress by remember { mutableStateOf(0f) }
     val animated by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(durationMillis = 1600),
         label = "splash-progress",
     )
-    LaunchedEffect(Unit) {
-        progress = 1f
-        delay(1800)
-        onReturning()
+    LaunchedEffect(Unit) { progress = 1f }
+    LaunchedEffect(destination) {
+        if (destination == SplashDestination.Pending) return@LaunchedEffect
+        delay(1200)
+        when (destination) {
+            SplashDestination.Onboarding -> onFirstLaunch()
+            SplashDestination.Home -> onReturning()
+            SplashDestination.Pending -> Unit
+        }
     }
 
     Box(
