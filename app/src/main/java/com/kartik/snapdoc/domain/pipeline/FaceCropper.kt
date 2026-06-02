@@ -35,16 +35,7 @@ class FaceCropper @Inject constructor() {
     suspend fun cropToSpec(composited: Bitmap, spec: DocumentSpec): CropResult {
         val face = detect(composited) ?: return CropResult.Failure("No face detected")
 
-        val targetAspect = spec.dimensions.widthPx.toFloat() / spec.dimensions.heightPx
-        val headHeightPercent = (spec.face.headHeightPercentMin + spec.face.headHeightPercentMax) / 2f / 100f
-        val eyeLinePercent = (spec.face.eyeLineFromTopPercentMin + spec.face.eyeLineFromTopPercentMax) / 2f / 100f
-
         val faceBox = face.boundingBox
-        val headHeightPx = faceBox.height().toFloat()
-
-        val outHeight = headHeightPx / headHeightPercent
-        val outWidth = outHeight * targetAspect
-
         val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)?.position
         val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)?.position
         val eyeY = if (leftEye != null && rightEye != null) (leftEye.y + rightEye.y) / 2f
@@ -52,15 +43,26 @@ class FaceCropper @Inject constructor() {
         val eyeX = if (leftEye != null && rightEye != null) (leftEye.x + rightEye.x) / 2f
         else faceBox.exactCenterX()
 
-        val cropTop = eyeY - outHeight * eyeLinePercent
-        val cropLeft = eyeX - outWidth / 2f
+        val geom = FaceCropGeometry.computeCropRect(
+            faceBoxHeightPx = faceBox.height().toFloat(),
+            eyeX = eyeX,
+            eyeY = eyeY,
+            spec = spec,
+            sourceWidth = composited.width,
+            sourceHeight = composited.height,
+        )
+        val rect = when (geom) {
+            is CropRectResult.Ok -> geom.rect
+            CropRectResult.FaceTooClose ->
+                return CropResult.Failure("Move further from the camera and retake")
+        }
 
+        val cropLeft = rect.left
+        val cropTop = rect.top
+        val outWidth = rect.width
+        val outHeight = rect.height
         val srcW = composited.width
         val srcH = composited.height
-
-        if (outWidth > srcW || outHeight > srcH) {
-            return CropResult.Failure("Move further from the camera and retake")
-        }
 
         val padLeft = max(0f, -cropLeft).roundToInt()
         val padTop = max(0f, -cropTop).roundToInt()

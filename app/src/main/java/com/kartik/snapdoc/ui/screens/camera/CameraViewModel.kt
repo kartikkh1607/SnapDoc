@@ -29,6 +29,18 @@ class CameraViewModel @Inject constructor(
         _state.update { it.copy(guidance = guidance, checks = checks) }
     }
 
+    fun cycleFlash() {
+        _state.update {
+            it.copy(
+                flashMode = when (it.flashMode) {
+                    FlashMode.Off -> FlashMode.Auto
+                    FlashMode.Auto -> FlashMode.On
+                    FlashMode.On -> FlashMode.Off
+                },
+            )
+        }
+    }
+
     fun toggleLens() {
         _state.update {
             it.copy(

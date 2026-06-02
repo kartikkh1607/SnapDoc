@@ -94,6 +94,8 @@
     <string name="camera_perm_cancel">रद्द करें</string>
     <string name="camera_perm_grant">अनुमति दें</string>
     <string name="camera_capture_error">फ़ोटो नहीं ली जा सकी। कृपया फिर से कोशिश करें।</string>
+    <string name="camera_cd_flash">फ़्लैश बदलें</string>
+    <string name="camera_cd_gallery">गैलरी से चुनें</string>
 
     <!-- Face guidance -->
     <string name="guidance_no_face">कोई चेहरा नहीं मिला</string>

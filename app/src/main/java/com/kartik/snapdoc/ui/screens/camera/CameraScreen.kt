@@ -3,6 +3,9 @@ package com.kartik.snapdoc.ui.screens.camera
 import android.Manifest
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -28,7 +31,10 @@ import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Cameraswitch
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.FlashAuto
+import androidx.compose.material.icons.outlined.FlashOff
 import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -86,6 +92,7 @@ fun CameraScreen(
             onCaptured = onCaptured,
             onGuidance = viewModel::onGuidance,
             onToggleLens = viewModel::toggleLens,
+            onCycleFlash = viewModel::cycleFlash,
             onCapturingChanged = viewModel::setCapturing,
             onError = viewModel::setError,
         )
@@ -104,6 +111,7 @@ private fun CameraContent(
     onCaptured: (docId: String, imageUri: String) -> Unit,
     onGuidance: (FaceGuidanceState, GuidanceChecks) -> Unit,
     onToggleLens: () -> Unit,
+    onCycleFlash: () -> Unit,
     onCapturingChanged: (Boolean) -> Unit,
     onError: (String?) -> Unit,
 ) {
@@ -131,6 +139,21 @@ private fun CameraContent(
         controller.cameraSelector = CameraSelector.Builder()
             .requireLensFacing(state.lensFacing)
             .build()
+    }
+
+    LaunchedEffect(state.flashMode) {
+        controller.imageCaptureFlashMode = when (state.flashMode) {
+            FlashMode.Off -> ImageCapture.FLASH_MODE_OFF
+            FlashMode.Auto -> ImageCapture.FLASH_MODE_AUTO
+            FlashMode.On -> ImageCapture.FLASH_MODE_ON
+        }
+    }
+
+    val docId = state.doc?.id
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri != null && docId != null) onCaptured(docId, uri.toString())
     }
 
     LaunchedEffect(analyzer) {
@@ -171,7 +194,7 @@ private fun CameraContent(
                 .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(18.dp))
                 .padding(horizontal = 8.dp),
         ) {
-            GlassChip(icon = Icons.Outlined.Close, onClick = onClose, tint = Color.White)
+            GlassChip(icon = Icons.Outlined.Close, onClick = onClose, tint = Color.White, contentDescription = null)
             Column(
                 modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -194,7 +217,17 @@ private fun CameraContent(
                     style = MaterialTheme.typography.labelSmall,
                 )
             }
-            GlassChip(icon = Icons.Outlined.Bolt, onClick = {}, tint = Amber)
+            val (flashIcon, flashTint) = when (state.flashMode) {
+                FlashMode.Off -> Icons.Outlined.FlashOff to Color.White.copy(alpha = 0.7f)
+                FlashMode.Auto -> Icons.Outlined.FlashAuto to Amber
+                FlashMode.On -> Icons.Outlined.Bolt to Amber
+            }
+            GlassChip(
+                icon = flashIcon,
+                onClick = onCycleFlash,
+                tint = flashTint,
+                contentDescription = stringResource(R.string.camera_cd_flash),
+            )
         }
 
         GuidancePill(
@@ -246,7 +279,13 @@ private fun CameraContent(
                 .padding(bottom = 50.dp, start = 36.dp, end = 36.dp)
                 .fillMaxWidth(),
         ) {
-            GalleryThumb()
+            GalleryThumb(
+                onClick = {
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                    )
+                },
+            )
             CaptureButton(
                 enabled = state.captureEnabled,
                 onClick = {
@@ -426,7 +465,7 @@ private fun CheckChip(label: String, passed: Boolean) {
 }
 
 @Composable
-private fun GlassChip(icon: ImageVector, onClick: () -> Unit, tint: Color) {
+private fun GlassChip(icon: ImageVector, onClick: () -> Unit, tint: Color, contentDescription: String?) {
     Box(
         modifier = Modifier
             .size(36.dp)
@@ -437,7 +476,7 @@ private fun GlassChip(icon: ImageVector, onClick: () -> Unit, tint: Color) {
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             tint = tint,
             modifier = Modifier.size(18.dp),
         )
@@ -445,14 +484,23 @@ private fun GlassChip(icon: ImageVector, onClick: () -> Unit, tint: Color) {
 }
 
 @Composable
-private fun GalleryThumb() {
+private fun GalleryThumb(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(48.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.10f))
-            .border(2.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(14.dp)),
-    )
+            .border(2.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.PhotoLibrary,
+            contentDescription = stringResource(R.string.camera_cd_gallery),
+            tint = Color.White,
+            modifier = Modifier.size(20.dp),
+        )
+    }
 }
 
 @Composable

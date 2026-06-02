@@ -94,6 +94,8 @@
     <string name="camera_perm_cancel">Cancel</string>
     <string name="camera_perm_grant">Grant access</string>
     <string name="camera_capture_error">Couldn\'t capture photo. Please try again.</string>
+    <string name="camera_cd_flash">Toggle flash</string>
+    <string name="camera_cd_gallery">Pick from gallery</string>
 
     <!-- Face guidance -->
     <string name="guidance_no_face">No face detected</string>
