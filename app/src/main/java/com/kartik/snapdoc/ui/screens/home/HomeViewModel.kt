@@ -32,20 +32,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onQueryChange(query: String) {
-        _state.update {
-            it.copy(
-                query = query,
-                documents = repo.search(query, it.selectedCategoryId),
-            )
-        }
-    }
-
     fun onCategorySelect(categoryId: String?) {
         _state.update {
             it.copy(
                 selectedCategoryId = categoryId,
-                documents = repo.search(it.query, categoryId),
+                documents = repo.search("", categoryId),
             )
         }
     }

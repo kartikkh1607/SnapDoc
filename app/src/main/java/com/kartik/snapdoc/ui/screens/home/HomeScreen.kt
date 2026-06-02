@@ -3,6 +3,7 @@ package com.kartik.snapdoc.ui.screens.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -231,7 +235,11 @@ private fun ContinueHero(onClick: () -> Unit) {
                     end = Offset(500f, 500f),
                 ),
             )
-            .clickable(onClick = onClick)
+            .clickable(
+                role = Role.Button,
+                onClickLabel = stringResource(R.string.home_continue_title),
+                onClick = onClick,
+            )
             .padding(14.dp),
     ) {
         // Mini preview card.
@@ -360,7 +368,11 @@ private fun CategoryChips(
                         if (active) mod.background(MaterialTheme.colorScheme.onSurface)
                         else mod.s1(99.dp).background(MaterialTheme.colorScheme.surface)
                     }
-                    .clickable { onSelect(id) }
+                    .selectable(
+                        selected = active,
+                        role = Role.Tab,
+                        onClick = { onSelect(id) },
+                    )
                     .padding(horizontal = 12.dp, vertical = 7.dp),
             ) {
                 Text(
@@ -386,6 +398,7 @@ private fun SuggestedHeader() {
             text = stringResource(R.string.home_suggested_title),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.semantics { heading() },
         )
         Text(
             text = stringResource(R.string.home_suggested_action),
@@ -433,7 +446,11 @@ private fun DocCardLarge(
             .s1(18.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick)
+            .clickable(
+                role = Role.Button,
+                onClickLabel = doc.displayName,
+                onClick = onClick,
+            )
             .height(132.dp)
             .padding(12.dp),
     ) {

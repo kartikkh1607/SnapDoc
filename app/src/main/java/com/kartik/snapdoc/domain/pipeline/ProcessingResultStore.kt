@@ -17,14 +17,35 @@ import javax.inject.Singleton
 @Singleton
 class ProcessingResultStore @Inject constructor() {
 
-    data class Entry(
+    class Entry(
         val processedUri: Uri,
         val rawJpegBytes: ByteArray,
         val sizeKb: Int,
         val widthPx: Int,
         val heightPx: Int,
         val validation: ValidationResult,
-    )
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is Entry) return false
+            return processedUri == other.processedUri &&
+                sizeKb == other.sizeKb &&
+                widthPx == other.widthPx &&
+                heightPx == other.heightPx &&
+                validation == other.validation &&
+                rawJpegBytes.contentEquals(other.rawJpegBytes)
+        }
+
+        override fun hashCode(): Int {
+            var result = processedUri.hashCode()
+            result = 31 * result + rawJpegBytes.contentHashCode()
+            result = 31 * result + sizeKb
+            result = 31 * result + widthPx
+            result = 31 * result + heightPx
+            result = 31 * result + validation.hashCode()
+            return result
+        }
+    }
 
     private val byUri = object : LinkedHashMap<String, Entry>(8, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Entry>?): Boolean =

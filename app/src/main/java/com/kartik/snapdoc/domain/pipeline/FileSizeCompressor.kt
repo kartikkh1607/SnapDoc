@@ -5,7 +5,22 @@ import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class CompressedImage(val bytes: ByteArray, val qualityUsed: Int, val sizeKb: Int)
+class CompressedImage(val bytes: ByteArray, val qualityUsed: Int, val sizeKb: Int) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is CompressedImage) return false
+        return qualityUsed == other.qualityUsed &&
+            sizeKb == other.sizeKb &&
+            bytes.contentEquals(other.bytes)
+    }
+
+    override fun hashCode(): Int {
+        var result = bytes.contentHashCode()
+        result = 31 * result + qualityUsed
+        result = 31 * result + sizeKb
+        return result
+    }
+}
 
 @Singleton
 class FileSizeCompressor @Inject constructor() {

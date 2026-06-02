@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -49,7 +52,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.kartik.snapdoc.ui.theme.Amber
+import com.kartik.snapdoc.ui.theme.Grabber
 import com.kartik.snapdoc.ui.theme.Hairline
+import com.kartik.snapdoc.ui.theme.Scrim
 import com.kartik.snapdoc.ui.theme.Ink2
 import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Ink4
@@ -95,7 +100,7 @@ fun ExportScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0F140F).copy(alpha = 0.6f)),
+            .background(Scrim.copy(alpha = 0.6f)),
     ) {
         // Sheet
         Column(
@@ -115,7 +120,7 @@ fun ExportScreen(
                     .width(44.dp)
                     .height(5.dp)
                     .clip(RoundedCornerShape(3.dp))
-                    .background(Color(0xFFE0E0E0)),
+                    .background(Grabber),
             )
 
             // Header
@@ -357,7 +362,11 @@ private fun SavedSuccessCard(
                     .height(52.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(PrimaryFaint)
-                    .clickable(enabled = savedUri != null) { savedUri?.let(onShare) },
+                    .clickable(
+                        enabled = savedUri != null,
+                        role = Role.Button,
+                        onClickLabel = stringResource(R.string.export_share_button),
+                    ) { savedUri?.let(onShare) },
                 contentAlignment = Alignment.Center,
             ) {
                 Row(
@@ -384,7 +393,11 @@ private fun SavedSuccessCard(
                     .sGreen(16.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(Primary)
-                    .clickable(onClick = onDone),
+                    .clickable(
+                        role = Role.Button,
+                        onClickLabel = stringResource(R.string.export_done),
+                        onClick = onDone,
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -399,25 +412,90 @@ private fun SavedSuccessCard(
 
 @Composable
 private fun PlanCard(plan: Plan, selected: Boolean, onSelect: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(if (selected) PrimaryFaint else MaterialTheme.colorScheme.surface)
-            .border(
-                width = if (selected) 2.dp else 1.5.dp,
-                color = if (selected) Primary else Hairline,
-                shape = RoundedCornerShape(18.dp),
-            )
-            .clickable(onClick = onSelect)
-            .padding(14.dp),
-    ) {
+    // Outer Box is not clipped so the badge can sit above the card's top edge
+    // without being cut off by the card's rounded corners.
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(if (selected) PrimaryFaint else MaterialTheme.colorScheme.surface)
+                .border(
+                    width = if (selected) 2.dp else 1.5.dp,
+                    color = if (selected) Primary else Hairline,
+                    shape = RoundedCornerShape(18.dp),
+                )
+                .selectable(
+                    selected = selected,
+                    role = Role.RadioButton,
+                    onClick = onSelect,
+                )
+                .padding(14.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                // Radio
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .background(if (selected) Primary else Color.Transparent)
+                        .border(
+                            width = 1.5.dp,
+                            color = if (selected) Primary else Hairline,
+                            shape = CircleShape,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (selected) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(Color.White),
+                        )
+                    }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(plan.titleRes),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
+                        ),
+                    )
+                    Text(
+                        text = stringResource(plan.subtitleRes),
+                        color = if (selected) Ink2 else Ink3,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    if (plan.strikeRes != null) {
+                        Text(
+                            text = stringResource(plan.strikeRes),
+                            color = Ink4,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                textDecoration = TextDecoration.LineThrough,
+                            ),
+                        )
+                    }
+                    Text(
+                        text = stringResource(plan.priceRes),
+                        color = if (selected) Primary else MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    )
+                }
+            }
+        }
         if (plan.badge != null) {
             val (labelRes, color) = plan.badge
             Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = 2.dp, top = (-22).dp)
+                    .offset(x = 16.dp, y = (-8).dp)
                     .clip(RoundedCornerShape(6.dp))
                     .background(color)
                     .padding(horizontal = 9.dp, vertical = 3.dp),
@@ -426,63 +504,6 @@ private fun PlanCard(plan: Plan, selected: Boolean, onSelect: () -> Unit) {
                     text = stringResource(labelRes),
                     color = Color.White,
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                )
-            }
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            // Radio
-            Box(
-                modifier = Modifier
-                    .size(22.dp)
-                    .clip(CircleShape)
-                    .background(if (selected) Primary else Color.Transparent)
-                    .border(
-                        width = 1.5.dp,
-                        color = if (selected) Primary else Hairline,
-                        shape = CircleShape,
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (selected) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(Color.White),
-                    )
-                }
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(plan.titleRes),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
-                    ),
-                )
-                Text(
-                    text = stringResource(plan.subtitleRes),
-                    color = if (selected) Ink2 else Ink3,
-                    style = MaterialTheme.typography.labelMedium,
-                )
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                if (plan.strikeRes != null) {
-                    Text(
-                        text = stringResource(plan.strikeRes),
-                        color = Ink4,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            textDecoration = TextDecoration.LineThrough,
-                        ),
-                    )
-                }
-                Text(
-                    text = stringResource(plan.priceRes),
-                    color = if (selected) Primary else MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 )
             }
         }

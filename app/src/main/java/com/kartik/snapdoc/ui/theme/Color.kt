@@ -24,6 +24,11 @@ val Ink4 = Color(0xFF9CA3AF)
 val Hairline = Color(0xFFECECEC)
 val Hairline2 = Color(0xFFF2F2F2)
 
+// Scrim used behind modal sheets (bottom-sheet style overlays).
+val Scrim = Color(0xFF0F140F)
+// Drag-handle indicator color for modal sheets.
+val Grabber = Color(0xFFE0E0E0)
+
 val Success = Color(0xFF2E7D32)
 val ErrorRed = Color(0xFFC62828)
 

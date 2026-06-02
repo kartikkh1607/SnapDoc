@@ -91,13 +91,17 @@ class SpecValidator @Inject constructor() {
             passed = fileSizeKb in spec.file.minSizeKb..spec.file.maxSizeKb,
         )
         val avgBg = sampleCornerAverage(bitmap)
-        val targetBg = parseHex(spec.background.colorHex)
+        val targetBg = parseHexColor(spec.background.colorHex)
         val deltaE = labDelta(avgBg, targetBg)
         val bg = ValidationCheck(
             name = "Background",
             expected = "${spec.background.displayName} (${spec.background.colorHex})",
             actual = "#%02X%02X%02X".format(Color.red(avgBg), Color.green(avgBg), Color.blue(avgBg)),
-            passed = deltaE <= spec.background.toleranceLab.toFloat() * 3,
+            // Tolerance multiplier widens the acceptance band because the corner-pixel
+            // average is sampled from a tiny 4×100-pixel patch and tends to drift a few
+            // ΔE units from the true background even on a clean white. Without this,
+            // photos that look fine to humans (and to government portals) get rejected.
+            passed = deltaE <= spec.background.toleranceLab.toFloat() * BG_TOLERANCE_MULTIPLIER,
         )
         return listOf(dims, size, bg)
     }
@@ -130,12 +134,6 @@ class SpecValidator @Inject constructor() {
             }
         }
         return Color.rgb((r / count).toInt(), (g / count).toInt(), (b / count).toInt())
-    }
-
-    private fun parseHex(hex: String): Int {
-        val cleaned = hex.removePrefix("#")
-        val v = cleaned.toLong(16).toInt()
-        return if (cleaned.length == 6) (0xFF000000.toInt()) or v else v
     }
 
     /**
@@ -171,9 +169,13 @@ class SpecValidator @Inject constructor() {
         if (v > 0.04045f) ((v + 0.055f) / 1.055f).pow(2.4f) else v / 12.92f
 
     private fun pivotXyz(v: Float): Float =
-        if (v > 0.008856f) v.pow(1f / 3f) else (7.787f * v) + 16f / 116f
+        if (v > 0.008856f) v.pow(1f / 3f) else (7.787f * v) + (16f / 116f)
 
     fun close() {
         detector.close()
+    }
+
+    private companion object {
+        const val BG_TOLERANCE_MULTIPLIER = 3f
     }
 }

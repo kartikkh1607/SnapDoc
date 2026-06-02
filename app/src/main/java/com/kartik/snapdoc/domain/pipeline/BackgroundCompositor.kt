@@ -34,7 +34,7 @@ class BackgroundCompositor @Inject constructor() {
             val buf = mask.buffer.duplicate().asReadOnlyBuffer().apply { rewind() }
             val maskValues = FloatArray(maskW * maskH).also { buf.asFloatBuffer().get(it) }
 
-            val bgColor = parseHex(background.colorHex)
+            val bgColor = parseHexColor(background.colorHex)
             val bgR = Color.red(bgColor)
             val bgG = Color.green(bgColor)
             val bgB = Color.blue(bgColor)
@@ -111,13 +111,4 @@ class BackgroundCompositor @Inject constructor() {
         }
     }
 
-    private fun parseHex(hex: String): Int {
-        val cleaned = hex.removePrefix("#")
-        val v = cleaned.toLong(16)
-        return if (cleaned.length == 6) {
-            (0xFF000000.toInt()) or v.toInt()
-        } else {
-            v.toInt()
-        }
-    }
 }
