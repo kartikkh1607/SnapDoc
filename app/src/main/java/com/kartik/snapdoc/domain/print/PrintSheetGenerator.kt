@@ -19,6 +19,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PrintSheetGenerator @Inject constructor(
+
     @ApplicationContext private val context: Context,
 ) {
 
@@ -71,7 +72,7 @@ class PrintSheetGenerator @Inject constructor(
                 val y = layout.marginTopPt + r * (layout.photoHeightPt + layout.gutterPt)
                 val rect = RectF(x, y, x + layout.photoWidthPt, y + layout.photoHeightPt)
                 if (layout.rotated) {
-                    // Rotate the photo 90° around the tile centre so the source
+                    // Rotate the photo 90° around the tile center so the source
                     // image (whose own aspect is W × H) fills a H × W tile.
                     canvas.save()
                     canvas.rotate(90f, rect.centerX(), rect.centerY())
