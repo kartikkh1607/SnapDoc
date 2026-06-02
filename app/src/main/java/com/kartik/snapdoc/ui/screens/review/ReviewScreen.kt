@@ -32,11 +32,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.navigation.toRoute
 import com.kartik.snapdoc.R
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.navigation.Routes
@@ -49,8 +51,9 @@ import javax.inject.Inject
 class ReviewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    val docId: String = savedStateHandle.get<String>(Routes.Args.DOC_ID).orEmpty()
-    val imageUri: String = savedStateHandle.get<String>(Routes.Args.IMAGE_URI).orEmpty()
+    private val args = savedStateHandle.toRoute<Routes.Review>()
+    val docId: String = args.docId
+    val imageUri: String = args.imageUri
 }
 
 @Composable
@@ -72,13 +75,21 @@ fun ReviewScreen(
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 14.dp),
         ) {
-            DarkIconButton(icon = Icons.Outlined.Close, onClick = onRetake)
+            DarkIconButton(
+                icon = Icons.Outlined.Close,
+                onClick = onRetake,
+                contentDescription = stringResource(R.string.review_retake),
+            )
             Text(
                 text = stringResource(R.string.review_title),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             )
-            DarkIconButton(icon = Icons.Outlined.Info, onClick = {})
+            DarkIconButton(
+                icon = Icons.Outlined.Info,
+                onClick = {},
+                contentDescription = stringResource(R.string.cd_info),
+            )
         }
 
         // Captured image — large.
@@ -233,13 +244,21 @@ private fun UsePhotoButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun DarkIconButton(icon: ImageVector, onClick: () -> Unit) {
+private fun DarkIconButton(
+    icon: ImageVector,
+    onClick: () -> Unit,
+    contentDescription: String? = null,
+) {
     Box(
         modifier = Modifier
             .size(40.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White.copy(alpha = 0.10f))
-            .clickable(onClick = onClick),
+            .clickable(
+                onClickLabel = contentDescription,
+                role = Role.Button,
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Icon(

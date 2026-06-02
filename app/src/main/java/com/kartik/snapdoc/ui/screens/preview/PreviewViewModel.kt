@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.kartik.snapdoc.data.billing.PurchaseRepository
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.domain.pipeline.ProcessingResultStore
@@ -14,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.net.URLDecoder
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,9 +25,10 @@ class PreviewViewModel @Inject constructor(
     purchases: PurchaseRepository,
 ) : ViewModel() {
 
-    val docId: String = savedStateHandle.get<String>(Routes.Args.DOC_ID).orEmpty()
-    val imageUri: String = savedStateHandle.get<String>(Routes.Args.IMAGE_URI).orEmpty()
-    private val decodedUri: String = runCatching { URLDecoder.decode(imageUri, "UTF-8") }.getOrDefault(imageUri)
+    private val args = savedStateHandle.toRoute<Routes.Preview>()
+    val docId: String = args.docId
+    val imageUri: String = args.imageUri
+    private val decodedUri: String = imageUri
 
     private val _state = MutableStateFlow(PreviewUiState())
     val state: StateFlow<PreviewUiState> = _state.asStateFlow()

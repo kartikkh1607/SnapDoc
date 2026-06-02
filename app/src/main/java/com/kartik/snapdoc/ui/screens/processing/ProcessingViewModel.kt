@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.domain.pipeline.PhotoProcessor
 import com.kartik.snapdoc.domain.pipeline.ProcessingOutcome
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.net.URLDecoder
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,9 +25,10 @@ class ProcessingViewModel @Inject constructor(
     private val processor: PhotoProcessor,
 ) : ViewModel() {
 
-    val docId: String = savedStateHandle.get<String>(Routes.Args.DOC_ID).orEmpty()
-    val rawImageUri: String = savedStateHandle.get<String>(Routes.Args.IMAGE_URI).orEmpty()
-    private val decodedImageUri: String = runCatching { URLDecoder.decode(rawImageUri, "UTF-8") }.getOrDefault(rawImageUri)
+    private val args = savedStateHandle.toRoute<Routes.Processing>()
+    val docId: String = args.docId
+    val imageUri: String = args.imageUri
+    private val decodedImageUri: String = imageUri
 
     private val _state = MutableStateFlow(ProcessingUiState())
     val state: StateFlow<ProcessingUiState> = _state.asStateFlow()

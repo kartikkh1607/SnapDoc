@@ -9,6 +9,7 @@ data class HomeUiState(
     val categories: List<CategorySpec> = emptyList(),
     val popular: List<DocumentSpec> = emptyList(),
     val documents: List<DocumentSpec> = emptyList(),
+    val loading: Boolean = true,
 ) {
     val showPopular: Boolean get() = query.isBlank() && selectedCategoryId == null
 }

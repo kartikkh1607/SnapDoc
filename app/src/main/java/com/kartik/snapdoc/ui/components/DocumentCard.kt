@@ -109,3 +109,32 @@ fun DocumentSpec.shortSpecSummary(): String {
     val h = dimensions.heightMm.toInt()
     return "${w}×${h}mm · ${background.displayName} · ${file.minSizeKb}–${file.maxSizeKb} KB"
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun DocumentCardPreview() {
+    com.kartik.snapdoc.ui.theme.SnapDocTheme {
+        DocumentCard(doc = previewSpec(), onClick = {}, modifier = Modifier.padding(16.dp))
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun PopularDocumentCardPreview() {
+    com.kartik.snapdoc.ui.theme.SnapDocTheme {
+        PopularDocumentCard(doc = previewSpec(), onClick = {}, modifier = Modifier.padding(16.dp))
+    }
+}
+
+private fun previewSpec(): DocumentSpec = DocumentSpec(
+    id = "preview_passport",
+    displayName = "Indian Passport",
+    shortName = "Passport",
+    categoryId = "in_government",
+    popularity = 100,
+    dimensions = com.kartik.snapdoc.data.specs.model.DimensionsSpec(35f, 45f, 413, 531, 300),
+    background = com.kartik.snapdoc.data.specs.model.BackgroundSpec("#FFFFFF", "White", 5),
+    face = com.kartik.snapdoc.data.specs.model.FaceSpec(70, 80, 50, 70),
+    file = com.kartik.snapdoc.data.specs.model.FileSpec("JPG", 10, 100),
+    rules = com.kartik.snapdoc.data.specs.model.RulesSpec(),
+)

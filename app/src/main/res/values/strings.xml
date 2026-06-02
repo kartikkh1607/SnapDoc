@@ -13,24 +13,13 @@
     <string name="home_continue_step_left">1 STEP LEFT</string>
     <string name="home_continue_title">Continue Aadhaar photo</string>
     <string name="home_continue_subtitle">Pay ₹49 · ready for download</string>
-    <string name="home_stat_photos_value">12</string>
-    <string name="home_stat_photos_label">Photos made</string>
-    <string name="home_stat_saved_value">₹480</string>
-    <string name="home_stat_saved_label">Saved</string>
-    <string name="home_stat_approved_value">100%</string>
-    <string name="home_stat_approved_label">Approved</string>
     <string name="home_reminder_title">Passport expires Mar 2027</string>
     <string name="home_reminder_subtitle">Renew in 10 months · get fresh photos ready</string>
     <string name="home_reminder_cta">Plan</string>
-    <string name="home_search_placeholder">Search 90+ Indian docs…</string>
     <string name="home_category_all">All</string>
     <string name="home_suggested_title">Popular documents</string>
     <string name="home_suggested_action">See all</string>
     <string name="home_featured_badge">FOR YOU</string>
-    <string name="home_tab_home">Home</string>
-    <string name="home_tab_history">History</string>
-    <string name="home_tab_documents">Documents</string>
-    <string name="home_tab_profile">Profile</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
@@ -96,6 +85,12 @@
     <string name="camera_capture_error">Couldn\'t capture photo. Please try again.</string>
     <string name="camera_cd_flash">Toggle flash</string>
     <string name="camera_cd_gallery">Pick from gallery</string>
+    <string name="camera_cd_close">Close camera</string>
+    <string name="camera_cd_capture">Take photo</string>
+    <string name="camera_cd_flip">Switch camera</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_share">Share</string>
+    <string name="cd_info">Info</string>
 
     <!-- Face guidance -->
     <string name="guidance_no_face">No face detected</string>

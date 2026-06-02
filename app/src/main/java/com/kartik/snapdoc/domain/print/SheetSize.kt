@@ -30,18 +30,44 @@ data class SheetLayout(
     val gutterPt: Float,
     val marginLeftPt: Float,
     val marginTopPt: Float,
+    /**
+     * Whether each photo cell should be rotated 90° on the sheet. True when
+     * laying out a landscape source onto the sheet, or when rotating a
+     * portrait photo gives more copies per page.
+     */
+    val rotated: Boolean = false,
 ) {
     val copies: Int get() = cols * rows
 }
 
 object PrintSheetLayout {
-    /** Computes grid of copies that fit on `sheet`. Gutter defaults to 2mm. */
+    /**
+     * Computes the grid of copies that fit on [sheet]. Tries both the natural
+     * orientation and the rotated one (swap width/height) and picks whichever
+     * yields more copies — that's the "free upgrade" for landscape sources or
+     * portrait photos that happen to tile better when laid sideways.
+     *
+     * Gutter defaults to 2mm; margin to 5mm.
+     */
     fun compute(
         sheet: SheetSize,
         photoWidthMm: Float,
         photoHeightMm: Float,
         gutterMm: Float = 2f,
         marginMm: Float = 5f,
+    ): SheetLayout {
+        val natural = layout(sheet, photoWidthMm, photoHeightMm, gutterMm, marginMm, rotated = false)
+        val rotated = layout(sheet, photoHeightMm, photoWidthMm, gutterMm, marginMm, rotated = true)
+        return if (rotated.copies > natural.copies) rotated else natural
+    }
+
+    private fun layout(
+        sheet: SheetSize,
+        photoWidthMm: Float,
+        photoHeightMm: Float,
+        gutterMm: Float,
+        marginMm: Float,
+        rotated: Boolean,
     ): SheetLayout {
         val photoWPt = SheetSize.mmToPt(photoWidthMm)
         val photoHPt = SheetSize.mmToPt(photoHeightMm)
@@ -68,6 +94,7 @@ object PrintSheetLayout {
             gutterPt = gutterPt,
             marginLeftPt = marginLeft,
             marginTopPt = marginTop,
+            rotated = rotated,
         )
     }
 }

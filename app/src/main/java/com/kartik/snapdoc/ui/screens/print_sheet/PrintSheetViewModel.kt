@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.kartik.snapdoc.data.billing.PurchaseRepository
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.domain.export.DocumentExporter
@@ -19,7 +20,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.net.URLDecoder
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,9 +33,9 @@ class PrintSheetViewModel @Inject constructor(
     purchases: PurchaseRepository,
 ) : ViewModel() {
 
-    val docId: String = savedStateHandle.get<String>(Routes.Args.DOC_ID).orEmpty()
-    private val rawUri: String = savedStateHandle.get<String>(Routes.Args.IMAGE_URI).orEmpty()
-    private val decodedUri: String = runCatching { URLDecoder.decode(rawUri, "UTF-8") }.getOrDefault(rawUri)
+    private val args = savedStateHandle.toRoute<Routes.PrintSheet>()
+    val docId: String = args.docId
+    private val decodedUri: String = args.imageUri
 
     private val _state = MutableStateFlow(PrintSheetUiState())
     val state: StateFlow<PrintSheetUiState> = _state.asStateFlow()

@@ -2,6 +2,7 @@ package com.kartik.snapdoc.ui.screens.doc_detail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.navigation.toRoute
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.ui.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +17,7 @@ class DocDetailViewModel @Inject constructor(
     repo: SpecCatalogRepository,
 ) : ViewModel() {
 
-    val docId: String = savedStateHandle.get<String>(Routes.Args.DOC_ID).orEmpty()
+    val docId: String = savedStateHandle.toRoute<Routes.DocDetail>().docId
 
     private val _state = MutableStateFlow(
         repo.byId(docId)?.let { DocDetailUiState(doc = it) }

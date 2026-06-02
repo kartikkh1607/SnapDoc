@@ -2,10 +2,8 @@ package com.kartik.snapdoc.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.kartik.snapdoc.ui.screens.camera.CameraScreen
 import com.kartik.snapdoc.ui.screens.doc_detail.DocDetailScreen
 import com.kartik.snapdoc.ui.screens.export.ExportScreen
@@ -21,136 +19,100 @@ import com.kartik.snapdoc.ui.screens.splash.SplashScreen
 @Composable
 fun SnapDocNavGraph(
     navController: NavHostController,
-    startDestination: String = Routes.SPLASH,
+    startDestination: Any = Routes.Splash,
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
-        composable(Routes.SPLASH) {
+        composable<Routes.Splash> {
             SplashScreen(
                 onFirstLaunch = {
-                    navController.navigate(Routes.ONBOARDING) {
-                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    navController.navigate(Routes.Onboarding) {
+                        popUpTo(Routes.Splash) { inclusive = true }
                     }
                 },
                 onReturning = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    navController.navigate(Routes.Home) {
+                        popUpTo(Routes.Splash) { inclusive = true }
                     }
                 },
             )
         }
 
-        composable(Routes.ONBOARDING) {
+        composable<Routes.Onboarding> {
             OnboardingScreen(
                 onFinish = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                    navController.navigate(Routes.Home) {
+                        popUpTo(Routes.Onboarding) { inclusive = true }
                     }
                 },
             )
         }
 
-        composable(Routes.HOME) {
+        composable<Routes.Home> {
             HomeScreen(
-                onDocClick = { docId -> navController.navigate(Routes.docDetail(docId)) },
-                onSettingsClick = { navController.navigate(Routes.SETTINGS) },
+                onDocClick = { docId -> navController.navigate(Routes.DocDetail(docId)) },
+                onSettingsClick = { navController.navigate(Routes.Settings) },
             )
         }
 
-        composable(
-            route = Routes.DOC_DETAIL,
-            arguments = listOf(navArgument(Routes.Args.DOC_ID) { type = NavType.StringType }),
-        ) {
+        composable<Routes.DocDetail> {
             DocDetailScreen(
                 onBack = { navController.popBackStack() },
-                onTakePhoto = { docId -> navController.navigate(Routes.camera(docId)) },
+                onTakePhoto = { docId -> navController.navigate(Routes.Camera(docId)) },
             )
         }
 
-        composable(
-            route = Routes.CAMERA,
-            arguments = listOf(navArgument(Routes.Args.DOC_ID) { type = NavType.StringType }),
-        ) {
+        composable<Routes.Camera> {
             CameraScreen(
                 onClose = { navController.popBackStack() },
                 onCaptured = { docId, uri ->
-                    navController.navigate(Routes.review(docId, uri))
+                    navController.navigate(Routes.Review(docId, uri))
                 },
             )
         }
 
-        composable(
-            route = Routes.REVIEW,
-            arguments = listOf(
-                navArgument(Routes.Args.DOC_ID) { type = NavType.StringType },
-                navArgument(Routes.Args.IMAGE_URI) { type = NavType.StringType },
-            ),
-        ) {
+        composable<Routes.Review> {
             ReviewScreen(
                 onRetake = { navController.popBackStack() },
                 onUsePhoto = { docId, uri ->
-                    navController.navigate(Routes.processing(docId, uri))
+                    navController.navigate(Routes.Processing(docId, uri))
                 },
             )
         }
 
-        composable(
-            route = Routes.PROCESSING,
-            arguments = listOf(
-                navArgument(Routes.Args.DOC_ID) { type = NavType.StringType },
-                navArgument(Routes.Args.IMAGE_URI) { type = NavType.StringType },
-            ),
-        ) {
+        composable<Routes.Processing> {
             ProcessingScreen(
                 onDone = { docId, uri ->
-                    navController.navigate(Routes.preview(docId, uri)) {
-                        popUpTo(Routes.PROCESSING) { inclusive = true }
+                    navController.navigate(Routes.Preview(docId, uri)) {
+                        popUpTo<Routes.Processing> { inclusive = true }
                     }
                 },
-                onError = { navController.popBackStack(Routes.CAMERA, inclusive = false) },
+                onError = { navController.popBackStack<Routes.Camera>(inclusive = false) },
             )
         }
 
-        composable(
-            route = Routes.PREVIEW,
-            arguments = listOf(
-                navArgument(Routes.Args.DOC_ID) { type = NavType.StringType },
-                navArgument(Routes.Args.IMAGE_URI) { type = NavType.StringType },
-            ),
-        ) {
+        composable<Routes.Preview> {
             PreviewScreen(
                 onBack = { navController.popBackStack() },
-                onExport = { docId, uri -> navController.navigate(Routes.export(docId, uri)) },
-                onPrintSheet = { docId, uri -> navController.navigate(Routes.printSheet(docId, uri)) },
+                onExport = { docId, uri -> navController.navigate(Routes.Export(docId, uri)) },
+                onPrintSheet = { docId, uri -> navController.navigate(Routes.PrintSheet(docId, uri)) },
             )
         }
 
-        composable(
-            route = Routes.EXPORT,
-            arguments = listOf(
-                navArgument(Routes.Args.DOC_ID) { type = NavType.StringType },
-                navArgument(Routes.Args.IMAGE_URI) { type = NavType.StringType },
-            ),
-        ) {
+        composable<Routes.Export> {
             ExportScreen(
                 onDone = {
-                    navController.popBackStack(Routes.HOME, inclusive = false)
+                    navController.popBackStack(Routes.Home, inclusive = false)
                 },
             )
         }
 
-        composable(
-            route = Routes.PRINT_SHEET,
-            arguments = listOf(
-                navArgument(Routes.Args.DOC_ID) { type = NavType.StringType },
-                navArgument(Routes.Args.IMAGE_URI) { type = NavType.StringType },
-            ),
-        ) {
+        composable<Routes.PrintSheet> {
             PrintSheetScreen(
                 onBack = { navController.popBackStack() },
             )
         }
 
-        composable(Routes.SETTINGS) {
+        composable<Routes.Settings> {
             SettingsScreen(
                 onBack = { navController.popBackStack() },
             )

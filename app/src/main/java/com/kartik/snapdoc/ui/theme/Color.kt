@@ -35,3 +35,14 @@ val Outline = Hairline
 
 // Legacy alias kept for the dark-mode color scheme.
 val PrimaryVariant = Success
+
+// Dark scheme tokens. These power [DarkColors] in Theme.kt. Screens that hardcode
+// dark surfaces (camera, review) remain dark in both themes — intentional.
+val DarkBackground = Color(0xFF0F1110)
+val DarkSurface = Color(0xFF181B19)
+val DarkSurfaceVariant = Color(0xFF1F2320)
+val DarkOnSurface = Color(0xFFE6E8E6)
+val DarkOnSurfaceVariant = Color(0xFFB8BDB8)
+val DarkOutline = Color(0xFF2A2E2B)
+val DarkPrimarySoft = Color(0xFF1F3624)
+val DarkPrimaryFaint = Color(0xFF14201A)

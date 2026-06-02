@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kartik.snapdoc.R
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
+import com.kartik.snapdoc.ui.components.CircleIconButton
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.theme.Background
 import com.kartik.snapdoc.ui.theme.Hairline2
@@ -115,12 +116,16 @@ private fun HeroSection(onBack: () -> Unit) {
                 .fillMaxWidth()
                 .padding(start = 22.dp, end = 22.dp, top = 58.dp),
         ) {
-            CircleIconButton(icon = { tint ->
-                Icon(Icons.AutoMirrored.Outlined.ArrowBack, null, tint = tint, modifier = Modifier.size(20.dp))
-            }, onClick = onBack)
-            CircleIconButton(icon = { tint ->
-                Icon(Icons.Outlined.Info, null, tint = tint, modifier = Modifier.size(20.dp))
-            }, onClick = {})
+            CircleIconButton(
+                icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                onClick = onBack,
+                contentDescription = stringResource(R.string.cd_back),
+            )
+            CircleIconButton(
+                icon = Icons.Outlined.Info,
+                onClick = {},
+                contentDescription = stringResource(R.string.cd_info),
+            )
         }
 
         // Floating hero card.
@@ -139,23 +144,6 @@ private fun HeroSection(onBack: () -> Unit) {
     }
 }
 
-@Composable
-private fun CircleIconButton(
-    icon: @Composable (tint: Color) -> Unit,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .s1(14.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        icon(MaterialTheme.colorScheme.onSurface)
-    }
-}
 
 @Composable
 private fun BodyContent(doc: DocumentSpec) {

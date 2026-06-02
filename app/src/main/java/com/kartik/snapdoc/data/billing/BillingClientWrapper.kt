@@ -21,12 +21,17 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,11 +51,22 @@ class BillingClientWrapper @Inject constructor(
     private val _connected = MutableStateFlow(false)
     val connected: StateFlow<Boolean> = _connected.asStateFlow()
 
+    // Fire-and-forget error events for the UI (snackbar / dialog).
+    private val _errors = MutableSharedFlow<BillingError>(
+        replay = 0,
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    val errors: SharedFlow<BillingError> = _errors.asSharedFlow()
+
     private val purchasesUpdatedListener = PurchasesUpdatedListener { result, purchases ->
         when (result.responseCode) {
             BillingClient.BillingResponseCode.OK -> purchases?.forEach { handlePurchase(it) }
             BillingClient.BillingResponseCode.USER_CANCELED -> Log.d(TAG, "User cancelled")
-            else -> Log.w(TAG, "Purchase update failed: ${result.debugMessage}")
+            else -> {
+                Log.w(TAG, "Purchase update failed: ${result.debugMessage}")
+                _errors.tryEmit(BillingError.PurchaseFailed(result.responseCode, result.debugMessage))
+            }
         }
     }
 
@@ -61,7 +77,7 @@ class BillingClientWrapper @Inject constructor(
         )
         .build()
 
-    private var connectAttempts = 0
+    private val connectAttempts = AtomicInteger(0)
 
     fun start() {
         if (client.isReady) return
@@ -72,7 +88,7 @@ class BillingClientWrapper @Inject constructor(
         client.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(result: BillingResult) {
                 if (result.responseCode == BillingClient.BillingResponseCode.OK) {
-                    connectAttempts = 0
+                    connectAttempts.set(0)
                     _connected.value = true
                     scope.launch {
                         queryProducts()
@@ -80,6 +96,9 @@ class BillingClientWrapper @Inject constructor(
                     }
                 } else {
                     Log.w(TAG, "Billing setup failed: ${result.debugMessage}")
+                    if (connectAttempts.get() >= 4) {
+                        _errors.tryEmit(BillingError.ConnectionFailed(result.debugMessage))
+                    }
                     retry()
                 }
             }
@@ -92,9 +111,12 @@ class BillingClientWrapper @Inject constructor(
     }
 
     private fun retry() {
-        if (connectAttempts >= 5) return
-        connectAttempts++
-        val backoffMs = (1000L * (1 shl connectAttempts)).coerceAtMost(32_000L)
+        val attempt = connectAttempts.incrementAndGet()
+        if (attempt > 5) {
+            connectAttempts.set(5)
+            return
+        }
+        val backoffMs = (1000L * (1 shl attempt)).coerceAtMost(32_000L)
         scope.launch {
             delay(backoffMs)
             connect()
@@ -126,7 +148,9 @@ class BillingClientWrapper @Inject constructor(
             .build()
         val result = client.queryPurchasesAsync(params)
         if (result.billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-            applyPurchases(result.purchasesList)
+            // Authoritative snapshot from Play — replace, don't merge, so refunds
+            // revoke entitlements instead of being masked by stale cached state.
+            replaceEntitlement(result.purchasesList)
         }
     }
 
@@ -150,7 +174,7 @@ class BillingClientWrapper @Inject constructor(
 
     private fun handlePurchase(purchase: Purchase) {
         if (purchase.purchaseState != Purchase.PurchaseState.PURCHASED) return
-        applyPurchases(listOf(purchase))
+        mergePurchases(listOf(purchase))
         if (!purchase.isAcknowledged) {
             scope.launch {
                 val ack = AcknowledgePurchaseParams.newBuilder()
@@ -164,7 +188,11 @@ class BillingClientWrapper @Inject constructor(
         }
     }
 
-    private fun applyPurchases(purchases: List<Purchase>) {
+    /**
+     * Merge a single new purchase into entitlement state (additive — for the
+     * purchase-update listener where we only see the newly purchased item).
+     */
+    private fun mergePurchases(purchases: List<Purchase>) {
         var photo = _entitlement.value.photoExportUnlocked
         var studio = _entitlement.value.studioBundleUnlocked
         for (p in purchases) {
@@ -177,6 +205,26 @@ class BillingClientWrapper @Inject constructor(
             }
         }
         _entitlement.update { EntitlementState(photo, studio) }
+    }
+
+    /**
+     * Replace entitlement state entirely from an authoritative purchase list
+     * (Play's [queryPurchasesAsync] result). A refunded purchase will be absent
+     * here, so this revokes access.
+     */
+    private fun replaceEntitlement(purchases: List<Purchase>) {
+        var photo = false
+        var studio = false
+        for (p in purchases) {
+            if (p.purchaseState != Purchase.PurchaseState.PURCHASED) continue
+            for (id in p.products) {
+                when (id) {
+                    ProductIds.PHOTO_EXPORT -> photo = true
+                    ProductIds.STUDIO_BUNDLE -> { studio = true; photo = true }
+                }
+            }
+        }
+        _entitlement.value = EntitlementState(photo, studio)
     }
 
     private companion object {

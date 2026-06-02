@@ -70,7 +70,22 @@ class PrintSheetGenerator @Inject constructor(
                 val x = layout.marginLeftPt + c * (layout.photoWidthPt + layout.gutterPt)
                 val y = layout.marginTopPt + r * (layout.photoHeightPt + layout.gutterPt)
                 val rect = RectF(x, y, x + layout.photoWidthPt, y + layout.photoHeightPt)
-                canvas.drawBitmap(photo, null, rect, null)
+                if (layout.rotated) {
+                    // Rotate the photo 90° around the tile centre so the source
+                    // image (whose own aspect is W × H) fills a H × W tile.
+                    canvas.save()
+                    canvas.rotate(90f, rect.centerX(), rect.centerY())
+                    val rotatedDest = RectF(
+                        rect.centerX() - rect.height() / 2f,
+                        rect.centerY() - rect.width() / 2f,
+                        rect.centerX() + rect.height() / 2f,
+                        rect.centerY() + rect.width() / 2f,
+                    )
+                    canvas.drawBitmap(photo, null, rotatedDest, null)
+                    canvas.restore()
+                } else {
+                    canvas.drawBitmap(photo, null, rect, null)
+                }
                 canvas.drawRect(rect, borderPaint)
             }
         }

@@ -55,6 +55,7 @@ import com.kartik.snapdoc.R
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.ui.components.DocKind
 import com.kartik.snapdoc.ui.components.DocPreview
+import com.kartik.snapdoc.ui.components.HomeShimmerSkeleton
 import com.kartik.snapdoc.ui.components.ShoulderArt
 import com.kartik.snapdoc.ui.theme.Amber
 import com.kartik.snapdoc.ui.theme.AmberDark
@@ -88,23 +89,15 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 44.dp, bottom = 96.dp),
+                .padding(top = 44.dp, bottom = 24.dp),
         ) {
             PersonalisedHeader(onSettingsClick = onSettingsClick)
             Spacer(modifier = Modifier.height(8.dp))
             ContinueHero(
-                onClick = {
-                    state.documents.firstOrNull { it.id.contains("aadhaar", ignoreCase = true) }
-                        ?.let { onDocClick(it.id) }
-                        ?: state.documents.firstOrNull()?.let { onDocClick(it.id) }
-                },
+                onClick = { state.documents.firstOrNull()?.let { onDocClick(it.id) } },
             )
             Spacer(modifier = Modifier.height(14.dp))
-            StatsRow()
-            Spacer(modifier = Modifier.height(14.dp))
             SmartReminder()
-            Spacer(modifier = Modifier.height(14.dp))
-            SearchPill(query = state.query)
             Spacer(modifier = Modifier.height(14.dp))
             CategoryChips(
                 categories = listOf(null to stringResource(R.string.home_category_all)) +
@@ -115,9 +108,12 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(14.dp))
             SuggestedHeader()
             Spacer(modifier = Modifier.height(8.dp))
-            DocumentGrid(documents = state.documents, onDocClick = onDocClick)
+            if (state.loading) {
+                HomeShimmerSkeleton()
+            } else {
+                DocumentGrid(documents = state.documents, onDocClick = onDocClick)
+            }
         }
-        BottomTabBar(modifier = Modifier.align(Alignment.BottomCenter))
     }
 }
 
@@ -299,75 +295,6 @@ private fun ContinueHero(onClick: () -> Unit) {
 }
 
 @Composable
-private fun StatsRow() {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp),
-    ) {
-        StatCell(
-            value = stringResource(R.string.home_stat_photos_value),
-            label = stringResource(R.string.home_stat_photos_label),
-            icon = Icons.Outlined.Image,
-            modifier = Modifier.weight(1f),
-        )
-        StatCell(
-            value = stringResource(R.string.home_stat_saved_value),
-            label = stringResource(R.string.home_stat_saved_label),
-            icon = Icons.Outlined.Wallet,
-            modifier = Modifier.weight(1f),
-        )
-        StatCell(
-            value = stringResource(R.string.home_stat_approved_value),
-            label = stringResource(R.string.home_stat_approved_label),
-            icon = Icons.Outlined.Shield,
-            modifier = Modifier.weight(1f),
-        )
-    }
-}
-
-@Composable
-private fun StatCell(value: String, label: String, icon: ImageVector, modifier: Modifier = Modifier) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
-            .s1(14.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(RoundedCornerShape(9.dp))
-                .background(PrimaryFaint),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Primary,
-                modifier = Modifier.size(14.dp),
-            )
-        }
-        Column {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = Ink3,
-            )
-        }
-    }
-}
-
-@Composable
 private fun SmartReminder() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -411,48 +338,6 @@ private fun SmartReminder() {
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
             color = AmberDark,
         )
-    }
-}
-
-@Composable
-private fun SearchPill(query: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp)
-            .height(46.dp)
-            .s1(14.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable { /* opens search — query state managed by VM */ }
-            .padding(horizontal = 14.dp),
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.Search,
-            contentDescription = null,
-            tint = Ink4,
-            modifier = Modifier.size(18.dp),
-        )
-        Text(
-            text = if (query.isBlank()) stringResource(R.string.home_search_placeholder) else query,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (query.isBlank()) Ink4 else MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(Hairline2)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-        ) {
-            Text(
-                text = "⌘K",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = Ink3,
-            )
-        }
     }
 }
 
@@ -605,41 +490,3 @@ private fun kindFor(doc: DocumentSpec): DocKind {
     }
 }
 
-@Composable
-private fun BottomTabBar(modifier: Modifier = Modifier) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(78.dp)
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
-            .border(width = 1.dp, color = Hairline, shape = RoundedCornerShape(0.dp))
-            .padding(start = 22.dp, end = 22.dp, bottom = 18.dp),
-    ) {
-        TabItem(label = stringResource(R.string.home_tab_home), icon = Icons.Outlined.Home, active = true)
-        TabItem(label = stringResource(R.string.home_tab_history), icon = Icons.Outlined.History, active = false)
-        TabItem(label = stringResource(R.string.home_tab_documents), icon = Icons.Outlined.Folder, active = false)
-        TabItem(label = stringResource(R.string.home_tab_profile), icon = Icons.Outlined.Person, active = false)
-    }
-}
-
-@Composable
-private fun TabItem(label: String, icon: ImageVector, active: Boolean) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = if (active) Primary else Ink4,
-            modifier = Modifier.size(22.dp),
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = if (active) FontWeight.SemiBold else FontWeight.Medium,
-            ),
-            color = if (active) Primary else Ink4,
-        )
-    }
-}

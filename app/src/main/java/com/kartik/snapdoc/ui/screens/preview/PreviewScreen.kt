@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.kartik.snapdoc.R
 import com.kartik.snapdoc.domain.pipeline.ValidationCheck
+import com.kartik.snapdoc.ui.components.CircleIconButton
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.theme.Amber
 import com.kartik.snapdoc.ui.theme.AmberDark
@@ -82,13 +84,21 @@ fun PreviewScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp),
             ) {
-                CircleIcon(Icons.AutoMirrored.Outlined.ArrowBack, onBack)
+                CircleIcon(
+                    icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                    onClick = onBack,
+                    contentDescription = stringResource(R.string.cd_back),
+                )
                 Text(
                     text = stringResource(R.string.preview_title),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 )
-                CircleIcon(Icons.Outlined.Share, {})
+                CircleIcon(
+                    icon = Icons.Outlined.Share,
+                    onClick = {},
+                    contentDescription = stringResource(R.string.cd_share),
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -393,22 +403,11 @@ private fun ExportCta(entitled: Boolean, onClick: () -> Unit, modifier: Modifier
     }
 }
 
+// Local alias for the shared CircleIconButton — keeps the existing call sites
+// terse while routing through the canonical component.
 @Composable
-private fun CircleIcon(icon: ImageVector, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .s1(14.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size(20.dp),
-        )
-    }
-}
+private fun CircleIcon(
+    icon: ImageVector,
+    onClick: () -> Unit,
+    contentDescription: String? = null,
+) = CircleIconButton(icon = icon, onClick = onClick, contentDescription = contentDescription)

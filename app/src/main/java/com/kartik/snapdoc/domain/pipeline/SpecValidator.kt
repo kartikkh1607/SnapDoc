@@ -30,47 +30,24 @@ data class ValidationResult(
 @Singleton
 class SpecValidator @Inject constructor() {
 
-    private val detector = FaceDetection.getClient(
-        FaceDetectorOptions.Builder()
-            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
-            .setMinFaceSize(0.15f)
-            .build(),
-    )
+    // Lazy so unit tests can construct the validator without ML Kit's native
+    // detector being initialized at class-load time (Robolectric doesn't ship
+    // the ML Kit native lib).
+    private val detector by lazy {
+        FaceDetection.getClient(
+            FaceDetectorOptions.Builder()
+                .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+                .setMinFaceSize(0.15f)
+                .build(),
+        )
+    }
 
     suspend fun validate(
         bitmap: Bitmap,
         fileSizeKb: Int,
         spec: DocumentSpec,
     ): ValidationResult {
-        val checks = mutableListOf<ValidationCheck>()
-
-        val dimsPassed = bitmap.width == spec.dimensions.widthPx &&
-            bitmap.height == spec.dimensions.heightPx
-        checks += ValidationCheck(
-            name = "Dimensions",
-            expected = "${spec.dimensions.widthPx} × ${spec.dimensions.heightPx} px",
-            actual = "${bitmap.width} × ${bitmap.height} px",
-            passed = dimsPassed,
-        )
-
-        val sizePassed = fileSizeKb in spec.file.minSizeKb..spec.file.maxSizeKb
-        checks += ValidationCheck(
-            name = "File size",
-            expected = "${spec.file.minSizeKb}–${spec.file.maxSizeKb} KB",
-            actual = "$fileSizeKb KB",
-            passed = sizePassed,
-        )
-
-        val avgBg = sampleCornerAverage(bitmap)
-        val targetBg = parseHex(spec.background.colorHex)
-        val deltaE = labDelta(avgBg, targetBg)
-        val bgPassed = deltaE <= spec.background.toleranceLab.toFloat() * 3
-        checks += ValidationCheck(
-            name = "Background",
-            expected = "${spec.background.displayName} (${spec.background.colorHex})",
-            actual = "#%02X%02X%02X".format(Color.red(avgBg), Color.green(avgBg), Color.blue(avgBg)),
-            passed = bgPassed,
-        )
+        val checks = staticChecks(bitmap, fileSizeKb, spec).toMutableList()
 
         val face = detect(bitmap)
         checks += ValidationCheck(
@@ -92,6 +69,37 @@ class SpecValidator @Inject constructor() {
         }
 
         return ValidationResult(passed = checks.all { it.passed }, checks = checks)
+    }
+
+    /** Synchronous checks that don't require ML Kit — useful for unit tests. */
+    internal fun staticChecks(
+        bitmap: Bitmap,
+        fileSizeKb: Int,
+        spec: DocumentSpec,
+    ): List<ValidationCheck> {
+        val dims = ValidationCheck(
+            name = "Dimensions",
+            expected = "${spec.dimensions.widthPx} × ${spec.dimensions.heightPx} px",
+            actual = "${bitmap.width} × ${bitmap.height} px",
+            passed = bitmap.width == spec.dimensions.widthPx &&
+                bitmap.height == spec.dimensions.heightPx,
+        )
+        val size = ValidationCheck(
+            name = "File size",
+            expected = "${spec.file.minSizeKb}–${spec.file.maxSizeKb} KB",
+            actual = "$fileSizeKb KB",
+            passed = fileSizeKb in spec.file.minSizeKb..spec.file.maxSizeKb,
+        )
+        val avgBg = sampleCornerAverage(bitmap)
+        val targetBg = parseHex(spec.background.colorHex)
+        val deltaE = labDelta(avgBg, targetBg)
+        val bg = ValidationCheck(
+            name = "Background",
+            expected = "${spec.background.displayName} (${spec.background.colorHex})",
+            actual = "#%02X%02X%02X".format(Color.red(avgBg), Color.green(avgBg), Color.blue(avgBg)),
+            passed = deltaE <= spec.background.toleranceLab.toFloat() * 3,
+        )
+        return listOf(dims, size, bg)
     }
 
     private suspend fun detect(bitmap: Bitmap): Face? = suspendCancellableCoroutine { cont ->

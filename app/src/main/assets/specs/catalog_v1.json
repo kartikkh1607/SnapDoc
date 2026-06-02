@@ -44,14 +44,14 @@
       "shortName": "PAN",
       "categoryId": "in_government",
       "popularity": 92,
-      "dimensions": { "widthMm": 25, "heightMm": 35, "widthPx": 213, "heightPx": 213, "dpi": 300 },
+      "dimensions": { "widthMm": 25, "heightMm": 35, "widthPx": 213, "heightPx": 298, "dpi": 216 },
       "background": { "colorHex": "#FFFFFF", "displayName": "White", "toleranceLab": 5 },
       "face": { "headHeightPercentMin": 70, "headHeightPercentMax": 80, "eyeLineFromTopPercentMin": 50, "eyeLineFromTopPercentMax": 70 },
       "file": { "format": "JPG", "minSizeKb": 20, "maxSizeKb": 50 },
       "rules": { "glassesAllowed": false, "headCoveringAllowed": true, "headCoveringReligiousOnly": true, "mouthClosed": true, "neutralExpression": true, "eyesOpen": true, "noShadows": true },
       "sourceUrl": "https://onlineservices.nsdl.com/",
       "lastUpdated": "2025-11-01",
-      "notes": "Online PAN portal usually accepts 213x213 px."
+      "notes": "Online PAN portal — 25x35 mm at ~216 DPI (213x298 px) keeps the 5:7 aspect ratio."
     },
     {
       "id": "in_dl",

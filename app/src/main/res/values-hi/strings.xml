@@ -13,24 +13,13 @@
     <string name="home_continue_step_left">1 स्टेप बाकी</string>
     <string name="home_continue_title">आधार फ़ोटो जारी रखें</string>
     <string name="home_continue_subtitle">₹49 भुगतान · डाउनलोड के लिए तैयार</string>
-    <string name="home_stat_photos_value">12</string>
-    <string name="home_stat_photos_label">फ़ोटो बनाए</string>
-    <string name="home_stat_saved_value">₹480</string>
-    <string name="home_stat_saved_label">बचत</string>
-    <string name="home_stat_approved_value">100%</string>
-    <string name="home_stat_approved_label">स्वीकृत</string>
     <string name="home_reminder_title">पासपोर्ट मार्च 2027 में समाप्त</string>
     <string name="home_reminder_subtitle">10 महीने में नवीनीकरण · नए फ़ोटो तैयार रखें</string>
     <string name="home_reminder_cta">योजना</string>
-    <string name="home_search_placeholder">90+ भारतीय डॉक्यूमेंट खोजें…</string>
     <string name="home_category_all">सभी</string>
     <string name="home_suggested_title">लोकप्रिय डॉक्यूमेंट</string>
     <string name="home_suggested_action">सभी देखें</string>
     <string name="home_featured_badge">आपके लिए</string>
-    <string name="home_tab_home">होम</string>
-    <string name="home_tab_history">इतिहास</string>
-    <string name="home_tab_documents">डॉक्यूमेंट</string>
-    <string name="home_tab_profile">प्रोफ़ाइल</string>
 
     <!-- Settings -->
     <string name="settings_title">सेटिंग्स</string>
@@ -96,6 +85,12 @@
     <string name="camera_capture_error">फ़ोटो नहीं ली जा सकी। कृपया फिर से कोशिश करें।</string>
     <string name="camera_cd_flash">फ़्लैश बदलें</string>
     <string name="camera_cd_gallery">गैलरी से चुनें</string>
+    <string name="camera_cd_close">कैमरा बंद करें</string>
+    <string name="camera_cd_capture">फ़ोटो लें</string>
+    <string name="camera_cd_flip">कैमरा बदलें</string>
+    <string name="cd_back">वापस</string>
+    <string name="cd_share">शेयर करें</string>
+    <string name="cd_info">जानकारी</string>
 
     <!-- Face guidance -->
     <string name="guidance_no_face">कोई चेहरा नहीं मिला</string>

@@ -9,10 +9,14 @@ import android.media.ExifInterface
 import androidx.core.net.toFile
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -39,19 +43,26 @@ class PhotoProcessor @Inject constructor(
     private val _stage = MutableStateFlow(ProcessingStage.DetectingFace)
     val stage: StateFlow<ProcessingStage> = _stage.asStateFlow()
 
-    suspend fun process(sourceUri: Uri, spec: DocumentSpec): ProcessingOutcome = withContext(Dispatchers.Default) {
+    private val processMutex = Mutex()
+
+    suspend fun process(sourceUri: Uri, spec: DocumentSpec): ProcessingOutcome = processMutex.withLock {
+      withContext(Dispatchers.Default) {
         try {
             _stage.value = ProcessingStage.DetectingFace
+            ensureActive()
             val source = decodeOriented(sourceUri) ?: return@withContext ProcessingOutcome.Failure("Couldn't read photo")
 
             _stage.value = ProcessingStage.RemovingBackground
+            ensureActive()
             val removed = backgroundRemover.remove(source)
 
             _stage.value = ProcessingStage.ApplyingBackground
+            ensureActive()
             val composited = backgroundCompositor.composite(removed, spec.background)
             if (composited !== source) source.recycle()
 
             _stage.value = ProcessingStage.Cropping
+            ensureActive()
             val cropResult = faceCropper.cropToSpec(composited, spec)
             val cropped = when (cropResult) {
                 is CropResult.Success -> cropResult.bitmap.also { if (it !== composited) composited.recycle() }
@@ -62,13 +73,16 @@ class PhotoProcessor @Inject constructor(
             }
 
             _stage.value = ProcessingStage.Resizing
+            ensureActive()
             val resized = imageResizer.resize(cropped, spec.dimensions.widthPx, spec.dimensions.heightPx)
             if (resized !== cropped) cropped.recycle()
 
             _stage.value = ProcessingStage.Compressing
+            ensureActive()
             val compressed = compressor.compressToTarget(resized, spec.file.minSizeKb, spec.file.maxSizeKb)
 
             _stage.value = ProcessingStage.Validating
+            ensureActive()
             val validation = validator.validate(resized, compressed.sizeKb, spec)
 
             val outFile = File(context.cacheDir, "snapdoc_processed_${spec.id}_${System.currentTimeMillis()}.jpg")
@@ -87,9 +101,13 @@ class PhotoProcessor @Inject constructor(
 
             _stage.value = ProcessingStage.Done
             ProcessingOutcome.Success(entry)
+        } catch (ce: CancellationException) {
+            // Honor cancellation — the caller's coroutine is gone.
+            throw ce
         } catch (t: Throwable) {
             ProcessingOutcome.Failure(t.message ?: "Processing failed")
         }
+      }
     }
 
     private fun decodeOriented(uri: Uri): Bitmap? {

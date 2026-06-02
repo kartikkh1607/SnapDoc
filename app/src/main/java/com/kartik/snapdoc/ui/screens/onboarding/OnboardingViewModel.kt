@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kartik.snapdoc.data.prefs.UserPrefsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,7 +17,7 @@ class OnboardingViewModel @Inject constructor(
     fun finish(onDone: () -> Unit) {
         viewModelScope.launch {
             prefs.setOnboardingSeen(true)
-            onDone()
+            withContext(Dispatchers.Main) { onDone() }
         }
     }
 }

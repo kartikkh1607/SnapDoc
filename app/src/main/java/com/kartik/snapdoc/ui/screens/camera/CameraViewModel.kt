@@ -3,6 +3,7 @@ package com.kartik.snapdoc.ui.screens.camera
 import androidx.camera.core.CameraSelector
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.navigation.toRoute
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.domain.camera.FaceGuidanceState
 import com.kartik.snapdoc.domain.camera.GuidanceChecks
@@ -20,7 +21,7 @@ class CameraViewModel @Inject constructor(
     repo: SpecCatalogRepository,
 ) : ViewModel() {
 
-    val docId: String = savedStateHandle.get<String>(Routes.Args.DOC_ID).orEmpty()
+    val docId: String = savedStateHandle.toRoute<Routes.Camera>().docId
 
     private val _state = MutableStateFlow(CameraUiState(doc = repo.byId(docId)))
     val state: StateFlow<CameraUiState> = _state.asStateFlow()

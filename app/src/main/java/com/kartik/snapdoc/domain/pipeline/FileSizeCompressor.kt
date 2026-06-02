@@ -32,7 +32,7 @@ class FileSizeCompressor @Inject constructor() {
         val out = ByteArrayOutputStream()
         current.compress(Bitmap.CompressFormat.JPEG, 30, out)
         val bytes = out.toByteArray()
-        return CompressedImage(bytes, 30, bytes.size / 1024)
+        return CompressedImage(bytes, 30, bytes.size.toKbRounded())
     }
 
     private fun searchQuality(bitmap: Bitmap, minKb: Int, maxKb: Int): CompressedImage? {
@@ -45,7 +45,7 @@ class FileSizeCompressor @Inject constructor() {
             val out = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, mid, out)
             val bytes = out.toByteArray()
-            val sizeKb = bytes.size / 1024
+            val sizeKb = bytes.size.toKbRounded()
             when {
                 sizeKb in minKb..maxKb -> {
                     best = CompressedImage(bytes, mid, sizeKb)
@@ -57,4 +57,6 @@ class FileSizeCompressor @Inject constructor() {
         }
         return best
     }
+
+    private fun Int.toKbRounded(): Int = (this + 512) / 1024
 }

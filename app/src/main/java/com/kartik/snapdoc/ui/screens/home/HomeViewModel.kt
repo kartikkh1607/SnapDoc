@@ -26,6 +26,7 @@ class HomeViewModel @Inject constructor(
                     categories = repo.categories(),
                     popular = repo.popular(5),
                     documents = repo.search("", null),
+                    loading = false,
                 )
             }
         }

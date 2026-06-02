@@ -51,6 +51,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -59,9 +64,12 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
+import android.app.Activity
+import android.content.pm.PackageManager
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.core.app.ActivityCompat
 import com.kartik.snapdoc.R
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.domain.camera.FaceGuidanceAnalyzer
@@ -75,7 +83,6 @@ import com.kartik.snapdoc.ui.theme.Primary
 import com.kartik.snapdoc.ui.theme.Success
 import java.io.File
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraScreen(
     onClose: () -> Unit,
@@ -83,10 +90,31 @@ fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val permission = rememberPermissionState(Manifest.permission.CAMERA)
+    val context = LocalContext.current
 
-    when (val status = permission.status) {
-        is PermissionStatus.Granted -> CameraContent(
+    var granted by rememberSaveable {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED,
+        )
+    }
+    // The system only updates shouldShowRequestPermissionRationale after a denial,
+    // so we read it lazily on each recomposition triggered by the launcher callback.
+    var shouldShowRationale by rememberSaveable { mutableStateOf(false) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        granted = isGranted
+        if (!isGranted) {
+            val activity = context as? Activity
+            shouldShowRationale = activity != null &&
+                ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA)
+        }
+    }
+
+    if (granted) {
+        CameraContent(
             state = state,
             onClose = onClose,
             onCaptured = onCaptured,
@@ -96,10 +124,11 @@ fun CameraScreen(
             onCapturingChanged = viewModel::setCapturing,
             onError = viewModel::setError,
         )
-        is PermissionStatus.Denied -> PermissionGate(
-            shouldShowRationale = status.shouldShowRationale,
+    } else {
+        PermissionGate(
+            shouldShowRationale = shouldShowRationale,
             onClose = onClose,
-            onRequest = { permission.launchPermissionRequest() },
+            onRequest = { permissionLauncher.launch(Manifest.permission.CAMERA) },
         )
     }
 }
@@ -194,7 +223,12 @@ private fun CameraContent(
                 .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(18.dp))
                 .padding(horizontal = 8.dp),
         ) {
-            GlassChip(icon = Icons.Outlined.Close, onClick = onClose, tint = Color.White, contentDescription = null)
+            GlassChip(
+                icon = Icons.Outlined.Close,
+                onClick = onClose,
+                tint = Color.White,
+                contentDescription = stringResource(R.string.camera_cd_close),
+            )
             Column(
                 modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -402,13 +436,18 @@ private fun GuidancePill(guidance: FaceGuidanceState, modifier: Modifier = Modif
         FaceGuidanceState.NoFace, FaceGuidanceState.MultipleFaces -> ErrorRed.copy(alpha = 0.92f)
         else -> Color(0xFF14141B).copy(alpha = 0.78f)
     }
+    val headline = stringResource(guidance.headlineRes())
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
             .clip(RoundedCornerShape(99.dp))
             .background(background)
-            .padding(start = 12.dp, end = 16.dp, top = 10.dp, bottom = 10.dp),
+            .padding(start = 12.dp, end = 16.dp, top = 10.dp, bottom = 10.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = headline
+                liveRegion = LiveRegionMode.Polite
+            },
     ) {
         Box(
             modifier = Modifier
@@ -471,12 +510,18 @@ private fun GlassChip(icon: ImageVector, onClick: () -> Unit, tint: Color, conte
             .size(36.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White.copy(alpha = 0.10f))
-            .clickable(onClick = onClick),
+            .clickable(
+                onClickLabel = contentDescription,
+                role = Role.Button,
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = contentDescription,
+            // Click label on the parent already announces the action — keep
+            // the icon decorative to avoid TalkBack double-reads.
+            contentDescription = null,
             tint = tint,
             modifier = Modifier.size(18.dp),
         )
@@ -505,13 +550,19 @@ private fun GalleryThumb(onClick: () -> Unit) {
 
 @Composable
 private fun CaptureButton(enabled: Boolean, onClick: () -> Unit) {
+    val captureLabel = stringResource(R.string.camera_cd_capture)
     Box(
         modifier = Modifier
             .size(78.dp)
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.16f))
             .border(3.dp, Color.White.copy(alpha = if (enabled) 0.95f else 0.5f), CircleShape)
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(
+                enabled = enabled,
+                onClickLabel = captureLabel,
+                role = Role.Button,
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Box(
@@ -526,12 +577,13 @@ private fun CaptureButton(enabled: Boolean, onClick: () -> Unit) {
 
 @Composable
 private fun FlipButton(onClick: () -> Unit) {
+    val label = stringResource(R.string.camera_cd_flip)
     Box(
         modifier = Modifier
             .size(48.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.14f))
-            .clickable(onClick = onClick),
+            .clickable(onClickLabel = label, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(

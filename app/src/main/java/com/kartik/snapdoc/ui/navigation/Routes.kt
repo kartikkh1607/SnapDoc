@@ -1,41 +1,37 @@
 package com.kartik.snapdoc.ui.navigation
 
+import kotlinx.serialization.Serializable
+
+/**
+ * Type-safe navigation routes (Navigation Compose 2.8+).
+ *
+ * Route objects are serialized via kotlinx.serialization, so call sites just
+ * instantiate the typed object (no string templating, no URL encoding). Args
+ * are read in ViewModels via [androidx.navigation.toRoute].
+ *
+ * Names are kept short under the [Routes] namespace to disambiguate from
+ * similarly-named Compose types (e.g. `@Preview`).
+ */
 object Routes {
-    const val SPLASH = "splash"
-    const val ONBOARDING = "onboarding"
-    const val HOME = "home"
-    const val SETTINGS = "settings"
+    @Serializable object Splash
 
-    private const val DOC_DETAIL_BASE = "docDetail"
-    const val DOC_DETAIL = "$DOC_DETAIL_BASE/{docId}"
-    fun docDetail(docId: String) = "$DOC_DETAIL_BASE/$docId"
+    @Serializable object Onboarding
 
-    private const val CAMERA_BASE = "camera"
-    const val CAMERA = "$CAMERA_BASE/{docId}"
-    fun camera(docId: String) = "$CAMERA_BASE/$docId"
+    @Serializable object Home
 
-    private const val REVIEW_BASE = "review"
-    const val REVIEW = "$REVIEW_BASE/{docId}/{imageUri}"
-    fun review(docId: String, imageUri: String) = "$REVIEW_BASE/$docId/${java.net.URLEncoder.encode(imageUri, "UTF-8")}"
+    @Serializable object Settings
 
-    private const val PROCESSING_BASE = "processing"
-    const val PROCESSING = "$PROCESSING_BASE/{docId}/{imageUri}"
-    fun processing(docId: String, imageUri: String) = "$PROCESSING_BASE/$docId/${java.net.URLEncoder.encode(imageUri, "UTF-8")}"
+    @Serializable data class DocDetail(val docId: String)
 
-    private const val PREVIEW_BASE = "preview"
-    const val PREVIEW = "$PREVIEW_BASE/{docId}/{imageUri}"
-    fun preview(docId: String, imageUri: String) = "$PREVIEW_BASE/$docId/${java.net.URLEncoder.encode(imageUri, "UTF-8")}"
+    @Serializable data class Camera(val docId: String)
 
-    private const val EXPORT_BASE = "export"
-    const val EXPORT = "$EXPORT_BASE/{docId}/{imageUri}"
-    fun export(docId: String, imageUri: String) = "$EXPORT_BASE/$docId/${java.net.URLEncoder.encode(imageUri, "UTF-8")}"
+    @Serializable data class Review(val docId: String, val imageUri: String)
 
-    private const val PRINT_SHEET_BASE = "printSheet"
-    const val PRINT_SHEET = "$PRINT_SHEET_BASE/{docId}/{imageUri}"
-    fun printSheet(docId: String, imageUri: String) = "$PRINT_SHEET_BASE/$docId/${java.net.URLEncoder.encode(imageUri, "UTF-8")}"
+    @Serializable data class Processing(val docId: String, val imageUri: String)
 
-    object Args {
-        const val DOC_ID = "docId"
-        const val IMAGE_URI = "imageUri"
-    }
+    @Serializable data class Preview(val docId: String, val imageUri: String)
+
+    @Serializable data class Export(val docId: String, val imageUri: String)
+
+    @Serializable data class PrintSheet(val docId: String, val imageUri: String)
 }

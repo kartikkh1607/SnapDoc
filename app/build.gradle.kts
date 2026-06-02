@@ -136,9 +136,6 @@ dependencies {
     // Splash
     implementation(libs.androidx.core.splashscreen)
 
-    // Accompanist
-    implementation(libs.accompanist.permissions)
-
     // Work
     implementation(libs.androidx.work.runtime.ktx)
 

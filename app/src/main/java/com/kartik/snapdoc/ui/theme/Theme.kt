@@ -1,8 +1,11 @@
 package com.kartik.snapdoc.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColorScheme(
     primary = Primary,
@@ -25,15 +28,36 @@ private val LightColors = lightColorScheme(
     outlineVariant = Hairline2,
 )
 
+private val DarkColors = darkColorScheme(
+    primary = Primary,
+    onPrimary = OnPrimary,
+    primaryContainer = DarkPrimarySoft,
+    onPrimaryContainer = Color.White,
+    secondary = Amber,
+    onSecondary = OnPrimary,
+    secondaryContainer = DarkPrimaryFaint,
+    onSecondaryContainer = Amber,
+    background = DarkBackground,
+    onBackground = DarkOnSurface,
+    surface = DarkSurface,
+    onSurface = DarkOnSurface,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkOnSurfaceVariant,
+    error = ErrorRed,
+    onError = OnPrimary,
+    outline = DarkOutline,
+    outlineVariant = DarkOutline,
+)
+
 @Composable
 fun SnapDocTheme(
-    @Suppress("UNUSED_PARAMETER") darkTheme: Boolean = false,
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    // SnapDoc is light-only by design.
     MaterialTheme(
-        colorScheme = LightColors,
+        colorScheme = if (darkTheme) DarkColors else LightColors,
         typography = Typography,
+        shapes = SnapDocShapes,
         content = content,
     )
 }

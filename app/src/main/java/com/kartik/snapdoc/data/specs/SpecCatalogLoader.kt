@@ -9,21 +9,37 @@ import com.kartik.snapdoc.data.specs.model.FaceSpec
 import com.kartik.snapdoc.data.specs.model.FileSpec
 import com.kartik.snapdoc.data.specs.model.RulesSpec
 import com.kartik.snapdoc.data.specs.model.SpecCatalog
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class SpecCatalogLoaderModule {
+    @Binds
+    @Singleton
+    abstract fun bindSpecCatalogLoader(impl: AssetSpecCatalogLoader): SpecCatalogLoader
+}
+
+interface SpecCatalogLoader {
+    fun load(): SpecCatalog
+}
+
 @Singleton
-class SpecCatalogLoader @Inject constructor(
+class AssetSpecCatalogLoader @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : SpecCatalogLoader {
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
     }
 
-    fun load(): SpecCatalog = runCatching {
+    override fun load(): SpecCatalog = runCatching {
         val raw = context.assets.open(CATALOG_PATH).bufferedReader().use { it.readText() }
         json.decodeFromString<SpecCatalog>(raw)
     }.getOrElse {
