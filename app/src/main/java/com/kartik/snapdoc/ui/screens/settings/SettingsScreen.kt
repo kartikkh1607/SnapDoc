@@ -43,8 +43,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.ui.theme.Hairline2
 import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Ink4
@@ -63,22 +65,35 @@ private data class SettingsRow(
 
 private data class SettingsGroup(val title: String, val rows: List<SettingsRow>)
 
+@Composable
 private fun buildGroups(state: SettingsUiState, onRestore: () -> Unit): List<SettingsGroup> = listOf(
     SettingsGroup(
-        title = "Purchases",
+        title = stringResource(R.string.settings_group_purchases),
         rows = listOf(
             SettingsRow(
-                label = "Photo Export",
-                subtitle = if (state.entitlement.canExport) "Unlocked" else "₹49 · tap export from any photo",
+                label = stringResource(R.string.settings_row_photo_export),
+                subtitle = if (state.entitlement.canExport) {
+                    stringResource(R.string.settings_row_photo_export_unlocked)
+                } else {
+                    stringResource(R.string.settings_row_photo_export_locked)
+                },
                 icon = Icons.Outlined.Wallet,
             ),
             SettingsRow(
-                label = "Studio Bundle",
-                subtitle = if (state.entitlement.studioBundleUnlocked) "Unlocked · print sheets enabled" else "₹99 · adds print sheets",
+                label = stringResource(R.string.settings_row_studio_bundle),
+                subtitle = if (state.entitlement.studioBundleUnlocked) {
+                    stringResource(R.string.settings_row_studio_bundle_unlocked)
+                } else {
+                    stringResource(R.string.settings_row_studio_bundle_locked)
+                },
                 icon = Icons.Outlined.Image,
             ),
             SettingsRow(
-                label = if (state.restoring) "Restoring…" else "Restore purchase",
+                label = if (state.restoring) {
+                    stringResource(R.string.settings_row_restoring)
+                } else {
+                    stringResource(R.string.settings_row_restore)
+                },
                 subtitle = state.restoreMessage,
                 icon = Icons.Outlined.Refresh,
                 onClick = onRestore,
@@ -86,28 +101,36 @@ private fun buildGroups(state: SettingsUiState, onRestore: () -> Unit): List<Set
         ),
     ),
     SettingsGroup(
-        title = "Preferences",
+        title = stringResource(R.string.settings_group_preferences),
         rows = listOf(
-            SettingsRow("Language", "English (India)", Icons.Outlined.Language),
-            SettingsRow("On-device processing", "Always", Icons.Outlined.Bolt),
-        ),
-    ),
-    SettingsGroup(
-        title = "Support",
-        rows = listOf(
-            SettingsRow("Help & FAQ", null, Icons.AutoMirrored.Outlined.Help),
-            SettingsRow("Contact support", null, Icons.Outlined.Notifications),
-            SettingsRow("Rate SnapDoc", null, Icons.Outlined.Star),
-        ),
-    ),
-    SettingsGroup(
-        title = "Legal",
-        rows = listOf(
-            SettingsRow("Privacy policy", null, Icons.Outlined.Shield),
-            SettingsRow("Terms of service", null, Icons.Outlined.Book),
             SettingsRow(
-                label = "About",
-                subtitle = "v${state.versionName} (${state.versionCode})",
+                stringResource(R.string.settings_row_language),
+                stringResource(R.string.settings_row_language_value),
+                Icons.Outlined.Language,
+            ),
+            SettingsRow(
+                stringResource(R.string.settings_row_on_device),
+                stringResource(R.string.settings_row_on_device_value),
+                Icons.Outlined.Bolt,
+            ),
+        ),
+    ),
+    SettingsGroup(
+        title = stringResource(R.string.settings_group_support),
+        rows = listOf(
+            SettingsRow(stringResource(R.string.settings_row_help), null, Icons.AutoMirrored.Outlined.Help),
+            SettingsRow(stringResource(R.string.settings_row_contact), null, Icons.Outlined.Notifications),
+            SettingsRow(stringResource(R.string.settings_row_rate), null, Icons.Outlined.Star),
+        ),
+    ),
+    SettingsGroup(
+        title = stringResource(R.string.settings_group_legal),
+        rows = listOf(
+            SettingsRow(stringResource(R.string.settings_row_privacy), null, Icons.Outlined.Shield),
+            SettingsRow(stringResource(R.string.settings_row_terms), null, Icons.Outlined.Book),
+            SettingsRow(
+                label = stringResource(R.string.settings_row_about),
+                subtitle = stringResource(R.string.settings_about_version, state.versionName, state.versionCode),
                 icon = Icons.Outlined.Info,
             ),
         ),
@@ -141,7 +164,7 @@ fun SettingsScreen(
                     .padding(horizontal = 22.dp, vertical = 18.dp),
             ) {
                 Text(
-                    text = "Settings",
+                    text = stringResource(R.string.settings_title),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineLarge,
                 )
@@ -156,7 +179,7 @@ fun SettingsScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(R.string.settings_cd_close),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(18.dp),
                     )
@@ -175,7 +198,7 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Made in India · v${state.versionName} (build ${state.versionCode})",
+                text = stringResource(R.string.settings_footer, state.versionName, state.versionCode),
                 color = Ink4,
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
@@ -197,7 +220,6 @@ private fun ProfileCard(modifier: Modifier = Modifier) {
             .background(Primary)
             .padding(16.dp),
     ) {
-        // Decorative ring (top-right)
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -217,30 +239,25 @@ private fun ProfileCard(modifier: Modifier = Modifier) {
                     .background(Color.White.copy(alpha = 0.16f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = "RS",
-                    color = Color.White,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                Icon(
+                    imageVector = Icons.Outlined.Shield,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp),
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Riya Sharma",
+                    text = stringResource(R.string.settings_profile_title),
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
                 Text(
-                    text = "riya.sharma@gmail.com",
-                    color = Color.White.copy(alpha = 0.75f),
+                    text = stringResource(R.string.settings_profile_subtitle),
+                    color = Color.White.copy(alpha = 0.85f),
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(20.dp),
-            )
         }
     }
 }

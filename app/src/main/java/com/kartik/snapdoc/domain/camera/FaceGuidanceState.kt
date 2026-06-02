@@ -1,5 +1,8 @@
 package com.kartik.snapdoc.domain.camera
 
+import androidx.annotation.StringRes
+import com.kartik.snapdoc.R
+
 sealed interface FaceGuidanceState {
     object NoFace : FaceGuidanceState
     object MultipleFaces : FaceGuidanceState
@@ -14,19 +17,18 @@ sealed interface FaceGuidanceState {
 
 data class GuidanceChecks(
     val faceCentered: Boolean = false,
-    val evenLighting: Boolean = false,
-    val plainBackground: Boolean = false,
     val eyesOpen: Boolean = false,
 )
 
-fun FaceGuidanceState.headline(): String = when (this) {
-    FaceGuidanceState.NoFace -> "No face detected"
-    FaceGuidanceState.MultipleFaces -> "Only one person in frame"
-    is FaceGuidanceState.TooFar -> "Move closer"
-    is FaceGuidanceState.TooClose -> "Move back"
-    FaceGuidanceState.NotCentered -> "Center your face"
-    FaceGuidanceState.NotStraight -> "Look straight at the camera"
-    FaceGuidanceState.EyesClosed -> "Open your eyes"
-    FaceGuidanceState.MouthOpen -> "Close your mouth"
-    FaceGuidanceState.Ready -> "Perfect — hold still"
+@StringRes
+fun FaceGuidanceState.headlineRes(): Int = when (this) {
+    FaceGuidanceState.NoFace -> R.string.guidance_no_face
+    FaceGuidanceState.MultipleFaces -> R.string.guidance_multiple_faces
+    is FaceGuidanceState.TooFar -> R.string.guidance_too_far
+    is FaceGuidanceState.TooClose -> R.string.guidance_too_close
+    FaceGuidanceState.NotCentered -> R.string.guidance_not_centered
+    FaceGuidanceState.NotStraight -> R.string.guidance_not_straight
+    FaceGuidanceState.EyesClosed -> R.string.guidance_eyes_closed
+    FaceGuidanceState.MouthOpen -> R.string.guidance_mouth_open
+    FaceGuidanceState.Ready -> R.string.guidance_ready
 }

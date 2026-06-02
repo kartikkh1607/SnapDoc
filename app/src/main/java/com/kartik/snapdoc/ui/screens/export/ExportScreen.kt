@@ -35,9 +35,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.data.billing.ProductIds
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,27 +60,27 @@ import com.kartik.snapdoc.ui.theme.sGreen
 
 private data class Plan(
     val productId: String,
-    val title: String,
-    val subtitle: String,
-    val price: String,
-    val strike: String? = null,
-    val badge: Pair<String, Color>? = null,
+    val titleRes: Int,
+    val subtitleRes: Int,
+    val priceRes: Int,
+    val strikeRes: Int? = null,
+    val badge: Pair<Int, Color>? = null,
 )
 
 private val Plans = listOf(
     Plan(
         productId = ProductIds.PHOTO_EXPORT,
-        title = "Photo Export",
-        subtitle = "Remove watermark · export unlimited photos",
-        price = "₹49",
+        titleRes = R.string.export_plan_photo_title,
+        subtitleRes = R.string.export_plan_photo_subtitle,
+        priceRes = R.string.export_plan_photo_price,
     ),
     Plan(
         productId = ProductIds.STUDIO_BUNDLE,
-        title = "Studio Bundle",
-        subtitle = "Photo Export + multi-copy print sheets (4×6 / A4)",
-        price = "₹99",
-        strike = "₹149",
-        badge = "BEST VALUE" to Primary,
+        titleRes = R.string.export_plan_studio_title,
+        subtitleRes = R.string.export_plan_studio_subtitle,
+        priceRes = R.string.export_plan_studio_price,
+        strikeRes = R.string.export_plan_studio_strike,
+        badge = R.string.export_plan_studio_badge to Primary,
     ),
 )
 
@@ -133,19 +135,19 @@ fun ExportScreen(
                         modifier = Modifier.size(12.dp),
                     )
                     Text(
-                        text = "ONE-TIME PAYMENT · NO SUBSCRIPTION",
+                        text = stringResource(R.string.export_eyebrow),
                         color = Primary,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Pick your export",
+                    text = stringResource(R.string.export_title),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineMedium,
                 )
                 Text(
-                    text = "Pay once. Re-download anytime. Keep it forever.",
+                    text = stringResource(R.string.export_subtitle),
                     color = Ink3,
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -162,7 +164,9 @@ fun ExportScreen(
                             putExtra(Intent.EXTRA_STREAM, uri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
-                        context.startActivity(Intent.createChooser(intent, "Share photo"))
+                        context.startActivity(
+                            Intent.createChooser(intent, context.getString(R.string.export_share_chooser)),
+                        )
                     },
                     onDone = onDone,
                 )
@@ -205,9 +209,9 @@ fun ExportScreen(
                     .background(PrimaryFaint)
                     .padding(horizontal = 14.dp, vertical = 12.dp),
             ) {
-                TrustItem(icon = Icons.Outlined.Shield, label = "Secure pay")
-                TrustItem(icon = Icons.Outlined.Refresh, label = "Re-download")
-                TrustItem(icon = Icons.Outlined.Lock, label = "Private")
+                TrustItem(icon = Icons.Outlined.Shield, label = stringResource(R.string.export_trust_secure))
+                TrustItem(icon = Icons.Outlined.Refresh, label = stringResource(R.string.export_trust_redownload))
+                TrustItem(icon = Icons.Outlined.Lock, label = stringResource(R.string.export_trust_private))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -225,8 +229,8 @@ fun ExportScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 val ctaText = when (state.phase) {
-                    ExportPhase.Purchasing -> "Opening Play Billing…"
-                    else -> "Pay ${selectedPlan.price}"
+                    ExportPhase.Purchasing -> stringResource(R.string.export_cta_purchasing)
+                    else -> stringResource(R.string.export_cta_pay, stringResource(selectedPlan.priceRes))
                 }
                 Text(
                     text = ctaText,
@@ -236,7 +240,7 @@ fun ExportScreen(
             }
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Google Play · UPI · Cards · Wallets",
+                text = stringResource(R.string.export_payment_methods),
                 color = Ink4,
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier
@@ -245,7 +249,7 @@ fun ExportScreen(
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Restore purchase",
+                text = stringResource(R.string.export_restore),
                 color = Primary,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                 modifier = Modifier
@@ -281,7 +285,7 @@ private fun SavingCard() {
         }
         Spacer(modifier = Modifier.height(14.dp))
         Text(
-            text = "Saving to your gallery…",
+            text = stringResource(R.string.export_saving),
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
         )
@@ -320,12 +324,12 @@ private fun SavedSuccessCard(
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Saved to Pictures/SnapDoc",
+                    text = stringResource(R.string.export_saved_title),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 )
                 Text(
-                    text = "Watermark removed · ready to upload",
+                    text = stringResource(R.string.export_saved_subtitle),
                     color = Ink3,
                     style = MaterialTheme.typography.labelMedium,
                 )
@@ -336,7 +340,7 @@ private fun SavedSuccessCard(
             Spacer(modifier = Modifier.height(14.dp))
             AsyncImage(
                 model = savedUri,
-                contentDescription = "Saved photo",
+                contentDescription = stringResource(R.string.export_cd_saved),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .size(width = 180.dp, height = 224.dp)
@@ -367,7 +371,7 @@ private fun SavedSuccessCard(
                         modifier = Modifier.size(18.dp),
                     )
                     Text(
-                        text = "Share",
+                        text = stringResource(R.string.export_share_button),
                         color = Primary,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     )
@@ -384,7 +388,7 @@ private fun SavedSuccessCard(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Done",
+                    text = stringResource(R.string.export_done),
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
@@ -409,7 +413,7 @@ private fun PlanCard(plan: Plan, selected: Boolean, onSelect: () -> Unit) {
             .padding(14.dp),
     ) {
         if (plan.badge != null) {
-            val (label, color) = plan.badge
+            val (labelRes, color) = plan.badge
             Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -419,7 +423,7 @@ private fun PlanCard(plan: Plan, selected: Boolean, onSelect: () -> Unit) {
                     .padding(horizontal = 9.dp, vertical = 3.dp),
             ) {
                 Text(
-                    text = label,
+                    text = stringResource(labelRes),
                     color = Color.White,
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 )
@@ -453,22 +457,22 @@ private fun PlanCard(plan: Plan, selected: Boolean, onSelect: () -> Unit) {
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = plan.title,
+                    text = stringResource(plan.titleRes),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
                     ),
                 )
                 Text(
-                    text = plan.subtitle,
+                    text = stringResource(plan.subtitleRes),
                     color = if (selected) Ink2 else Ink3,
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
             Column(horizontalAlignment = Alignment.End) {
-                if (plan.strike != null) {
+                if (plan.strikeRes != null) {
                     Text(
-                        text = plan.strike,
+                        text = stringResource(plan.strikeRes),
                         color = Ink4,
                         style = MaterialTheme.typography.labelMedium.copy(
                             textDecoration = TextDecoration.LineThrough,
@@ -476,7 +480,7 @@ private fun PlanCard(plan: Plan, selected: Boolean, onSelect: () -> Unit) {
                     )
                 }
                 Text(
-                    text = plan.price,
+                    text = stringResource(plan.priceRes),
                     color = if (selected) Primary else MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 )

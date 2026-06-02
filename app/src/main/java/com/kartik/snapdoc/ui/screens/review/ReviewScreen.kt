@@ -31,11 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.navigation.Routes
 import com.kartik.snapdoc.ui.theme.Primary
@@ -72,7 +74,7 @@ fun ReviewScreen(
         ) {
             DarkIconButton(icon = Icons.Outlined.Close, onClick = onRetake)
             Text(
-                text = "Review your photo",
+                text = stringResource(R.string.review_title),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             )
@@ -105,7 +107,7 @@ fun ReviewScreen(
                         .padding(horizontal = 7.dp, vertical = 3.dp),
                 ) {
                     Text(
-                        text = "1:1 · CAPTURED",
+                        text = stringResource(R.string.review_chip),
                         color = Color(0xFF6B7280),
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                     )
@@ -159,12 +161,12 @@ private fun QualityBadge() {
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Looks great",
+                text = stringResource(R.string.review_quality_title),
                 color = Color.White,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
             )
             Text(
-                text = "Sharp focus · clean background · face centered",
+                text = stringResource(R.string.review_quality_subtitle),
                 color = Color.White.copy(alpha = 0.55f),
                 style = MaterialTheme.typography.labelMedium,
             )
@@ -193,7 +195,7 @@ private fun RetakeButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             modifier = Modifier.size(18.dp),
         )
         Text(
-            text = "Retake",
+            text = stringResource(R.string.review_retake),
             color = Color.White,
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
         )
@@ -216,7 +218,7 @@ private fun UsePhotoButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = "Use this photo",
+            text = stringResource(R.string.review_use_photo),
             color = Color.White,
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
         )

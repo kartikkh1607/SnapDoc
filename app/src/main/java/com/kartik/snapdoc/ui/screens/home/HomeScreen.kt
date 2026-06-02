@@ -45,11 +45,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.ui.components.DocKind
 import com.kartik.snapdoc.ui.components.DocPreview
@@ -105,7 +107,8 @@ fun HomeScreen(
             SearchPill(query = state.query)
             Spacer(modifier = Modifier.height(14.dp))
             CategoryChips(
-                categories = listOf(null to "All") + state.categories.map { it.id to it.displayName },
+                categories = listOf(null to stringResource(R.string.home_category_all)) +
+                    state.categories.map { it.id to it.displayName },
                 selected = state.selectedCategoryId,
                 onSelect = viewModel::onCategorySelect,
             )
@@ -130,27 +133,18 @@ private fun PersonalisedHeader(onSettingsClick: () -> Unit) {
         AvatarTile()
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Good morning",
+                text = stringResource(R.string.home_eyebrow),
                 style = MaterialTheme.typography.labelMedium,
                 color = Ink3,
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                Text(
-                    text = "Riya",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontSize = 19.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = "👋",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
+            Text(
+                text = stringResource(R.string.home_title),
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
         }
         NotificationBell(onClick = onSettingsClick)
     }
@@ -173,7 +167,7 @@ private fun AvatarTile() {
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = "RS",
+                text = "SD",
                 color = Color.White,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             )
@@ -206,7 +200,7 @@ private fun NotificationBell(onClick: () -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Outlined.Notifications,
-            contentDescription = "Notifications",
+            contentDescription = stringResource(R.string.home_cd_notifications),
             tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(19.dp),
         )
@@ -267,7 +261,7 @@ private fun ContinueHero(onClick: () -> Unit) {
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             ) {
                 Text(
-                    text = "1 STEP LEFT",
+                    text = stringResource(R.string.home_continue_step_left),
                     color = Color.White,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
@@ -277,12 +271,12 @@ private fun ContinueHero(onClick: () -> Unit) {
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Continue Aadhaar photo",
+                text = stringResource(R.string.home_continue_title),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             )
             Text(
-                text = "Pay ₹49 · ready for download",
+                text = stringResource(R.string.home_continue_subtitle),
                 color = Color.White.copy(alpha = 0.75f),
                 style = MaterialTheme.typography.labelMedium,
             )
@@ -312,9 +306,24 @@ private fun StatsRow() {
             .fillMaxWidth()
             .padding(horizontal = 22.dp),
     ) {
-        StatCell(value = "12", label = "Photos made", icon = Icons.Outlined.Image, modifier = Modifier.weight(1f))
-        StatCell(value = "₹480", label = "Saved", icon = Icons.Outlined.Wallet, modifier = Modifier.weight(1f))
-        StatCell(value = "100%", label = "Approved", icon = Icons.Outlined.Shield, modifier = Modifier.weight(1f))
+        StatCell(
+            value = stringResource(R.string.home_stat_photos_value),
+            label = stringResource(R.string.home_stat_photos_label),
+            icon = Icons.Outlined.Image,
+            modifier = Modifier.weight(1f),
+        )
+        StatCell(
+            value = stringResource(R.string.home_stat_saved_value),
+            label = stringResource(R.string.home_stat_saved_label),
+            icon = Icons.Outlined.Wallet,
+            modifier = Modifier.weight(1f),
+        )
+        StatCell(
+            value = stringResource(R.string.home_stat_approved_value),
+            label = stringResource(R.string.home_stat_approved_label),
+            icon = Icons.Outlined.Shield,
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 
@@ -387,18 +396,18 @@ private fun SmartReminder() {
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Passport expires Mar 2027",
+                text = stringResource(R.string.home_reminder_title),
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = AmberDark,
             )
             Text(
-                text = "Renew in 10 months · get fresh photos ready",
+                text = stringResource(R.string.home_reminder_subtitle),
                 style = MaterialTheme.typography.labelMedium,
                 color = AmberDark.copy(alpha = 0.85f),
             )
         }
         Text(
-            text = "Plan",
+            text = stringResource(R.string.home_reminder_cta),
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
             color = AmberDark,
         )
@@ -427,7 +436,7 @@ private fun SearchPill(query: String) {
             modifier = Modifier.size(18.dp),
         )
         Text(
-            text = if (query.isBlank()) "Search 90+ Indian docs…" else query,
+            text = if (query.isBlank()) stringResource(R.string.home_search_placeholder) else query,
             style = MaterialTheme.typography.bodyMedium,
             color = if (query.isBlank()) Ink4 else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f),
@@ -489,12 +498,12 @@ private fun SuggestedHeader() {
             .padding(horizontal = 22.dp),
     ) {
         Text(
-            text = "Suggested for Riya",
+            text = stringResource(R.string.home_suggested_title),
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = "See all",
+            text = stringResource(R.string.home_suggested_action),
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
             color = Primary,
         )
@@ -570,7 +579,7 @@ private fun DocCardLarge(
                     .padding(horizontal = 7.dp, vertical = 2.dp),
             ) {
                 Text(
-                    text = "FOR YOU",
+                    text = stringResource(R.string.home_featured_badge),
                     color = Primary,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
@@ -608,10 +617,10 @@ private fun BottomTabBar(modifier: Modifier = Modifier) {
             .border(width = 1.dp, color = Hairline, shape = RoundedCornerShape(0.dp))
             .padding(start = 22.dp, end = 22.dp, bottom = 18.dp),
     ) {
-        TabItem(label = "Home", icon = Icons.Outlined.Home, active = true)
-        TabItem(label = "History", icon = Icons.Outlined.History, active = false)
-        TabItem(label = "Documents", icon = Icons.Outlined.Folder, active = false)
-        TabItem(label = "Profile", icon = Icons.Outlined.Person, active = false)
+        TabItem(label = stringResource(R.string.home_tab_home), icon = Icons.Outlined.Home, active = true)
+        TabItem(label = stringResource(R.string.home_tab_history), icon = Icons.Outlined.History, active = false)
+        TabItem(label = stringResource(R.string.home_tab_documents), icon = Icons.Outlined.Folder, active = false)
+        TabItem(label = stringResource(R.string.home_tab_profile), icon = Icons.Outlined.Person, active = false)
     }
 }
 

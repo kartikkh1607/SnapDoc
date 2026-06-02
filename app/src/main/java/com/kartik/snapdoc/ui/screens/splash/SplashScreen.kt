@@ -38,11 +38,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.ui.theme.Amber
 import com.kartik.snapdoc.ui.theme.AmberDark
 import com.kartik.snapdoc.ui.theme.AmberSoft
@@ -113,19 +115,15 @@ fun SplashScreen(
             Wordmark()
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Document photos, done right.",
+                text = stringResource(R.string.splash_tagline),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Ink3,
             )
-            Spacer(modifier = Modifier.height(36.dp))
-            WelcomeBackCard()
-            Spacer(modifier = Modifier.height(14.dp))
-            ResumeHint()
             Spacer(modifier = Modifier.weight(1f))
             LoaderBar(progress = animated)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Loading your documents…",
+                text = stringResource(R.string.splash_loading),
                 style = MaterialTheme.typography.labelMedium,
                 color = Ink3,
             )
@@ -149,7 +147,7 @@ private fun MadeForIndiaChip() {
     ) {
         IndianFlag()
         Text(
-            text = "MADE FOR INDIA",
+            text = stringResource(R.string.splash_made_for_india),
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -264,116 +262,6 @@ private fun Wordmark() {
             text = "Doc",
             style = MaterialTheme.typography.displayLarge.copy(fontWeight = FontWeight.Bold),
             color = Primary,
-        )
-    }
-}
-
-@Composable
-private fun WelcomeBackCard() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .s2(22.dp)
-            .clip(RoundedCornerShape(22.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(16.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(Primary, PrimaryDark),
-                        start = Offset(0f, 0f),
-                        end = Offset(120f, 120f),
-                    ),
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = "RS",
-                color = Color.White,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "Welcome back",
-                style = MaterialTheme.typography.labelMedium,
-                color = Ink3,
-            )
-            Text(
-                text = "Riya Sharma",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.padding(top = 4.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(Success),
-                )
-                Text(
-                    text = "12 photos · ₹480 saved on prints",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Primary,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ResumeHint() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(AmberSoft)
-            .border(1.dp, AmberDark.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(30.dp)
-                .clip(RoundedCornerShape(9.dp))
-                .background(Amber),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.History,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(16.dp),
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "Resume Aadhaar photo",
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = AmberDark,
-            )
-            Text(
-                text = "Started 2 days ago · 1 step left",
-                style = MaterialTheme.typography.labelMedium,
-                color = AmberDark.copy(alpha = 0.85f),
-            )
-        }
-        Icon(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-            contentDescription = null,
-            tint = AmberDark,
-            modifier = Modifier.size(16.dp),
         )
     }
 }

@@ -1,3 +1,206 @@
 <resources>
     <string name="app_name">SnapDoc</string>
+
+    <!-- Splash -->
+    <string name="splash_tagline">Document photos, done right.</string>
+    <string name="splash_loading">Loading your documents…</string>
+    <string name="splash_made_for_india">MADE FOR INDIA</string>
+
+    <!-- Home -->
+    <string name="home_eyebrow">SnapDoc</string>
+    <string name="home_title">Pick a document</string>
+    <string name="home_cd_notifications">Notifications</string>
+    <string name="home_continue_step_left">1 STEP LEFT</string>
+    <string name="home_continue_title">Continue Aadhaar photo</string>
+    <string name="home_continue_subtitle">Pay ₹49 · ready for download</string>
+    <string name="home_stat_photos_value">12</string>
+    <string name="home_stat_photos_label">Photos made</string>
+    <string name="home_stat_saved_value">₹480</string>
+    <string name="home_stat_saved_label">Saved</string>
+    <string name="home_stat_approved_value">100%</string>
+    <string name="home_stat_approved_label">Approved</string>
+    <string name="home_reminder_title">Passport expires Mar 2027</string>
+    <string name="home_reminder_subtitle">Renew in 10 months · get fresh photos ready</string>
+    <string name="home_reminder_cta">Plan</string>
+    <string name="home_search_placeholder">Search 90+ Indian docs…</string>
+    <string name="home_category_all">All</string>
+    <string name="home_suggested_title">Popular documents</string>
+    <string name="home_suggested_action">See all</string>
+    <string name="home_featured_badge">FOR YOU</string>
+    <string name="home_tab_home">Home</string>
+    <string name="home_tab_history">History</string>
+    <string name="home_tab_documents">Documents</string>
+    <string name="home_tab_profile">Profile</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_cd_close">Close</string>
+    <string name="settings_profile_title">On-device only</string>
+    <string name="settings_profile_subtitle">Your photos never leave this phone</string>
+    <string name="settings_group_purchases">Purchases</string>
+    <string name="settings_row_photo_export">Photo Export</string>
+    <string name="settings_row_photo_export_locked">₹49 · tap export from any photo</string>
+    <string name="settings_row_photo_export_unlocked">Unlocked</string>
+    <string name="settings_row_studio_bundle">Studio Bundle</string>
+    <string name="settings_row_studio_bundle_locked">₹99 · adds print sheets</string>
+    <string name="settings_row_studio_bundle_unlocked">Unlocked · print sheets enabled</string>
+    <string name="settings_row_restore">Restore purchase</string>
+    <string name="settings_row_restoring">Restoring…</string>
+    <string name="settings_group_preferences">Preferences</string>
+    <string name="settings_row_language">Language</string>
+    <string name="settings_row_language_value">English (India)</string>
+    <string name="settings_row_on_device">On-device processing</string>
+    <string name="settings_row_on_device_value">Always</string>
+    <string name="settings_group_support">Support</string>
+    <string name="settings_row_help">Help &amp; FAQ</string>
+    <string name="settings_row_contact">Contact support</string>
+    <string name="settings_row_rate">Rate SnapDoc</string>
+    <string name="settings_group_legal">Legal</string>
+    <string name="settings_row_privacy">Privacy policy</string>
+    <string name="settings_row_terms">Terms of service</string>
+    <string name="settings_row_about">About</string>
+    <string name="settings_about_version">v%1$s (%2$d)</string>
+    <string name="settings_footer">Made in India · v%1$s (build %2$d)</string>
+    <string name="settings_restore_success">Purchases restored.</string>
+    <string name="settings_restore_none">No purchases to restore.</string>
+    <string name="settings_restore_failed">Restore failed</string>
+
+    <!-- Preview -->
+    <string name="preview_title">Your photo</string>
+    <string name="preview_chip_ready">READY</string>
+    <string name="preview_chip_review">REVIEW</string>
+    <string name="preview_processing">Processing</string>
+    <string name="preview_loading">Loading…</string>
+    <string name="preview_actual_expected">%1$s · expected %2$s</string>
+    <string name="preview_print_sheet_title_unlocked">Make a print sheet</string>
+    <string name="preview_print_sheet_title_locked">Print sheet</string>
+    <string name="preview_print_sheet_subtitle_unlocked">Tile copies on 4×6 or A4 for the print shop.</string>
+    <string name="preview_print_sheet_subtitle_locked">Unlock Studio Bundle to print multi-copy sheets.</string>
+    <string name="preview_export_save_title">Save &amp; export</string>
+    <string name="preview_export_save_subtitle">Save to gallery · share</string>
+    <string name="preview_export_paid_title">Export photo</string>
+    <string name="preview_export_paid_subtitle">One-time · no subscription</string>
+    <string name="preview_export_price">₹49</string>
+    <string name="preview_footer_trust">Secure payment · 1.2M happy customers</string>
+    <string name="preview_cd_processed">Processed photo</string>
+
+    <!-- Camera -->
+    <string name="camera_doc_default">Document</string>
+    <string name="camera_doc_subtitle">%1$d × %2$d mm · %3$s BG</string>
+    <string name="camera_check_face_centered">Face centered</string>
+    <string name="camera_check_eyes_open">Eyes open</string>
+    <string name="camera_perm_title">Camera permission needed</string>
+    <string name="camera_perm_subtitle">SnapDoc uses your camera to take a perfectly-sized document photo. Photos stay on your device.</string>
+    <string name="camera_perm_cancel">Cancel</string>
+    <string name="camera_perm_grant">Grant access</string>
+    <string name="camera_capture_error">Couldn\'t capture photo. Please try again.</string>
+
+    <!-- Face guidance -->
+    <string name="guidance_no_face">No face detected</string>
+    <string name="guidance_multiple_faces">Only one person in frame</string>
+    <string name="guidance_too_far">Move closer</string>
+    <string name="guidance_too_close">Move back</string>
+    <string name="guidance_not_centered">Center your face</string>
+    <string name="guidance_not_straight">Look straight at the camera</string>
+    <string name="guidance_eyes_closed">Open your eyes</string>
+    <string name="guidance_mouth_open">Close your mouth</string>
+    <string name="guidance_ready">Perfect — hold still</string>
+
+    <!-- Processing -->
+    <string name="processing_step_of">Step %1$d of %2$d</string>
+    <string name="processing_title">Working on your photo</string>
+    <string name="processing_subtitle">Our AI is checking every detail against the official passport spec.</string>
+    <string name="processing_step_face">Detecting face</string>
+    <string name="processing_step_bg_remove">Removing background</string>
+    <string name="processing_step_bg_apply">Applying background</string>
+    <string name="processing_step_crop">Cropping to size</string>
+    <string name="processing_step_resize">Resizing to spec</string>
+    <string name="processing_step_compress">Compressing file</string>
+    <string name="processing_step_validate">Verifying compliance</string>
+    <string name="processing_step_done">Done</string>
+    <string name="processing_footer">PROCESSED ON-DEVICE · NO IMAGES STORED</string>
+
+    <!-- Export / paywall -->
+    <string name="export_eyebrow">ONE-TIME PAYMENT · NO SUBSCRIPTION</string>
+    <string name="export_title">Pick your export</string>
+    <string name="export_subtitle">Pay once. Re-download anytime. Keep it forever.</string>
+    <string name="export_share_chooser">Share photo</string>
+    <string name="export_saving">Saving to your gallery…</string>
+    <string name="export_saved_title">Saved to Pictures/SnapDoc</string>
+    <string name="export_saved_subtitle">Watermark removed · ready to upload</string>
+    <string name="export_cd_saved">Saved photo</string>
+    <string name="export_share_button">Share</string>
+    <string name="export_done">Done</string>
+    <string name="export_plan_photo_title">Photo Export</string>
+    <string name="export_plan_photo_subtitle">Remove watermark · export unlimited photos</string>
+    <string name="export_plan_photo_price">₹49</string>
+    <string name="export_plan_studio_title">Studio Bundle</string>
+    <string name="export_plan_studio_subtitle">Photo Export + multi-copy print sheets (4×6 / A4)</string>
+    <string name="export_plan_studio_price">₹99</string>
+    <string name="export_plan_studio_strike">₹149</string>
+    <string name="export_plan_studio_badge">BEST VALUE</string>
+    <string name="export_trust_secure">Secure pay</string>
+    <string name="export_trust_redownload">Re-download</string>
+    <string name="export_trust_private">Private</string>
+    <string name="export_cta_purchasing">Opening Play Billing…</string>
+    <string name="export_cta_pay">Pay %1$s</string>
+    <string name="export_payment_methods">Google Play · UPI · Cards · Wallets</string>
+    <string name="export_restore">Restore purchase</string>
+
+    <!-- Doc detail -->
+    <string name="docdetail_not_found">Document not found.</string>
+    <string name="docdetail_loading">Loading…</string>
+    <string name="docdetail_verified_badge">MEA verified spec</string>
+    <string name="docdetail_eyebrow">GOVERNMENT OF INDIA · %1$s</string>
+    <string name="docdetail_source">Source · %1$s</string>
+    <string name="docdetail_spec_size">Size</string>
+    <string name="docdetail_spec_resolution">Resolution</string>
+    <string name="docdetail_spec_background">Background</string>
+    <string name="docdetail_spec_file">File size</string>
+    <string name="docdetail_spec_size_value">%1$d × %2$d mm</string>
+    <string name="docdetail_spec_resolution_value">%1$d × %2$d px</string>
+    <string name="docdetail_spec_file_value">%1$d–%2$d KB</string>
+    <string name="docdetail_requirements_title">Photo requirements</string>
+    <string name="docdetail_req_background_template">%1$s background</string>
+    <string name="docdetail_req_face">Face centered, eyes open</string>
+    <string name="docdetail_req_neutral">Neutral expression, mouth closed</string>
+    <string name="docdetail_req_no_glasses">No spectacles or shadows</string>
+    <string name="docdetail_req_recent">Taken within the last 6 months</string>
+    <string name="docdetail_cta_take">Take photo</string>
+
+    <!-- Print sheet -->
+    <string name="printsheet_title">Print sheet</string>
+    <string name="printsheet_share_chooser">Share sheet</string>
+    <string name="printsheet_header_preparing">PREPARING…</string>
+    <string name="printsheet_header_template">%1$s · %2$d COPIES · %3$d × %4$d MM</string>
+    <string name="printsheet_subtitle">Cut along the dotted lines</string>
+    <string name="printsheet_sheet_dims">%1$d × %2$d mm</string>
+    <string name="printsheet_locked_title">Studio Bundle required</string>
+    <string name="printsheet_locked_subtitle">Unlock print sheets for ₹99 from the export screen.</string>
+    <string name="printsheet_saved_pdf">PDF saved to Downloads/SnapDoc</string>
+    <string name="printsheet_saved_jpg">JPG saved to Pictures/SnapDoc</string>
+    <string name="printsheet_saved_subtitle">Ready for the print shop.</string>
+    <string name="printsheet_save_jpg">Save JPG</string>
+    <string name="printsheet_save_pdf">Save PDF</string>
+    <string name="printsheet_generating">Generating…</string>
+    <string name="printsheet_share">Share</string>
+
+    <!-- Review -->
+    <string name="review_title">Review your photo</string>
+    <string name="review_chip">1:1 · CAPTURED</string>
+    <string name="review_quality_title">Looks great</string>
+    <string name="review_quality_subtitle">Sharp focus · clean background · face centered</string>
+    <string name="review_retake">Retake</string>
+    <string name="review_use_photo">Use this photo</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_before">BEFORE</string>
+    <string name="onboarding_verified">Verified</string>
+    <string name="onboarding_slide1_title">Exact document\nspecs, every time.</string>
+    <string name="onboarding_slide1_subtitle">We keep dimensions, background colour, file size and head height in sync with the official source for 90+ Indian documents.</string>
+    <string name="onboarding_slide2_title">AI background\ncleanup, in a tap.</string>
+    <string name="onboarding_slide2_subtitle">Auto-detect your face, remove distractions, and apply the exact background colour your document needs.</string>
+    <string name="onboarding_slide3_title">Instant export &amp;\nprint-ready sheets.</string>
+    <string name="onboarding_slide3_subtitle">Download the digital photo, or grab an A4 sheet pre-arranged for your local print shop.</string>
 </resources>

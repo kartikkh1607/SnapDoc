@@ -1,6 +1,7 @@
 package com.kartik.snapdoc.domain.camera
 
 import android.annotation.SuppressLint
+import android.os.SystemClock
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import com.google.mlkit.vision.common.InputImage
@@ -25,8 +26,17 @@ class FaceGuidanceAnalyzer(
             .build(),
     )
 
+    private var lastAnalysisMs = 0L
+
     @SuppressLint("UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastAnalysisMs < ANALYSIS_INTERVAL_MS) {
+            imageProxy.close()
+            return
+        }
+        lastAnalysisMs = now
+
         val mediaImage = imageProxy.image
         if (mediaImage == null) {
             imageProxy.close()
@@ -83,8 +93,6 @@ class FaceGuidanceAnalyzer(
 
         val checks = GuidanceChecks(
             faceCentered = centered,
-            evenLighting = true,
-            plainBackground = true,
             eyesOpen = eyesOpen,
         )
 
@@ -106,5 +114,6 @@ class FaceGuidanceAnalyzer(
 
     companion object {
         private const val POSE_TOLERANCE_DEG = 8f
+        private const val ANALYSIS_INTERVAL_MS = 200L
     }
 }

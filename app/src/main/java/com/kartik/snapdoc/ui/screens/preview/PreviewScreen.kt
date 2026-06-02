@@ -35,11 +35,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.domain.pipeline.ValidationCheck
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.theme.Amber
@@ -82,7 +84,7 @@ fun PreviewScreen(
             ) {
                 CircleIcon(Icons.AutoMirrored.Outlined.ArrowBack, onBack)
                 Text(
-                    text = "Your photo",
+                    text = stringResource(R.string.preview_title),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 )
@@ -100,13 +102,16 @@ fun PreviewScreen(
                     .padding(horizontal = 22.dp),
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
-            LockedPrintSheetCard(
-                onClick = { onPrintSheet(viewModel.docId, viewModel.imageUri) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp),
-            )
+            if (state.entitlement.canExport) {
+                Spacer(modifier = Modifier.height(14.dp))
+                PrintSheetCard(
+                    unlocked = state.entitlement.canPrintSheet,
+                    onClick = { onPrintSheet(viewModel.docId, viewModel.imageUri) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 22.dp),
+                )
+            }
         }
 
         ExportCta(
@@ -141,7 +146,7 @@ private fun WatermarkedPreview(state: PreviewUiState) {
             if (state.processedUri != null) {
                 AsyncImage(
                     model = state.processedUri,
-                    contentDescription = "Processed photo",
+                    contentDescription = stringResource(R.string.preview_cd_processed),
                     modifier = Modifier.fillMaxSize(),
                 )
             } else {
@@ -163,7 +168,9 @@ private fun WatermarkedPreview(state: PreviewUiState) {
             }
         }
         val chipColor = if (state.allPassed) Primary else ErrorRed
-        val chipLabel = if (state.allPassed) "READY" else "REVIEW"
+        val chipLabel = stringResource(
+            if (state.allPassed) R.string.preview_chip_ready else R.string.preview_chip_review,
+        )
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -185,7 +192,14 @@ private fun WatermarkedPreview(state: PreviewUiState) {
 @Composable
 private fun VerificationChecklist(checks: List<ValidationCheck>, modifier: Modifier = Modifier) {
     val items = checks.ifEmpty {
-        listOf(ValidationCheck("Processing", "—", "Loading…", true))
+        listOf(
+            ValidationCheck(
+                stringResource(R.string.preview_processing),
+                "—",
+                stringResource(R.string.preview_loading),
+                true,
+            ),
+        )
     }
     Column(
         modifier = modifier
@@ -223,7 +237,7 @@ private fun VerificationChecklist(checks: List<ValidationCheck>, modifier: Modif
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                     )
                     Text(
-                        text = "${item.actual} · expected ${item.expected}",
+                        text = stringResource(R.string.preview_actual_expected, item.actual, item.expected),
                         color = if (item.passed) Ink3 else ErrorRed,
                         style = MaterialTheme.typography.labelMedium,
                     )
@@ -242,14 +256,22 @@ private fun VerificationChecklist(checks: List<ValidationCheck>, modifier: Modif
 }
 
 @Composable
-private fun LockedPrintSheetCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun PrintSheetCard(
+    unlocked: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accentColor = if (unlocked) Primary else AmberDark
+    val background = if (unlocked) MaterialTheme.colorScheme.surface else AmberSoft
+    val border = if (unlocked) Hairline2 else AmberDark.copy(alpha = 0.45f)
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(AmberSoft)
-            .border(1.dp, AmberDark.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
+            .background(background)
+            .border(1.dp, border, RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(14.dp),
     ) {
@@ -257,7 +279,7 @@ private fun LockedPrintSheetCard(onClick: () -> Unit, modifier: Modifier = Modif
             modifier = Modifier
                 .size(48.dp)
                 .clip(RoundedCornerShape(14.dp))
-                .background(Amber),
+                .background(if (unlocked) Primary else Amber),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -273,20 +295,28 @@ private fun LockedPrintSheetCard(onClick: () -> Unit, modifier: Modifier = Modif
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(
-                    text = "Print sheet · 8 copies on A4",
-                    color = AmberDark,
+                    text = stringResource(
+                        if (unlocked) R.string.preview_print_sheet_title_unlocked
+                        else R.string.preview_print_sheet_title_locked,
+                    ),
+                    color = accentColor,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 )
-                Icon(
-                    imageVector = Icons.Outlined.Lock,
-                    contentDescription = null,
-                    tint = AmberDark,
-                    modifier = Modifier.size(12.dp),
-                )
+                if (!unlocked) {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.size(12.dp),
+                    )
+                }
             }
             Text(
-                text = "Save ₹40 at your local print shop. Included.",
-                color = AmberDark.copy(alpha = 0.85f),
+                text = stringResource(
+                    if (unlocked) R.string.preview_print_sheet_subtitle_unlocked
+                    else R.string.preview_print_sheet_subtitle_locked,
+                ),
+                color = accentColor.copy(alpha = 0.85f),
                 style = MaterialTheme.typography.labelMedium,
             )
         }
@@ -310,12 +340,18 @@ private fun ExportCta(entitled: Boolean, onClick: () -> Unit, modifier: Modifier
         ) {
             Column {
                 Text(
-                    text = if (entitled) "Save & export" else "Export photo",
+                    text = stringResource(
+                        if (entitled) R.string.preview_export_save_title
+                        else R.string.preview_export_paid_title,
+                    ),
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
                 Text(
-                    text = if (entitled) "Save to gallery · share" else "One-time · no subscription",
+                    text = stringResource(
+                        if (entitled) R.string.preview_export_save_subtitle
+                        else R.string.preview_export_paid_subtitle,
+                    ),
                     color = Color.White.copy(alpha = 0.75f),
                     style = MaterialTheme.typography.labelMedium,
                 )
@@ -328,7 +364,7 @@ private fun ExportCta(entitled: Boolean, onClick: () -> Unit, modifier: Modifier
                         .padding(horizontal = 14.dp, vertical = 8.dp),
                 ) {
                     Text(
-                        text = "₹49",
+                        text = stringResource(R.string.preview_export_price),
                         color = Color.White,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     )
@@ -349,7 +385,7 @@ private fun ExportCta(entitled: Boolean, onClick: () -> Unit, modifier: Modifier
             )
             Spacer(modifier = Modifier.size(6.dp))
             Text(
-                text = "Secure payment · 1.2M happy customers",
+                text = stringResource(R.string.preview_footer_trust),
                 color = Ink4,
                 style = MaterialTheme.typography.labelMedium,
             )

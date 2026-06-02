@@ -33,9 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.ui.components.ShoulderArt
 import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Ink4
@@ -47,23 +49,14 @@ import com.kartik.snapdoc.ui.theme.s3
 import com.kartik.snapdoc.ui.theme.sGreen
 
 private data class Slide(
-    val title: String,
-    val subtitle: String,
+    val titleRes: Int,
+    val subtitleRes: Int,
 )
 
 private val Slides = listOf(
-    Slide(
-        title = "Exact document\nspecs, every time.",
-        subtitle = "We keep dimensions, background colour, file size and head height in sync with the official source for 90+ Indian documents.",
-    ),
-    Slide(
-        title = "AI background\ncleanup, in a tap.",
-        subtitle = "Auto-detect your face, remove distractions, and apply the exact background colour your document needs.",
-    ),
-    Slide(
-        title = "Instant export &\nprint-ready sheets.",
-        subtitle = "Download the digital photo, or grab an A4 sheet pre-arranged for your local print shop.",
-    ),
+    Slide(R.string.onboarding_slide1_title, R.string.onboarding_slide1_subtitle),
+    Slide(R.string.onboarding_slide2_title, R.string.onboarding_slide2_subtitle),
+    Slide(R.string.onboarding_slide3_title, R.string.onboarding_slide3_subtitle),
 )
 
 @Composable
@@ -93,7 +86,7 @@ fun OnboardingScreen(
                     .padding(end = 22.dp),
             ) {
                 Text(
-                    text = "Skip",
+                    text = stringResource(R.string.onboarding_skip),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Ink3,
                     modifier = Modifier.clickable(onClick = complete),
@@ -105,14 +98,14 @@ fun OnboardingScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
             Text(
-                text = slide.title,
+                text = stringResource(slide.titleRes),
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(horizontal = 32.dp),
             )
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = slide.subtitle,
+                text = stringResource(slide.subtitleRes),
                 style = MaterialTheme.typography.bodyLarge,
                 color = Ink3,
                 modifier = Modifier.padding(horizontal = 32.dp),
@@ -176,7 +169,7 @@ private fun VisualCanvas() {
                 .padding(horizontal = 8.dp, vertical = 3.dp),
         ) {
             Text(
-                text = "BEFORE",
+                text = stringResource(R.string.onboarding_before),
                 color = Color.White,
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
             )
@@ -247,7 +240,7 @@ private fun VisualCanvas() {
                 )
             }
             Text(
-                text = "Verified",
+                text = stringResource(R.string.onboarding_verified),
                 color = Success,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
             )

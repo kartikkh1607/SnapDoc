@@ -39,10 +39,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.domain.pipeline.ProcessingStage
 import com.kartik.snapdoc.ui.theme.Hairline
 import com.kartik.snapdoc.ui.theme.Hairline2
@@ -56,26 +58,27 @@ import com.kartik.snapdoc.ui.theme.s2
 private data class Step(val label: String, val state: StepState, val detail: String? = null)
 private enum class StepState { Done, Active, Idle }
 
-private val PipelineLabels = listOf(
-    ProcessingStage.DetectingFace to "Detecting face",
-    ProcessingStage.RemovingBackground to "Removing background",
-    ProcessingStage.ApplyingBackground to "Applying background",
-    ProcessingStage.Cropping to "Cropping to size",
-    ProcessingStage.Resizing to "Resizing to spec",
-    ProcessingStage.Compressing to "Compressing file",
-    ProcessingStage.Validating to "Verifying compliance",
+private val PipelineStageRes = listOf(
+    ProcessingStage.DetectingFace to R.string.processing_step_face,
+    ProcessingStage.RemovingBackground to R.string.processing_step_bg_remove,
+    ProcessingStage.ApplyingBackground to R.string.processing_step_bg_apply,
+    ProcessingStage.Cropping to R.string.processing_step_crop,
+    ProcessingStage.Resizing to R.string.processing_step_resize,
+    ProcessingStage.Compressing to R.string.processing_step_compress,
+    ProcessingStage.Validating to R.string.processing_step_validate,
 )
 
+@Composable
 private fun buildSteps(current: ProcessingStage): List<Step> {
-    val currentIdx = PipelineLabels.indexOfFirst { it.first == current }.coerceAtLeast(0)
-    return PipelineLabels.mapIndexed { idx, (_, label) ->
+    val currentIdx = PipelineStageRes.indexOfFirst { it.first == current }.coerceAtLeast(0)
+    return PipelineStageRes.mapIndexed { idx, (_, res) ->
         val state = when {
             current == ProcessingStage.Done -> StepState.Done
             idx < currentIdx -> StepState.Done
             idx == currentIdx -> StepState.Active
             else -> StepState.Idle
         }
-        Step(label, state)
+        Step(stringResource(res), state)
     }
 }
 
@@ -142,7 +145,7 @@ fun ProcessingScreen(
                 val currentIdx = (steps.indexOfFirst { it.state == StepState.Active } + 1)
                     .coerceAtLeast(1)
                 Text(
-                    text = "Step $currentIdx of ${steps.size}",
+                    text = stringResource(R.string.processing_step_of, currentIdx, steps.size),
                     color = Ink3,
                     style = MaterialTheme.typography.labelMedium,
                 )
@@ -159,13 +162,13 @@ fun ProcessingScreen(
                     .padding(horizontal = 32.dp),
             ) {
                 Text(
-                    text = "Working on your photo",
+                    text = stringResource(R.string.processing_title),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineMedium,
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Our AI is checking every detail against the official passport spec.",
+                    text = stringResource(R.string.processing_subtitle),
                     color = Ink3,
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -181,7 +184,7 @@ fun ProcessingScreen(
 
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "PROCESSED ON-DEVICE · NO IMAGES STORED",
+                text = stringResource(R.string.processing_footer),
                 color = Ink4,
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier
@@ -317,7 +320,7 @@ private fun TimelineRow(step: Step, isLast: Boolean) {
         }
         when (step.state) {
             StepState.Done -> Text(
-                text = "Done",
+                text = stringResource(R.string.processing_step_done),
                 color = Ink4,
                 style = MaterialTheme.typography.labelMedium,
             )

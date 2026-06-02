@@ -31,10 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.theme.Background
@@ -68,7 +70,9 @@ fun DocDetailScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = if (state.notFound) "Document not found." else "Loading…",
+                    text = stringResource(
+                        if (state.notFound) R.string.docdetail_not_found else R.string.docdetail_loading,
+                    ),
                     color = Ink3,
                     style = MaterialTheme.typography.bodyLarge,
                 )
@@ -182,7 +186,7 @@ private fun BodyContent(doc: DocumentSpec) {
                 )
             }
             Text(
-                text = "MEA verified spec",
+                text = stringResource(R.string.docdetail_verified_badge),
                 color = Primary,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
             )
@@ -190,7 +194,7 @@ private fun BodyContent(doc: DocumentSpec) {
 
         Spacer(modifier = Modifier.height(18.dp))
         Text(
-            text = "GOVERNMENT OF INDIA · ${doc.categoryId.uppercase()}",
+            text = stringResource(R.string.docdetail_eyebrow, doc.categoryId.uppercase()),
             color = Primary,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
         )
@@ -203,7 +207,7 @@ private fun BodyContent(doc: DocumentSpec) {
         if (doc.sourceUrl.isNotBlank()) {
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Source · ${doc.sourceUrl.cleanHost()}",
+                text = stringResource(R.string.docdetail_source, doc.sourceUrl.cleanHost()),
                 color = Ink3,
                 style = MaterialTheme.typography.bodyMedium,
             )
@@ -213,7 +217,7 @@ private fun BodyContent(doc: DocumentSpec) {
         SpecCards(doc = doc)
         Spacer(modifier = Modifier.height(22.dp))
         Text(
-            text = "Photo requirements",
+            text = stringResource(R.string.docdetail_requirements_title),
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
         )
@@ -225,10 +229,22 @@ private fun BodyContent(doc: DocumentSpec) {
 @Composable
 private fun SpecCards(doc: DocumentSpec) {
     val specs = listOf(
-        "Size" to "${doc.dimensions.widthMm.toInt()} × ${doc.dimensions.heightMm.toInt()} mm",
-        "Resolution" to "${doc.dimensions.widthPx} × ${doc.dimensions.heightPx} px",
-        "Background" to doc.background.displayName,
-        "File size" to "${doc.file.minSizeKb}–${doc.file.maxSizeKb} KB",
+        stringResource(R.string.docdetail_spec_size) to stringResource(
+            R.string.docdetail_spec_size_value,
+            doc.dimensions.widthMm.toInt(),
+            doc.dimensions.heightMm.toInt(),
+        ),
+        stringResource(R.string.docdetail_spec_resolution) to stringResource(
+            R.string.docdetail_spec_resolution_value,
+            doc.dimensions.widthPx,
+            doc.dimensions.heightPx,
+        ),
+        stringResource(R.string.docdetail_spec_background) to doc.background.displayName,
+        stringResource(R.string.docdetail_spec_file) to stringResource(
+            R.string.docdetail_spec_file_value,
+            doc.file.minSizeKb,
+            doc.file.maxSizeKb,
+        ),
     )
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         specs.chunked(2).forEach { row ->
@@ -268,11 +284,11 @@ private fun SpecCell(label: String, value: String, modifier: Modifier = Modifier
 @Composable
 private fun RequirementsCard(doc: DocumentSpec) {
     val items = buildList {
-        add("${doc.background.displayName} background")
-        add("Face centered, eyes open")
-        if (doc.rules.neutralExpression) add("Neutral expression, mouth closed")
-        if (!doc.rules.glassesAllowed) add("No spectacles or shadows")
-        add("Taken within the last 6 months")
+        add(stringResource(R.string.docdetail_req_background_template, doc.background.displayName))
+        add(stringResource(R.string.docdetail_req_face))
+        if (doc.rules.neutralExpression) add(stringResource(R.string.docdetail_req_neutral))
+        if (!doc.rules.glassesAllowed) add(stringResource(R.string.docdetail_req_no_glasses))
+        add(stringResource(R.string.docdetail_req_recent))
     }
     Column(
         modifier = Modifier
@@ -354,7 +370,7 @@ private fun StickyCta(onClick: () -> Unit, modifier: Modifier = Modifier) {
                 modifier = Modifier.size(20.dp),
             )
             Text(
-                text = "Take photo",
+                text = stringResource(R.string.docdetail_cta_take),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             )

@@ -38,11 +38,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.domain.print.SheetLayout
 import com.kartik.snapdoc.domain.print.SheetSize
 import com.kartik.snapdoc.ui.theme.AmberDark
@@ -70,7 +72,9 @@ fun PrintSheetScreen(
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        context.startActivity(Intent.createChooser(intent, "Share sheet"))
+        context.startActivity(
+            Intent.createChooser(intent, context.getString(R.string.printsheet_share_chooser)),
+        )
     }
 
     Box(
@@ -93,7 +97,7 @@ fun PrintSheetScreen(
             ) {
                 CircleIcon(Icons.AutoMirrored.Outlined.ArrowBack, onBack, MaterialTheme.colorScheme.onSurface)
                 Text(
-                    text = "Print sheet",
+                    text = stringResource(R.string.printsheet_title),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 )
@@ -160,10 +164,16 @@ fun PrintSheetScreen(
 private fun Header(state: PrintSheetUiState, modifier: Modifier = Modifier) {
     val doc = state.doc
     val layout = state.layout
-    val tagline = when {
-        layout != null && doc != null ->
-            "${layout.sheet.displayName.uppercase()} · ${layout.copies} COPIES · ${doc.dimensions.widthMm.toInt()} × ${doc.dimensions.heightMm.toInt()} MM"
-        else -> "PREPARING…"
+    val tagline = if (layout != null && doc != null) {
+        stringResource(
+            R.string.printsheet_header_template,
+            layout.sheet.displayName.uppercase(),
+            layout.copies,
+            doc.dimensions.widthMm.toInt(),
+            doc.dimensions.heightMm.toInt(),
+        )
+    } else {
+        stringResource(R.string.printsheet_header_preparing)
     }
     Column(modifier = modifier) {
         Text(
@@ -173,7 +183,7 @@ private fun Header(state: PrintSheetUiState, modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
-            text = "Cut along the dotted lines",
+            text = stringResource(R.string.printsheet_subtitle),
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
         )
@@ -260,7 +270,7 @@ private fun SheetPreview(state: PrintSheetUiState, modifier: Modifier = Modifier
             }
         }
         Text(
-            text = "${sheet.widthMm.toInt()} × ${sheet.heightMm.toInt()} mm",
+            text = stringResource(R.string.printsheet_sheet_dims, sheet.widthMm.toInt(), sheet.heightMm.toInt()),
             color = Ink4,
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier
@@ -316,12 +326,12 @@ private fun LockedBanner(modifier: Modifier = Modifier) {
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Studio Bundle required",
+                text = stringResource(R.string.printsheet_locked_title),
                 color = AmberDark,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             )
             Text(
-                text = "Unlock print sheets for ₹99 from the export screen.",
+                text = stringResource(R.string.printsheet_locked_subtitle),
                 color = AmberDark.copy(alpha = 0.85f),
                 style = MaterialTheme.typography.labelMedium,
             )
@@ -360,12 +370,15 @@ private fun SavedBanner(
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = if (state.shareMime == "application/pdf") "PDF saved to Downloads/SnapDoc" else "JPG saved to Pictures/SnapDoc",
+                text = stringResource(
+                    if (state.shareMime == "application/pdf") R.string.printsheet_saved_pdf
+                    else R.string.printsheet_saved_jpg,
+                ),
                 color = Primary,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             )
             Text(
-                text = "Ready for the print shop.",
+                text = stringResource(R.string.printsheet_saved_subtitle),
                 color = Ink3,
                 style = MaterialTheme.typography.labelMedium,
             )
@@ -374,7 +387,7 @@ private fun SavedBanner(
         val mime = state.shareMime
         if (uri != null && mime != null) {
             Text(
-                text = "Share",
+                text = stringResource(R.string.printsheet_share),
                 color = Primary,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier
@@ -419,7 +432,7 @@ private fun FooterActions(
                 modifier = Modifier.size(18.dp),
             )
             Text(
-                text = "Save JPG",
+                text = stringResource(R.string.printsheet_save_jpg),
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             )
@@ -445,7 +458,10 @@ private fun FooterActions(
                 modifier = Modifier.size(18.dp),
             )
             Text(
-                text = if (state.phase == PrintExportPhase.Generating) "Generating…" else "Save PDF",
+                text = stringResource(
+                    if (state.phase == PrintExportPhase.Generating) R.string.printsheet_generating
+                    else R.string.printsheet_save_pdf,
+                ),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             )

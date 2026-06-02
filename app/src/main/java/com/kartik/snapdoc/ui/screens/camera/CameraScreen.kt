@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +45,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -56,11 +56,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.domain.camera.FaceGuidanceAnalyzer
 import com.kartik.snapdoc.domain.camera.FaceGuidanceState
 import com.kartik.snapdoc.domain.camera.GuidanceChecks
-import com.kartik.snapdoc.domain.camera.headline
+import com.kartik.snapdoc.domain.camera.headlineRes
 import com.kartik.snapdoc.ui.components.FaceOvalGuide
 import com.kartik.snapdoc.ui.theme.Amber
 import com.kartik.snapdoc.ui.theme.ErrorRed
@@ -109,6 +110,7 @@ private fun CameraContent(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val mainExecutor = remember { ContextCompat.getMainExecutor(context) }
+    val captureErrorMsg = stringResource(R.string.camera_capture_error)
 
     val controller = remember {
         LifecycleCameraController(context).apply {
@@ -175,13 +177,18 @@ private fun CameraContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = state.doc?.displayName ?: "Document",
+                    text = state.doc?.displayName ?: stringResource(R.string.camera_doc_default),
                     color = Color.White,
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                 )
                 Text(
                     text = state.doc?.let {
-                        "${it.dimensions.widthMm.toInt()} × ${it.dimensions.heightMm.toInt()} mm · ${it.background.displayName.uppercase()} BG"
+                        stringResource(
+                            R.string.camera_doc_subtitle,
+                            it.dimensions.widthMm.toInt(),
+                            it.dimensions.heightMm.toInt(),
+                            it.background.displayName.uppercase(),
+                        )
                     } ?: "",
                     color = Color.White.copy(alpha = 0.7f),
                     style = MaterialTheme.typography.labelSmall,
@@ -212,10 +219,8 @@ private fun CameraContent(
                 .align(Alignment.CenterStart)
                 .padding(start = 14.dp),
         ) {
-            CheckChip("Face centered", state.checks.faceCentered)
-            CheckChip("Even lighting", state.checks.evenLighting)
-            CheckChip("Plain background", state.checks.plainBackground)
-            CheckChip("Eyes open", state.checks.eyesOpen)
+            CheckChip(stringResource(R.string.camera_check_face_centered), state.checks.faceCentered)
+            CheckChip(stringResource(R.string.camera_check_eyes_open), state.checks.eyesOpen)
         }
 
         Box(
@@ -232,33 +237,6 @@ private fun CameraContent(
                     ),
                 ),
         )
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(22.dp),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 148.dp),
-        ) {
-            Text(
-                text = "UPLOAD",
-                color = Color.White.copy(alpha = 0.55f),
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-            )
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = "CAMERA",
-                    color = Amber,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Box(
-                    modifier = Modifier
-                        .size(4.dp)
-                        .clip(CircleShape)
-                        .background(Amber),
-                )
-            }
-        }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -289,7 +267,7 @@ private fun CameraContent(
                             override fun onError(exception: ImageCaptureException) {
                                 Log.e(TAG, "Capture failed", exception)
                                 onCapturingChanged(false)
-                                onError("Couldn't capture photo. Please try again.")
+                                onError(captureErrorMsg)
                             }
                         },
                     )
@@ -335,12 +313,12 @@ private fun PermissionGate(
                 )
             }
             Text(
-                text = "Camera permission needed",
+                text = stringResource(R.string.camera_perm_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "SnapDoc uses your camera to take a perfectly-sized document photo. Photos stay on your device.",
+                text = stringResource(R.string.camera_perm_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -355,7 +333,7 @@ private fun PermissionGate(
                         .padding(horizontal = 24.dp, vertical = 14.dp),
                 ) {
                     Text(
-                        text = "Cancel",
+                        text = stringResource(R.string.camera_perm_cancel),
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleMedium,
                     )
@@ -368,7 +346,7 @@ private fun PermissionGate(
                         .padding(horizontal = 24.dp, vertical = 14.dp),
                 ) {
                     Text(
-                        text = "Grant access",
+                        text = stringResource(R.string.camera_perm_grant),
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium,
                     )
@@ -408,7 +386,7 @@ private fun GuidancePill(guidance: FaceGuidanceState, modifier: Modifier = Modif
             )
         }
         Text(
-            text = guidance.headline(),
+            text = stringResource(guidance.headlineRes()),
             color = Color.White,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
         )
