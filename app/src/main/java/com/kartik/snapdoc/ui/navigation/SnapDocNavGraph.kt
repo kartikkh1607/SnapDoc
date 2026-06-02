@@ -1,5 +1,7 @@
 package com.kartik.snapdoc.ui.navigation
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -16,12 +18,18 @@ import com.kartik.snapdoc.ui.screens.review.ReviewScreen
 import com.kartik.snapdoc.ui.screens.settings.SettingsScreen
 import com.kartik.snapdoc.ui.screens.splash.SplashScreen
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SnapDocNavGraph(
     navController: NavHostController,
     startDestination: Any = Routes.Splash,
 ) {
-    NavHost(navController = navController, startDestination = startDestination) {
+    // Wrap the whole NavHost in a SharedTransitionLayout so the captured photo
+    // can animate continuously across Review -> Processing -> Preview. Each of
+    // those screens claims `Modifier.sharedElement(... key = "photo-$docId")`
+    // on its photo container; everything else ignores the scope.
+    SharedTransitionLayout {
+      NavHost(navController = navController, startDestination = startDestination) {
         composable<Routes.Splash> {
             SplashScreen(
                 onFirstLaunch = {
@@ -76,6 +84,8 @@ fun SnapDocNavGraph(
                 onUsePhoto = { docId, uri ->
                     navController.navigate(Routes.Processing(docId, uri))
                 },
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedContentScope = this@composable,
             )
         }
 
@@ -95,6 +105,8 @@ fun SnapDocNavGraph(
                 onBack = { navController.popBackStack() },
                 onExport = { docId, uri -> navController.navigate(Routes.Export(docId, uri)) },
                 onPrintSheet = { docId, uri -> navController.navigate(Routes.PrintSheet(docId, uri)) },
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedContentScope = this@composable,
             )
         }
 
@@ -117,5 +129,6 @@ fun SnapDocNavGraph(
                 onBack = { navController.popBackStack() },
             )
         }
+      }
     }
 }

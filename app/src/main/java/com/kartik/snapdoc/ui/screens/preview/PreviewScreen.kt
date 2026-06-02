@@ -44,6 +44,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.kartik.snapdoc.R
 import com.kartik.snapdoc.domain.pipeline.ValidationCheck
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import com.kartik.snapdoc.ui.components.CircleIconButton
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.theme.Amber
@@ -58,11 +61,14 @@ import com.kartik.snapdoc.ui.theme.s1
 import com.kartik.snapdoc.ui.theme.s3
 import com.kartik.snapdoc.ui.theme.sGreen
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PreviewScreen(
     onBack: () -> Unit,
     onExport: (docId: String, imageUri: String) -> Unit,
     onPrintSheet: (docId: String, imageUri: String) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     viewModel: PreviewViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -102,7 +108,12 @@ fun PreviewScreen(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            WatermarkedPreview(state = state)
+            WatermarkedPreview(
+                state = state,
+                docId = viewModel.docId,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
+            )
 
             Spacer(modifier = Modifier.height(22.dp))
             VerificationChecklist(
@@ -134,8 +145,14 @@ fun PreviewScreen(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun WatermarkedPreview(state: PreviewUiState) {
+private fun WatermarkedPreview(
+    state: PreviewUiState,
+    docId: String,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+) {
     val doc = state.doc
     val aspect = if (doc != null) doc.dimensions.widthPx.toFloat() / doc.dimensions.heightPx else 0.82f
     val frameHeight = 260.dp
@@ -146,12 +163,18 @@ private fun WatermarkedPreview(state: PreviewUiState) {
         contentAlignment = Alignment.Center,
     ) {
         Box(
-            modifier = Modifier
-                .size(width = frameWidth, height = frameHeight)
-                .s3(22.dp)
-                .clip(RoundedCornerShape(22.dp))
-                .background(Color.White)
-                .padding(10.dp),
+            modifier = with(sharedTransitionScope) {
+                Modifier
+                    .size(width = frameWidth, height = frameHeight)
+                    .sharedElement(
+                        rememberSharedContentState(key = "photo-$docId"),
+                        animatedVisibilityScope = animatedContentScope,
+                    )
+                    .s3(22.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color.White)
+                    .padding(10.dp)
+            },
         ) {
             if (state.processedUri != null) {
                 AsyncImage(

@@ -1,5 +1,8 @@
 package com.kartik.snapdoc.ui.screens.review
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,6 +42,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
+import coil.compose.AsyncImage
 import com.kartik.snapdoc.R
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.navigation.Routes
@@ -56,10 +60,13 @@ class ReviewViewModel @Inject constructor(
     val imageUri: String = args.imageUri
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ReviewScreen(
     onRetake: () -> Unit,
     onUsePhoto: (docId: String, imageUri: String) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     viewModel: ReviewViewModel = hiltViewModel(),
 ) {
     Column(
@@ -101,15 +108,29 @@ fun ReviewScreen(
             contentAlignment = Alignment.Center,
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = 320.dp)
-                    .aspectRatio(3f / 4f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color.White)
-                    .padding(12.dp),
+                modifier = with(sharedTransitionScope) {
+                    Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 320.dp)
+                        .aspectRatio(3f / 4f)
+                        .sharedElement(
+                            rememberSharedContentState(key = "photo-${viewModel.docId}"),
+                            animatedVisibilityScope = animatedContentScope,
+                        )
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Color.White)
+                        .padding(12.dp)
+                },
             ) {
-                DocPreviewHero(modifier = Modifier.fillMaxSize())
+                if (viewModel.imageUri.isNotBlank()) {
+                    AsyncImage(
+                        model = viewModel.imageUri,
+                        contentDescription = stringResource(R.string.review_title),
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    DocPreviewHero(modifier = Modifier.fillMaxSize())
+                }
                 Box(
                     modifier = Modifier
                         .padding(20.dp)
