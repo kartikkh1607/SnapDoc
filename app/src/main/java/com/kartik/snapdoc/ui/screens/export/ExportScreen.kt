@@ -228,7 +228,10 @@ fun ExportScreen(
                     .sGreen(18.dp)
                     .clip(RoundedCornerShape(18.dp))
                     .background(Primary)
-                    .clickable(enabled = state.phase != ExportPhase.Purchasing) {
+                    .clickable(
+                        enabled = state.phase != ExportPhase.Purchasing,
+                        role = Role.Button,
+                    ) {
                         (context as? Activity)?.let { viewModel.pay(it) }
                     },
                 contentAlignment = Alignment.Center,
@@ -259,7 +262,7 @@ fun ExportScreen(
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .clickable { viewModel.restore() }
+                    .clickable(role = Role.Button) { viewModel.restore() }
                     .padding(6.dp),
             )
         }

@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -89,7 +90,11 @@ fun OnboardingScreen(
                     text = stringResource(R.string.onboarding_skip),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Ink3,
-                    modifier = Modifier.clickable(onClick = complete),
+                    modifier = Modifier.clickable(
+                        role = Role.Button,
+                        onClickLabel = stringResource(R.string.onboarding_cd_skip),
+                        onClick = complete,
+                    ),
                 )
             }
 
@@ -269,13 +274,18 @@ private fun FooterControls(index: Int, onNext: () -> Unit) {
                 )
             }
         }
+        val nextLabel = stringResource(R.string.onboarding_cd_next)
         Box(
             modifier = Modifier
                 .size(64.dp)
                 .sGreen(32.dp)
                 .clip(CircleShape)
                 .background(Primary)
-                .clickable(onClick = onNext),
+                .clickable(
+                    role = Role.Button,
+                    onClickLabel = nextLabel,
+                    onClick = onNext,
+                ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

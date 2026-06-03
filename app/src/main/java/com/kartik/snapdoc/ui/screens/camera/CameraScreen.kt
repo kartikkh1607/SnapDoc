@@ -530,18 +530,23 @@ private fun GlassChip(icon: ImageVector, onClick: () -> Unit, tint: Color, conte
 
 @Composable
 private fun GalleryThumb(onClick: () -> Unit) {
+    val label = stringResource(R.string.camera_cd_gallery)
     Box(
         modifier = Modifier
             .size(48.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.10f))
             .border(2.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick),
+            .clickable(
+                role = Role.Button,
+                onClickLabel = label,
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = Icons.Outlined.PhotoLibrary,
-            contentDescription = stringResource(R.string.camera_cd_gallery),
+            contentDescription = null,
             tint = Color.White,
             modifier = Modifier.size(20.dp),
         )

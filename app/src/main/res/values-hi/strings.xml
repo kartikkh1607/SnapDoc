@@ -169,7 +169,7 @@
     <string name="printsheet_title">प्रिंट शीट</string>
     <string name="printsheet_share_chooser">शीट शेयर करें</string>
     <string name="printsheet_header_preparing">तैयार हो रहा है…</string>
-    <string name="printsheet_header_template">%1$s · %2$d कॉपी · %3$d × %4$d मिमी</string>
+    <string name="printsheet_header_template">%1$s · %2$s · %3$d × %4$d मिमी</string>
     <string name="printsheet_subtitle">डॉटेड लाइन पर काटें</string>
     <string name="printsheet_sheet_dims">%1$d × %2$d मिमी</string>
     <string name="printsheet_locked_title">स्टूडियो बंडल चाहिए</string>
@@ -200,4 +200,6 @@
     <string name="onboarding_slide2_subtitle">आपका चेहरा अपने आप पहचानें, बाधाएँ हटाएँ, और आपके डॉक्यूमेंट के लिए ज़रूरी सटीक बैकग्राउंड रंग लगाएँ।</string>
     <string name="onboarding_slide3_title">तुरंत एक्सपोर्ट &amp;\nप्रिंट-तैयार शीट।</string>
     <string name="onboarding_slide3_subtitle">डिजिटल फ़ोटो डाउनलोड करें, या अपनी लोकल प्रिंट शॉप के लिए पहले से व्यवस्थित A4 शीट लें।</string>
+    <string name="onboarding_cd_next">अगला</string>
+    <string name="onboarding_cd_skip">ऑनबोर्डिंग छोड़ें</string>
 </resources>

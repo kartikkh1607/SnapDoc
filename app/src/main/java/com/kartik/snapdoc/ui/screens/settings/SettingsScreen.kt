@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kartik.snapdoc.R
@@ -168,18 +169,23 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineLarge,
                 )
+                val closeLabel = stringResource(R.string.settings_cd_close)
                 Box(
                     modifier = Modifier
                         .size(40.dp)
                         .s1(14.dp)
                         .clip(RoundedCornerShape(14.dp))
                         .background(MaterialTheme.colorScheme.surface)
-                        .clickable(onClick = onBack),
+                        .clickable(
+                            role = Role.Button,
+                            onClickLabel = closeLabel,
+                            onClick = onBack,
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Close,
-                        contentDescription = stringResource(R.string.settings_cd_close),
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(18.dp),
                     )

@@ -1,5 +1,6 @@
 package com.kartik.snapdoc.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -9,13 +10,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.Canvas
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kartik.snapdoc.ui.theme.Hairline
@@ -29,11 +30,11 @@ private data class Palette(val bg: Color, val shirt: Color)
 
 private fun paletteFor(kind: DocKind): Palette = when (kind) {
     DocKind.Passport -> Palette(Color(0xFFF4F7F4), Color(0xFF2E4F7A))
-    DocKind.Aadhaar  -> Palette(Color(0xFFFFF8EC), Color(0xFF5C4633))
-    DocKind.Pan      -> Palette(Color(0xFFF1F4FA), Color(0xFF2E4F7A))
-    DocKind.Upsc     -> Palette(Color(0xFFF6F0EC), Color(0xFF5C4633))
-    DocKind.Visa     -> Palette(Color(0xFFEEF2F7), Color(0xFF2E4F7A))
-    DocKind.Ssc      -> Palette(Color(0xFFF3F0F7), Color(0xFF4B3A6B))
+    DocKind.Aadhaar -> Palette(Color(0xFFFFF8EC), Color(0xFF5C4633))
+    DocKind.Pan -> Palette(Color(0xFFF1F4FA), Color(0xFF2E4F7A))
+    DocKind.Upsc -> Palette(Color(0xFFF6F0EC), Color(0xFF5C4633))
+    DocKind.Visa -> Palette(Color(0xFFEEF2F7), Color(0xFF2E4F7A))
+    DocKind.Ssc -> Palette(Color(0xFFF3F0F7), Color(0xFF4B3A6B))
 }
 
 private val Skin = Color(0xFFE8D7C4)
@@ -143,6 +144,28 @@ fun CameraSilhouette(modifier: Modifier = Modifier) {
             size = Size(shRx * 2f, shRy * 2f),
         )
     }
+}
+
+@Preview(showBackground = true, widthDp = 72, heightDp = 90)
+@Composable
+private fun DocPreviewPassportPreview() {
+    DocPreview(kind = DocKind.Passport, modifier = Modifier.size(72.dp, 90.dp))
+}
+
+@Preview(showBackground = true, widthDp = 72, heightDp = 90)
+@Composable
+private fun DocPreviewAadhaarPreview() {
+    DocPreview(kind = DocKind.Aadhaar, modifier = Modifier.size(72.dp, 90.dp))
+}
+
+@Preview(showBackground = true, widthDp = 248, heightDp = 320, backgroundColor = 0xFF111111)
+@Composable
+private fun FaceOvalGuidePreview() {
+    FaceOvalGuide(
+        strokeColor = Color.White.copy(alpha = 0.85f),
+        cornerColor = Color(0xFFFFB300),
+        modifier = Modifier.size(248.dp, 320.dp),
+    )
 }
 
 // Dashed face oval guide for the camera frame.

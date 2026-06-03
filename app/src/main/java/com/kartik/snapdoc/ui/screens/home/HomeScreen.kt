@@ -83,7 +83,21 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    HomeContent(
+        state = state,
+        onDocClick = onDocClick,
+        onSettingsClick = onSettingsClick,
+        onCategorySelect = viewModel::onCategorySelect,
+    )
+}
 
+@Composable
+private fun HomeContent(
+    state: HomeUiState,
+    onDocClick: (String) -> Unit,
+    onSettingsClick: () -> Unit,
+    onCategorySelect: (String?) -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -107,7 +121,7 @@ fun HomeScreen(
                 categories = listOf(null to stringResource(R.string.home_category_all)) +
                     state.categories.map { it.id to it.displayName },
                 selected = state.selectedCategoryId,
-                onSelect = viewModel::onCategorySelect,
+                onSelect = onCategorySelect,
             )
             Spacer(modifier = Modifier.height(14.dp))
             SuggestedHeader()
@@ -189,18 +203,23 @@ private fun AvatarTile() {
 
 @Composable
 private fun NotificationBell(onClick: () -> Unit) {
+    val label = stringResource(R.string.home_cd_notifications)
     Box(
         modifier = Modifier
             .size(40.dp)
             .s1(14.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick),
+            .clickable(
+                role = Role.Button,
+                onClickLabel = label,
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = Icons.Outlined.Notifications,
-            contentDescription = stringResource(R.string.home_cd_notifications),
+            contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(19.dp),
         )
@@ -492,6 +511,52 @@ private fun DocCardLarge(
         }
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, heightDp = 900)
+@Composable
+private fun HomeContentPreview() {
+    com.kartik.snapdoc.ui.theme.SnapDocTheme {
+        HomeContent(
+            state = HomeUiState(
+                loading = false,
+                categories = listOf(
+                    com.kartik.snapdoc.data.specs.model.CategorySpec("in_government", "Indian Gov", "ic_govt"),
+                    com.kartik.snapdoc.data.specs.model.CategorySpec("intl_visa", "Visas", "ic_visa"),
+                ),
+                documents = listOf(previewDoc("in_passport", "Indian Passport"), previewDoc("in_pan", "PAN Card")),
+            ),
+            onDocClick = {},
+            onSettingsClick = {},
+            onCategorySelect = {},
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, heightDp = 900)
+@Composable
+private fun HomeContentLoadingPreview() {
+    com.kartik.snapdoc.ui.theme.SnapDocTheme {
+        HomeContent(
+            state = HomeUiState(loading = true),
+            onDocClick = {},
+            onSettingsClick = {},
+            onCategorySelect = {},
+        )
+    }
+}
+
+private fun previewDoc(id: String, displayName: String): DocumentSpec = DocumentSpec(
+    id = id,
+    displayName = displayName,
+    shortName = displayName,
+    categoryId = "in_government",
+    popularity = 100,
+    dimensions = com.kartik.snapdoc.data.specs.model.DimensionsSpec(35f, 45f, 413, 531, 300),
+    background = com.kartik.snapdoc.data.specs.model.BackgroundSpec("#FFFFFF", "White", 5),
+    face = com.kartik.snapdoc.data.specs.model.FaceSpec(70, 80, 50, 70),
+    file = com.kartik.snapdoc.data.specs.model.FileSpec("JPG", 10, 100),
+    rules = com.kartik.snapdoc.data.specs.model.RulesSpec(),
+)
 
 private fun kindFor(doc: DocumentSpec): DocKind {
     val cat = doc.categoryId.lowercase()

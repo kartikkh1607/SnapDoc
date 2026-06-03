@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="printsheet_copies">
+        <item quantity="one">%d COPY</item>
+        <item quantity="other">%d COPIES</item>
+    </plurals>
+</resources>

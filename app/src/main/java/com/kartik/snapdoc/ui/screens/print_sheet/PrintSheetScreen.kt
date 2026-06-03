@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -165,10 +166,15 @@ private fun Header(state: PrintSheetUiState, modifier: Modifier = Modifier) {
     val doc = state.doc
     val layout = state.layout
     val tagline = if (layout != null && doc != null) {
+        val copies = pluralStringResource(
+            R.plurals.printsheet_copies,
+            layout.copies,
+            layout.copies,
+        )
         stringResource(
             R.string.printsheet_header_template,
             layout.sheet.displayName.uppercase(),
-            layout.copies,
+            copies,
             doc.dimensions.widthMm.toInt(),
             doc.dimensions.heightMm.toInt(),
         )
