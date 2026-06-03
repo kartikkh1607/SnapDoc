@@ -1,49 +1,35 @@
 package com.kartik.snapdoc.domain.pipeline
 
 import android.net.Uri
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Holds processed image bytes + validation results between Processing → Preview → Export
- * so downstream screens don't have to re-read or re-validate from disk.
+ * Holds processed image metadata + validation results between Processing → Preview → Export
+ * so downstream screens don't have to re-validate from disk.
  *
- * Why in-memory: nav args can only carry URIs, and we want the validation result
- * to be available immediately on Preview without re-running ML Kit.
+ * The processed JPEG itself lives on disk (cache dir) and is reachable via [Entry.processedUri].
+ * Callers that need bytes invoke [Entry.readBytes], which streams from the cache file —
+ * this keeps the store's memory footprint to ~kilobytes per entry instead of ~500KB+ each.
  *
  * Entries are evicted explicitly via [remove] once consumed (export saved, sheet saved,
- * user navigated away). A small LRU cap bounds memory if eviction is ever missed.
+ * user navigated away). A small LRU cap bounds growth if eviction is ever missed.
  */
 @Singleton
 class ProcessingResultStore @Inject constructor() {
 
-    class Entry(
+    data class Entry(
         val processedUri: Uri,
-        val rawJpegBytes: ByteArray,
         val sizeKb: Int,
         val widthPx: Int,
         val heightPx: Int,
         val validation: ValidationResult,
     ) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other !is Entry) return false
-            return processedUri == other.processedUri &&
-                sizeKb == other.sizeKb &&
-                widthPx == other.widthPx &&
-                heightPx == other.heightPx &&
-                validation == other.validation &&
-                rawJpegBytes.contentEquals(other.rawJpegBytes)
-        }
-
-        override fun hashCode(): Int {
-            var result = processedUri.hashCode()
-            result = 31 * result + rawJpegBytes.contentHashCode()
-            result = 31 * result + sizeKb
-            result = 31 * result + widthPx
-            result = 31 * result + heightPx
-            result = 31 * result + validation.hashCode()
-            return result
+        /** Reads the processed JPEG bytes from the cache file backing [processedUri]. */
+        fun readBytes(): ByteArray {
+            val path = processedUri.path ?: error("processedUri has no path: $processedUri")
+            return File(path).readBytes()
         }
     }
 

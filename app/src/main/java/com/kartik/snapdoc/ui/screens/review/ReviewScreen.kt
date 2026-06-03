@@ -36,6 +36,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -46,7 +48,9 @@ import coil.compose.AsyncImage
 import com.kartik.snapdoc.R
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.navigation.Routes
+import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Primary
+import com.kartik.snapdoc.ui.theme.Success
 import com.kartik.snapdoc.ui.theme.sGreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -91,6 +95,7 @@ fun ReviewScreen(
                 text = stringResource(R.string.review_title),
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                modifier = Modifier.semantics { heading() },
             )
             DarkIconButton(
                 icon = Icons.Outlined.Info,
@@ -140,7 +145,7 @@ fun ReviewScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.review_chip),
-                        color = Color(0xFF6B7280),
+                        color = Ink3,
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                     )
                 }
@@ -166,6 +171,8 @@ fun ReviewScreen(
     }
 }
 
+private val QualityBadgeIconTint = Color(0xFF7ED28A)
+
 @Composable
 private fun QualityBadge() {
     Row(
@@ -181,13 +188,13 @@ private fun QualityBadge() {
             modifier = Modifier
                 .size(36.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF2E7D32).copy(alpha = 0.2f)),
+                .background(Success.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Outlined.AutoAwesome,
                 contentDescription = null,
-                tint = Color(0xFF7ED28A),
+                tint = QualityBadgeIconTint,
                 modifier = Modifier.size(18.dp),
             )
         }

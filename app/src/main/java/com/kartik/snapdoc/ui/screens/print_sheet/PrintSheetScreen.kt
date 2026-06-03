@@ -54,6 +54,7 @@ import com.kartik.snapdoc.ui.theme.AmberDark
 import com.kartik.snapdoc.ui.theme.AmberSoft
 import com.kartik.snapdoc.ui.theme.ErrorRed
 import com.kartik.snapdoc.ui.theme.Hairline
+import com.kartik.snapdoc.ui.theme.Hairline2
 import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Ink4
 import com.kartik.snapdoc.ui.theme.Primary
@@ -303,7 +304,7 @@ private fun PhotoCell(photoUri: Uri?, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(1.dp))
-            .background(Color(0xFFF1F1F1))
+            .background(Hairline2)
             .border(0.5.dp, Color.Black.copy(alpha = 0.35f), RoundedCornerShape(1.dp)),
     ) {
         if (photoUri != null) {

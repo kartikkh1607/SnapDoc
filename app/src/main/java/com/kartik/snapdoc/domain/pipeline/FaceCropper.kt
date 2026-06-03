@@ -106,11 +106,15 @@ class FaceCropper @Inject constructor() : Closeable {
     private fun sampleCornerColor(bitmap: Bitmap): Int {
         val w = bitmap.width
         val h = bitmap.height
+        if (w <= 0 || h <= 0) return Color.WHITE
+        val inset = minOf(2, (w - 1).coerceAtLeast(0), (h - 1).coerceAtLeast(0))
+        val rightX = (w - 1 - inset).coerceAtLeast(0)
+        val bottomY = (h - 1 - inset).coerceAtLeast(0)
         val samples = intArrayOf(
-            bitmap.getPixel(2, 2),
-            bitmap.getPixel(w - 3, 2),
-            bitmap.getPixel(2, h - 3),
-            bitmap.getPixel(w - 3, h - 3),
+            bitmap.getPixel(inset, inset),
+            bitmap.getPixel(rightX, inset),
+            bitmap.getPixel(inset, bottomY),
+            bitmap.getPixel(rightX, bottomY),
         )
         val r = samples.map { Color.red(it) }.average().toInt()
         val g = samples.map { Color.green(it) }.average().toInt()

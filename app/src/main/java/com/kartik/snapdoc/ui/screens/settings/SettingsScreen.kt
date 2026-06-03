@@ -45,6 +45,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kartik.snapdoc.R
@@ -168,6 +173,7 @@ fun SettingsScreen(
                     text = stringResource(R.string.settings_title),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.semantics { heading() },
                 )
                 val closeLabel = stringResource(R.string.settings_cd_close)
                 Box(
@@ -275,7 +281,9 @@ private fun GroupCard(group: SettingsGroup) {
             text = group.title.uppercase(),
             color = Ink3,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+            modifier = Modifier
+                .padding(start = 4.dp, bottom = 8.dp)
+                .semantics { heading() },
         )
         Column(
             modifier = Modifier
@@ -363,7 +371,11 @@ private fun Toggle(on: Boolean) {
         modifier = Modifier
             .size(width = 36.dp, height = 22.dp)
             .clip(RoundedCornerShape(11.dp))
-            .background(if (on) Primary else Hairline2),
+            .background(if (on) Primary else Hairline2)
+            .semantics {
+                role = Role.Switch
+                toggleableState = if (on) ToggleableState.On else ToggleableState.Off
+            },
     ) {
         Box(
             modifier = Modifier

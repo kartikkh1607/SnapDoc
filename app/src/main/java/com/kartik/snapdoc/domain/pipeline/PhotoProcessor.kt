@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.media.ExifInterface
 import androidx.core.net.toFile
+import java.io.ByteArrayInputStream
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
@@ -100,7 +101,6 @@ class PhotoProcessor @Inject constructor(
 
             val entry = ProcessingResultStore.Entry(
                 processedUri = Uri.fromFile(outFile),
-                rawJpegBytes = compressed.bytes,
                 sizeKb = compressed.sizeKb,
                 widthPx = compressed.widthPx,
                 heightPx = compressed.heightPx,
@@ -120,31 +120,66 @@ class PhotoProcessor @Inject constructor(
     }
 
     private fun decodeOriented(uri: Uri): Bitmap? {
-        val stream = openStream(uri) ?: return null
-        val raw = stream.use { BitmapFactory.decodeStream(it) } ?: return null
+        // Buffer the URI once: content URIs from other apps (e.g. Google Photos)
+        // do not guarantee a second openInputStream() returns the same bytes.
+        val bytes = readAllBytes(uri) ?: return null
+
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+
+        val decodeOpts = BitmapFactory.Options().apply {
+            inSampleSize = computeInSampleSize(bounds.outWidth, bounds.outHeight, MAX_INPUT_DIMENSION_PX)
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+        val raw = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOpts) ?: return null
 
         val orientation = runCatching {
-            openStream(uri)?.use { ExifInterface(it).getAttributeInt(
+            ByteArrayInputStream(bytes).use { ExifInterface(it).getAttributeInt(
                 ExifInterface.TAG_ORIENTATION,
                 ExifInterface.ORIENTATION_NORMAL,
             ) }
         }.getOrNull() ?: ExifInterface.ORIENTATION_NORMAL
 
-        val rotation = when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> 90f
-            ExifInterface.ORIENTATION_ROTATE_180 -> 180f
-            ExifInterface.ORIENTATION_ROTATE_270 -> 270f
-            else -> 0f
-        }
-        if (rotation == 0f) return raw
-        val matrix = Matrix().apply { postRotate(rotation) }
-        val rotated = Bitmap.createBitmap(raw, 0, 0, raw.width, raw.height, matrix, true)
-        if (rotated !== raw) raw.recycle()
-        return rotated
+        val matrix = exifMatrix(orientation) ?: return raw
+        val oriented = Bitmap.createBitmap(raw, 0, 0, raw.width, raw.height, matrix, true)
+        if (oriented !== raw) raw.recycle()
+        return oriented
     }
 
-    private fun openStream(uri: Uri) = when (uri.scheme) {
-        "file", null -> runCatching { uri.toFile().inputStream() }.getOrNull()
-        else -> runCatching { context.contentResolver.openInputStream(uri) }.getOrNull()
+    private fun exifMatrix(orientation: Int): Matrix? {
+        val m = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> m.preScale(-1f, 1f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> m.postRotate(180f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> m.preScale(1f, -1f)
+            ExifInterface.ORIENTATION_TRANSPOSE -> { m.postRotate(90f); m.preScale(-1f, 1f) }
+            ExifInterface.ORIENTATION_ROTATE_90 -> m.postRotate(90f)
+            ExifInterface.ORIENTATION_TRANSVERSE -> { m.postRotate(270f); m.preScale(-1f, 1f) }
+            ExifInterface.ORIENTATION_ROTATE_270 -> m.postRotate(270f)
+            else -> return null
+        }
+        return m
+    }
+
+    private fun computeInSampleSize(width: Int, height: Int, maxDim: Int): Int {
+        var sample = 1
+        val longest = maxOf(width, height)
+        while (longest / sample > maxDim) sample *= 2
+        return sample
+    }
+
+    private fun readAllBytes(uri: Uri): ByteArray? {
+        val stream = when (uri.scheme) {
+            "file", null -> runCatching { uri.toFile().inputStream() }.getOrNull()
+            else -> runCatching { context.contentResolver.openInputStream(uri) }.getOrNull()
+        } ?: return null
+        return runCatching { stream.use { it.readBytes() } }.getOrNull()
+    }
+
+    private companion object {
+        // Caps decoded input at ~4096px longest side to keep peak ARGB_8888 allocation
+        // under ~67MB even from 50MP camera shots.
+        const val MAX_INPUT_DIMENSION_PX = 4096
     }
 }

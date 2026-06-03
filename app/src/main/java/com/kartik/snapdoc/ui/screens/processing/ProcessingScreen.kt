@@ -41,7 +41,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -174,6 +178,7 @@ fun ProcessingScreen(
                     text = stringResource(R.string.processing_title),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.semantics { heading() },
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
@@ -266,6 +271,7 @@ private fun MorphingLoader(progress: Float) {
                 text = "${(progress * 100).toInt()}%",
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.displayMedium,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
         }
     }

@@ -6,6 +6,7 @@ package com.kartik.snapdoc.domain.pipeline
  */
 internal fun parseHexColor(hex: String): Int {
     val cleaned = hex.removePrefix("#")
-    val v = cleaned.toLong(16).toInt()
-    return if (cleaned.length == 6) (0xFF000000.toInt()) or v else v
+    val v = cleaned.toLong(16)
+    val argb = if (cleaned.length == 6) v or 0xFF000000L else v
+    return argb.toInt()
 }

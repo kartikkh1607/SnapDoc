@@ -6,6 +6,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.google.mlkit.vision.face.FaceLandmark
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.Closeable
@@ -38,6 +39,7 @@ class SpecValidator @Inject constructor() : Closeable {
         FaceDetection.getClient(
             FaceDetectorOptions.Builder()
                 .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+                .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
                 .setMinFaceSize(0.15f)
                 .build(),
         )
@@ -66,6 +68,24 @@ class SpecValidator @Inject constructor() : Closeable {
                 expected = "${spec.face.headHeightPercentMin}–${spec.face.headHeightPercentMax}%",
                 actual = "${ratio.toInt()}%",
                 passed = ratioPassed,
+            )
+
+            val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)?.position
+            val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)?.position
+            // Fall back to a 35%-down-the-face estimate when landmarks are absent —
+            // matches FaceCropper's fallback so validation aligns with crop placement.
+            val eyeY = when {
+                leftEye != null && rightEye != null -> (leftEye.y + rightEye.y) / 2f
+                else -> face.boundingBox.top + face.boundingBox.height() * 0.35f
+            }
+            val eyePercent = eyeY / bitmap.height * 100f
+            val eyePassed = eyePercent >= spec.face.eyeLineFromTopPercentMin &&
+                eyePercent <= spec.face.eyeLineFromTopPercentMax
+            checks += ValidationCheck(
+                name = "Eye line",
+                expected = "${spec.face.eyeLineFromTopPercentMin}–${spec.face.eyeLineFromTopPercentMax}% from top",
+                actual = "${eyePercent.toInt()}%",
+                passed = eyePassed,
             )
         }
 
@@ -116,16 +136,21 @@ class SpecValidator @Inject constructor() : Closeable {
     private fun sampleCornerAverage(bitmap: Bitmap): Int {
         val w = bitmap.width
         val h = bitmap.height
-        val patches = listOf(
-            Triple(2, 2, "tl"),
-            Triple(w - 12, 2, "tr"),
-            Triple(2, h - 12, "bl"),
-            Triple(w - 12, h - 12, "br"),
+        if (w <= 0 || h <= 0) return Color.WHITE
+        val patch = minOf(PATCH_SIZE, w, h).coerceAtLeast(1)
+        val inset = minOf(PATCH_INSET, (w - patch).coerceAtLeast(0), (h - patch).coerceAtLeast(0))
+        val rightX = (w - patch - inset).coerceAtLeast(0)
+        val bottomY = (h - patch - inset).coerceAtLeast(0)
+        val corners = listOf(
+            inset to inset,
+            rightX to inset,
+            inset to bottomY,
+            rightX to bottomY,
         )
         var r = 0L; var g = 0L; var b = 0L; var count = 0
-        for ((x, y) in patches.map { it.first to it.second }) {
-            for (dy in 0 until 10) {
-                for (dx in 0 until 10) {
+        for ((x, y) in corners) {
+            for (dy in 0 until patch) {
+                for (dx in 0 until patch) {
                     val px = bitmap.getPixel(x + dx, y + dy)
                     r += Color.red(px)
                     g += Color.green(px)
@@ -134,6 +159,7 @@ class SpecValidator @Inject constructor() : Closeable {
                 }
             }
         }
+        if (count == 0) return Color.WHITE
         return Color.rgb((r / count).toInt(), (g / count).toInt(), (b / count).toInt())
     }
 
@@ -178,5 +204,7 @@ class SpecValidator @Inject constructor() : Closeable {
 
     private companion object {
         const val BG_TOLERANCE_MULTIPLIER = 3f
+        const val PATCH_SIZE = 10
+        const val PATCH_INSET = 2
     }
 }

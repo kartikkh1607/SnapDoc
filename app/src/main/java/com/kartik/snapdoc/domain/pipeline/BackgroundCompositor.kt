@@ -87,14 +87,29 @@ class BackgroundCompositor @Inject constructor() {
         bgG: Int,
         bgB: Int,
     ) {
+        val maxX = maskW - 1
+        val maxY = maskH - 1
         for (y in yStart until yEnd) {
-            val mY = (y * scaleY).toInt().coerceAtMost(maskH - 1)
-            val rowOffset = mY * maskW
+            val fy = y * scaleY
+            val y0 = fy.toInt().coerceIn(0, maxY)
+            val y1 = (y0 + 1).coerceAtMost(maxY)
+            val ty = (fy - y0).coerceIn(0f, 1f)
+            val row0 = y0 * maskW
+            val row1 = y1 * maskW
             val pixOffset = y * width
             for (x in 0 until width) {
-                val mX = (x * scaleX).toInt().coerceAtMost(maskW - 1)
-                val confidence = maskValues[rowOffset + mX]
-                val alpha = confidence.coerceIn(0f, 1f)
+                val fx = x * scaleX
+                val x0 = fx.toInt().coerceIn(0, maxX)
+                val x1 = (x0 + 1).coerceAtMost(maxX)
+                val tx = (fx - x0).coerceIn(0f, 1f)
+
+                val v00 = maskValues[row0 + x0]
+                val v01 = maskValues[row0 + x1]
+                val v10 = maskValues[row1 + x0]
+                val v11 = maskValues[row1 + x1]
+                val top = v00 + (v01 - v00) * tx
+                val bot = v10 + (v11 - v10) * tx
+                val alpha = (top + (bot - top) * ty).coerceIn(0f, 1f)
 
                 val src = srcPixels[pixOffset + x]
                 outPixels[pixOffset + x] = when {

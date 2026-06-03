@@ -74,7 +74,8 @@ class PrintSheetViewModel @Inject constructor(
         _state.update { it.copy(phase = PrintExportPhase.Generating, error = null) }
         viewModelScope.launch {
             runCatching {
-                val photo = BitmapFactory.decodeByteArray(entry.rawJpegBytes, 0, entry.rawJpegBytes.size)
+                val bytes = entry.readBytes()
+                val photo = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 val pdf = generator.generatePdf(photo, layout, doc)
                 photo.recycle()
                 val publicUri = documentExporter.savePdfToDownloads(
@@ -109,7 +110,8 @@ class PrintSheetViewModel @Inject constructor(
         _state.update { it.copy(phase = PrintExportPhase.Generating, error = null) }
         viewModelScope.launch {
             runCatching {
-                val photo = BitmapFactory.decodeByteArray(entry.rawJpegBytes, 0, entry.rawJpegBytes.size)
+                val bytes = entry.readBytes()
+                val photo = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 val jpegBytes = generator.generateJpegBytes(photo, layout)
                 photo.recycle()
                 photoExporter.saveToGallery(jpegBytes, "${doc.id}_sheet")

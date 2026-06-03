@@ -97,7 +97,7 @@ class ExportViewModel @Inject constructor(
                 }
                 return@launch
             }
-            runCatching { exporter.saveToGallery(entry.rawJpegBytes, docId) }
+            runCatching { exporter.saveToGallery(entry.readBytes(), docId) }
                 .onSuccess { uri ->
                     _state.update { it.copy(phase = ExportPhase.Saved, savedUri = uri) }
                 }

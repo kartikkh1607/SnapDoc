@@ -70,7 +70,6 @@ class ProcessingResultStoreTest {
     private fun makeEntry(uri: String): ProcessingResultStore.Entry =
         ProcessingResultStore.Entry(
             processedUri = Uri.parse(uri),
-            rawJpegBytes = byteArrayOf(1, 2, 3),
             sizeKb = 50,
             widthPx = 413,
             heightPx = 531,
