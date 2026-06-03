@@ -8,6 +8,7 @@ import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.Closeable
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -28,7 +29,7 @@ data class ValidationResult(
 )
 
 @Singleton
-class SpecValidator @Inject constructor() {
+class SpecValidator @Inject constructor() : Closeable {
 
     // Lazy so unit tests can construct the validator without ML Kit's native
     // detector being initialized at class-load time (Robolectric doesn't ship
@@ -171,7 +172,7 @@ class SpecValidator @Inject constructor() {
     private fun pivotXyz(v: Float): Float =
         if (v > 0.008856f) v.pow(1f / 3f) else (7.787f * v) + (16f / 116f)
 
-    fun close() {
+    override fun close() {
         detector.close()
     }
 

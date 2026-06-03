@@ -208,6 +208,7 @@ private fun QualityBadge() {
 
 @Composable
 private fun RetakeButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val label = stringResource(R.string.review_retake)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -216,7 +217,7 @@ private fun RetakeButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             .clip(RoundedCornerShape(18.dp))
             .background(Color.White.copy(alpha = 0.10f))
             .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
+            .clickable(role = Role.Button, onClickLabel = label, onClick = onClick)
             .padding(horizontal = 16.dp),
     ) {
         Spacer(modifier = Modifier.weight(1f))
@@ -237,6 +238,7 @@ private fun RetakeButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 
 @Composable
 private fun UsePhotoButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val label = stringResource(R.string.review_use_photo)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -245,7 +247,7 @@ private fun UsePhotoButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
             .sGreen(18.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(Primary)
-            .clickable(onClick = onClick)
+            .clickable(role = Role.Button, onClickLabel = label, onClick = onClick)
             .padding(horizontal = 16.dp),
     ) {
         Spacer(modifier = Modifier.weight(1f))

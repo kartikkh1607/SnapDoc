@@ -21,6 +21,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.Closeable
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,7 +40,7 @@ import javax.inject.Singleton
 @Singleton
 class BillingClientWrapper @Inject constructor(
     @ApplicationContext private val context: Context,
-) {
+) : Closeable {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -225,6 +227,11 @@ class BillingClientWrapper @Inject constructor(
             }
         }
         _entitlement.value = EntitlementState(photo, studio)
+    }
+
+    override fun close() {
+        scope.cancel()
+        if (client.isReady) client.endConnection()
     }
 
     private companion object {

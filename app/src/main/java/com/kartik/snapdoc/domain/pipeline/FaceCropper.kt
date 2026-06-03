@@ -9,6 +9,7 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import com.google.mlkit.vision.face.FaceLandmark
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.Closeable
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -22,7 +23,7 @@ sealed interface CropResult {
 }
 
 @Singleton
-class FaceCropper @Inject constructor() {
+class FaceCropper @Inject constructor() : Closeable {
 
     private val detector = FaceDetection.getClient(
         FaceDetectorOptions.Builder()
@@ -117,7 +118,7 @@ class FaceCropper @Inject constructor() {
         return Color.rgb(r, g, b)
     }
 
-    fun close() {
+    override fun close() {
         detector.close()
     }
 }

@@ -6,6 +6,7 @@ import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
 import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.Closeable
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -17,7 +18,7 @@ data class RemovedBackground(
 )
 
 @Singleton
-class BackgroundRemover @Inject constructor() {
+class BackgroundRemover @Inject constructor() : Closeable {
 
     private val segmenter = Segmentation.getClient(
         SelfieSegmenterOptions.Builder()
@@ -33,7 +34,7 @@ class BackgroundRemover @Inject constructor() {
             .addOnFailureListener { cont.resumeWithException(it) }
     }
 
-    fun close() {
+    override fun close() {
         segmenter.close()
     }
 }

@@ -303,12 +303,17 @@ private fun GroupCard(group: SettingsGroup) {
 @Composable
 private fun SettingsRowItem(row: SettingsRow) {
     val clickable = row.onClick
+    val label = row.label
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .let { if (clickable != null) it.clickable(onClick = clickable) else it }
+            .let {
+                if (clickable != null) {
+                    it.clickable(role = Role.Button, onClickLabel = label, onClick = clickable)
+                } else it
+            }
             .padding(vertical = 12.dp),
     ) {
         Box(

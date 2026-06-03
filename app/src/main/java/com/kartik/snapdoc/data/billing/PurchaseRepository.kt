@@ -5,12 +5,14 @@ import com.kartik.snapdoc.data.prefs.UserPrefsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.Closeable
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +20,7 @@ import javax.inject.Singleton
 class PurchaseRepository @Inject constructor(
     private val billing: BillingClientWrapper,
     private val prefs: UserPrefsRepository,
-) {
+) : Closeable {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
@@ -56,5 +58,10 @@ class PurchaseRepository @Inject constructor(
 
     suspend fun restorePurchases() {
         billing.queryPurchases()
+    }
+
+    override fun close() {
+        scope.cancel()
+        billing.close()
     }
 }

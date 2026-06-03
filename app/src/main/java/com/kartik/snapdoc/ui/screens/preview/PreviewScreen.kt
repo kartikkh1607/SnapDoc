@@ -297,6 +297,10 @@ private fun PrintSheetCard(
     val accentColor = if (unlocked) Primary else AmberDark
     val background = if (unlocked) MaterialTheme.colorScheme.surface else AmberSoft
     val border = if (unlocked) Hairline2 else AmberDark.copy(alpha = 0.45f)
+    val label = stringResource(
+        if (unlocked) R.string.preview_print_sheet_title_unlocked
+        else R.string.preview_print_sheet_title_locked,
+    )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -305,7 +309,7 @@ private fun PrintSheetCard(
             .clip(RoundedCornerShape(20.dp))
             .background(background)
             .border(1.dp, border, RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
+            .clickable(role = Role.Button, onClickLabel = label, onClick = onClick)
             .padding(14.dp),
     ) {
         Box(
@@ -358,6 +362,10 @@ private fun PrintSheetCard(
 
 @Composable
 private fun ExportCta(entitled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val label = stringResource(
+        if (entitled) R.string.preview_export_save_title
+        else R.string.preview_export_paid_title,
+    )
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -368,7 +376,7 @@ private fun ExportCta(entitled: Boolean, onClick: () -> Unit, modifier: Modifier
                 .sGreen(20.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(Primary)
-                .clickable(onClick = onClick)
+                .clickable(role = Role.Button, onClickLabel = label, onClick = onClick)
                 .padding(horizontal = 22.dp),
         ) {
             Column {
