@@ -10,9 +10,11 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.Closeable
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,12 +24,17 @@ class PurchaseRepository @Inject constructor(
     private val prefs: UserPrefsRepository,
 ) : Closeable {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val started = AtomicBoolean(false)
 
     /**
      * Entitlement is authoritative from Play once billing is connected.
      * The DataStore cache only fills the offline-bootstrap window before the
      * first successful Play query — once we have a live answer, refunds and
      * revocations propagate immediately.
+     *
+     * Billing connects lazily on first subscriber so cold launches that never
+     * navigate to a paid surface (settings, export) don't pay the Play Services
+     * round-trip during startup.
      */
     val entitlement: StateFlow<EntitlementState> = combine(
         billing.entitlement,
@@ -35,9 +42,14 @@ class PurchaseRepository @Inject constructor(
         prefs.entitlement,
     ) { live, connected, cached ->
         if (connected) live else cached
-    }.stateIn(scope, SharingStarted.Eagerly, EntitlementState.Locked)
+    }
+        .onStart { ensureStarted() }
+        .stateIn(scope, SharingStarted.Lazily, EntitlementState.Locked)
 
-    init {
+    val errors: SharedFlow<BillingError> = billing.errors
+
+    private fun ensureStarted() {
+        if (!started.compareAndSet(false, true)) return
         billing.start()
         // Mirror authoritative live state into the cache so offline launches are
         // accurate. If Play revokes, we write `false` back into the cache too.
@@ -51,12 +63,13 @@ class PurchaseRepository @Inject constructor(
         }
     }
 
-    val errors: SharedFlow<BillingError> = billing.errors
-
-    fun launchPurchase(activity: Activity, productId: String): Boolean =
-        billing.launchPurchase(activity, productId)
+    suspend fun launchPurchase(activity: Activity, productId: String): Boolean {
+        ensureStarted()
+        return billing.launchPurchase(activity, productId, obfuscatedAccountId = prefs.installId())
+    }
 
     suspend fun restorePurchases() {
+        ensureStarted()
         billing.queryPurchases()
     }
 

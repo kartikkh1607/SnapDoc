@@ -77,13 +77,15 @@ class ExportViewModel @Inject constructor(
     fun pay(activity: Activity) {
         val productId = _state.value.selectedProductId ?: ProductIds.PHOTO_EXPORT
         _state.update { it.copy(phase = ExportPhase.Purchasing, errorRes = null) }
-        val launched = purchases.launchPurchase(activity, productId)
-        if (!launched) {
-            _state.update {
-                it.copy(
-                    phase = ExportPhase.Paywall,
-                    errorRes = R.string.export_error_purchase_unavailable,
-                )
+        viewModelScope.launch {
+            val launched = purchases.launchPurchase(activity, productId)
+            if (!launched) {
+                _state.update {
+                    it.copy(
+                        phase = ExportPhase.Paywall,
+                        errorRes = R.string.export_error_purchase_unavailable,
+                    )
+                }
             }
         }
     }

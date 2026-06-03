@@ -17,6 +17,7 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
+import com.kartik.snapdoc.data.monitoring.CrashReporter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,8 @@ import javax.inject.Singleton
 @Singleton
 class BillingClientWrapper @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val crashReporter: CrashReporter,
+    private val verifier: PurchaseVerifier,
 ) : Closeable {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -98,6 +101,7 @@ class BillingClientWrapper @Inject constructor(
                     }
                 } else {
                     Log.w(TAG, "Billing setup failed: ${result.debugMessage}")
+                    crashReporter.log("Billing setup failed code=${result.responseCode} msg=${result.debugMessage}")
                     if (connectAttempts.get() >= 4) {
                         _errors.tryEmit(BillingError.ConnectionFailed(result.debugMessage))
                     }
@@ -156,7 +160,7 @@ class BillingClientWrapper @Inject constructor(
         }
     }
 
-    fun launchPurchase(activity: Activity, productId: String): Boolean {
+    fun launchPurchase(activity: Activity, productId: String, obfuscatedAccountId: String? = null): Boolean {
         val product = _products.value[productId] ?: run {
             Log.w(TAG, "Product not loaded yet: $productId")
             return false
@@ -169,6 +173,7 @@ class BillingClientWrapper @Inject constructor(
                         .build(),
                 ),
             )
+            .apply { if (obfuscatedAccountId != null) setObfuscatedAccountId(obfuscatedAccountId) }
             .build()
         val result = client.launchBillingFlow(activity, params)
         return result.responseCode == BillingClient.BillingResponseCode.OK
@@ -176,6 +181,11 @@ class BillingClientWrapper @Inject constructor(
 
     private fun handlePurchase(purchase: Purchase) {
         if (purchase.purchaseState != Purchase.PurchaseState.PURCHASED) return
+        if (!verifier.verify(purchase.originalJson, purchase.signature)) {
+            Log.w(TAG, "Rejected purchase with bad signature: ${purchase.products}")
+            crashReporter.log("Rejected purchase with bad signature: ${purchase.products}")
+            return
+        }
         mergePurchases(listOf(purchase))
         if (!purchase.isAcknowledged) {
             scope.launch {
@@ -219,6 +229,11 @@ class BillingClientWrapper @Inject constructor(
         var studio = false
         for (p in purchases) {
             if (p.purchaseState != Purchase.PurchaseState.PURCHASED) continue
+            if (!verifier.verify(p.originalJson, p.signature)) {
+                Log.w(TAG, "Skipped purchase with bad signature: ${p.products}")
+                crashReporter.log("Skipped purchase with bad signature: ${p.products}")
+                continue
+            }
             for (id in p.products) {
                 when (id) {
                     ProductIds.PHOTO_EXPORT -> photo = true

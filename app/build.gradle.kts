@@ -10,6 +10,16 @@ plugins {
     alias(libs.plugins.hilt.android)
 }
 
+// Firebase Crashlytics is opt-in: drop google-services.json into app/ to enable.
+// Without that file the google-services plugin would fail the build, so we apply
+// it (and the Crashlytics plugin) only when the config is present. The runtime
+// CrashReporter implementation falls back to a no-op when Firebase isn't init'd.
+val hasGoogleServices = file("google-services.json").exists()
+if (hasGoogleServices) {
+    apply(plugin = libs.plugins.google.services.get().pluginId)
+    apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+}
+
 // Release signing is configured via an untracked keystore.properties file at
 // the project root. See keystore.properties.example for the schema. When the
 // file is absent (CI without secrets, fresh clones, or debug-only builds)
@@ -23,6 +33,16 @@ val hasReleaseKeystore = keystoreProps.getProperty("storeFile")?.let {
     rootProject.file(it).exists()
 } == true
 
+// Play Console base64-encoded RSA public key, used by PurchaseVerifier to check
+// that purchase JSON came from Google Play. Sourced from local.properties so it
+// stays out of source control; absent on CI / fresh clones (verifier returns
+// permissive in that mode and logs a warning).
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val billingLicenseKey: String = localProps.getProperty("billing.licenseKey", "")
+
 android {
     namespace = "com.kartik.snapdoc"
     compileSdk = 36
@@ -35,6 +55,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "BILLING_LICENSE_KEY", "\"$billingLicenseKey\"")
     }
 
     signingConfigs {
@@ -130,6 +152,13 @@ dependencies {
 
     // Billing
     implementation(libs.billing.ktx)
+
+    // Firebase (Crashlytics + Analytics). The runtime CrashReporter no-ops when
+    // Firebase isn't initialized, so these deps are safe to ship without
+    // google-services.json — they just stay dormant.
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     // Serialization + Coroutines
     implementation(libs.kotlinx.serialization.json)

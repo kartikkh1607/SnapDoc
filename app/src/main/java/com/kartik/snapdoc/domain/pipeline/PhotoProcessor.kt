@@ -8,6 +8,7 @@ import android.net.Uri
 import android.media.ExifInterface
 import androidx.core.net.toFile
 import java.io.ByteArrayInputStream
+import com.kartik.snapdoc.data.monitoring.CrashReporter
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
@@ -39,6 +40,7 @@ class PhotoProcessor @Inject constructor(
     private val compressor: FileSizeCompressor,
     private val validator: SpecValidator,
     private val resultStore: ProcessingResultStore,
+    private val crashReporter: CrashReporter,
 ) {
 
     private val _stage = MutableStateFlow(ProcessingStage.DetectingFace)
@@ -114,6 +116,9 @@ class PhotoProcessor @Inject constructor(
             // Honor cancellation — the caller's coroutine is gone.
             throw ce
         } catch (t: Throwable) {
+            crashReporter.setKey("pipeline_stage", _stage.value.name)
+            crashReporter.setKey("spec_id", spec.id)
+            crashReporter.recordException(t, message = "PhotoProcessor failed at ${_stage.value}")
             ProcessingOutcome.Failure(t.message ?: "Processing failed")
         }
       }

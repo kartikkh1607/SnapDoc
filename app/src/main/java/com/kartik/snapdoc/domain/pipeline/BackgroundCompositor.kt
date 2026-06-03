@@ -17,10 +17,12 @@ class BackgroundCompositor @Inject constructor() {
     /**
      * Composites [removed]'s foreground onto a solid [background] colour.
      *
-     * Per-pixel work is split across CPU cores: each worker takes a horizontal
-     * band of rows and writes into its slice of the shared output array.
-     * Cancellation propagates between bands because each band is a child
-     * coroutine of the caller's scope.
+     * The image is processed in horizontal bands whose pixel buffer is capped
+     * around [BAND_BUDGET_BYTES]. Each band is read into a temporary IntArray,
+     * composited in parallel (workers split the band by row), and written back
+     * into the output bitmap. Peak transient memory is therefore one band buffer
+     * (~8MB on a typical photo) plus the output bitmap, rather than the previous
+     * two full-image IntArrays.
      */
     suspend fun composite(removed: RemovedBackground, background: BackgroundSpec): Bitmap =
         withContext(Dispatchers.Default) {
@@ -39,64 +41,82 @@ class BackgroundCompositor @Inject constructor() {
             val bgG = Color.green(bgColor)
             val bgB = Color.blue(bgColor)
 
-            val srcPixels = IntArray(width * height).also {
-                source.getPixels(it, 0, width, 0, 0, width, height)
-            }
-            val outPixels = IntArray(width * height)
-
             val scaleX = maskW.toFloat() / width
             val scaleY = maskH.toFloat() / height
 
+            val out = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             val workers = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
-            val bandHeight = (height + workers - 1) / workers
+            val bandHeight = chooseBandHeight(width, height)
+            val bandBuffer = IntArray(bandHeight * width)
 
-            coroutineScope {
-                (0 until workers)
-                    .map { worker ->
-                        async {
-                            val yStart = worker * bandHeight
-                            val yEnd = ((worker + 1) * bandHeight).coerceAtMost(height)
-                            compositeBand(
-                                yStart = yStart, yEnd = yEnd, width = width,
-                                maskW = maskW, maskH = maskH, scaleX = scaleX, scaleY = scaleY,
-                                maskValues = maskValues, srcPixels = srcPixels, outPixels = outPixels,
-                                bgR = bgR, bgG = bgG, bgB = bgB,
-                            )
+            var bandStart = 0
+            while (bandStart < height) {
+                val bandRows = (height - bandStart).coerceAtMost(bandHeight)
+                source.getPixels(bandBuffer, 0, width, 0, bandStart, width, bandRows)
+
+                coroutineScope {
+                    (0 until workers)
+                        .map { worker ->
+                            async {
+                                val sliceStart = worker * bandRows / workers
+                                val sliceEnd = (worker + 1) * bandRows / workers
+                                if (sliceStart < sliceEnd) {
+                                    compositeSlice(
+                                        bandYOffset = bandStart,
+                                        sliceStart = sliceStart,
+                                        sliceEnd = sliceEnd,
+                                        width = width,
+                                        maskW = maskW, maskH = maskH,
+                                        scaleX = scaleX, scaleY = scaleY,
+                                        maskValues = maskValues,
+                                        pixels = bandBuffer,
+                                        bgR = bgR, bgG = bgG, bgB = bgB,
+                                    )
+                                }
+                            }
                         }
-                    }
-                    .awaitAll()
+                        .awaitAll()
+                }
+
+                out.setPixels(bandBuffer, 0, width, 0, bandStart, width, bandRows)
+                bandStart += bandRows
             }
 
-            val out = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            out.setPixels(outPixels, 0, width, 0, 0, width, height)
             out
         }
 
-    private fun compositeBand(
-        yStart: Int,
-        yEnd: Int,
+    private fun chooseBandHeight(width: Int, height: Int): Int {
+        val bytesPerRow = width * BYTES_PER_PIXEL
+        if (bytesPerRow <= 0) return height.coerceAtLeast(1)
+        val rowsByBudget = (BAND_BUDGET_BYTES / bytesPerRow).coerceAtLeast(1)
+        return rowsByBudget.coerceAtMost(height).coerceAtLeast(1)
+    }
+
+    private fun compositeSlice(
+        bandYOffset: Int,
+        sliceStart: Int,
+        sliceEnd: Int,
         width: Int,
         maskW: Int,
         maskH: Int,
         scaleX: Float,
         scaleY: Float,
         maskValues: FloatArray,
-        srcPixels: IntArray,
-        outPixels: IntArray,
+        pixels: IntArray,
         bgR: Int,
         bgG: Int,
         bgB: Int,
     ) {
         val maxX = maskW - 1
         val maxY = maskH - 1
-        for (y in yStart until yEnd) {
-            val fy = y * scaleY
+        for (row in sliceStart until sliceEnd) {
+            val fy = (bandYOffset + row) * scaleY
             val y0 = fy.toInt().coerceIn(0, maxY)
             val y1 = (y0 + 1).coerceAtMost(maxY)
             val ty = (fy - y0).coerceIn(0f, 1f)
             val row0 = y0 * maskW
             val row1 = y1 * maskW
-            val pixOffset = y * width
+            val pixOffset = row * width
             for (x in 0 until width) {
                 val fx = x * scaleX
                 val x0 = fx.toInt().coerceIn(0, maxX)
@@ -111,8 +131,8 @@ class BackgroundCompositor @Inject constructor() {
                 val bot = v10 + (v11 - v10) * tx
                 val alpha = (top + (bot - top) * ty).coerceIn(0f, 1f)
 
-                val src = srcPixels[pixOffset + x]
-                outPixels[pixOffset + x] = when {
+                val src = pixels[pixOffset + x]
+                pixels[pixOffset + x] = when {
                     alpha >= 0.95f -> src
                     alpha <= 0.05f -> Color.rgb(bgR, bgG, bgB)
                     else -> {
@@ -126,4 +146,10 @@ class BackgroundCompositor @Inject constructor() {
         }
     }
 
+    private companion object {
+        const val BYTES_PER_PIXEL = 4
+        // 8MB band buffer keeps transient pipeline memory predictable: roughly
+        // 524 rows at 4000px wide, 1024 rows at 2048px wide.
+        const val BAND_BUDGET_BYTES = 8 * 1024 * 1024
+    }
 }
