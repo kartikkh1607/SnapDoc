@@ -80,10 +80,20 @@ class PhotoProcessor @Inject constructor(
             _stage.value = ProcessingStage.Compressing
             ensureActive()
             val compressed = compressor.compressToTarget(resized, spec.file.minSizeKb, spec.file.maxSizeKb)
+            resized.recycle()
 
             _stage.value = ProcessingStage.Validating
             ensureActive()
-            val validation = validator.validate(resized, compressed.sizeKb, spec)
+            // Validate against the actual saved bytes — the compressor may have
+            // downscaled `resized` past us when the size target was too tight,
+            // so decoding the final JPEG is the only way to validate truth.
+            val finalBitmap = BitmapFactory.decodeByteArray(compressed.bytes, 0, compressed.bytes.size)
+                ?: return@withContext ProcessingOutcome.Failure("Couldn't decode compressed photo")
+            val validation = try {
+                validator.validate(finalBitmap, compressed.sizeKb, spec)
+            } finally {
+                finalBitmap.recycle()
+            }
 
             val outFile = File(context.cacheDir, "snapdoc_processed_${spec.id}_${System.currentTimeMillis()}.jpg")
             FileOutputStream(outFile).use { it.write(compressed.bytes) }
@@ -92,12 +102,11 @@ class PhotoProcessor @Inject constructor(
                 processedUri = Uri.fromFile(outFile),
                 rawJpegBytes = compressed.bytes,
                 sizeKb = compressed.sizeKb,
-                widthPx = resized.width,
-                heightPx = resized.height,
+                widthPx = compressed.widthPx,
+                heightPx = compressed.heightPx,
                 validation = validation,
             )
             resultStore.put(entry)
-            resized.recycle()
 
             _stage.value = ProcessingStage.Done
             ProcessingOutcome.Success(entry)

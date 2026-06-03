@@ -117,12 +117,18 @@
     <string name="processing_step_done">Done</string>
     <string name="processing_footer">PROCESSED ON-DEVICE · NO IMAGES STORED</string>
     <string name="processing_cd_cancel">Cancel processing</string>
+    <string name="export_error_connection">Couldn\'t reach Google Play. Check your connection and try again.</string>
+    <string name="export_error_purchase_failed">Payment didn\'t go through. Try again or use a different payment method.</string>
+    <string name="export_error_purchase_unavailable">Payments aren\'t available right now. Try again in a moment.</string>
+    <string name="export_error_missing_processed">Processed photo missing — retake.</string>
+    <string name="export_error_save_failed">Couldn\'t save the photo. Try again.</string>
 
     <!-- Export / paywall -->
     <string name="export_eyebrow">ONE-TIME PAYMENT · NO SUBSCRIPTION</string>
     <string name="export_title">Pick your export</string>
     <string name="export_subtitle">Pay once. Re-download anytime. Keep it forever.</string>
     <string name="export_share_chooser">Share photo</string>
+    <string name="preview_share_chooser">Share photo</string>
     <string name="export_saving">Saving to your gallery…</string>
     <string name="export_saved_title">Saved to Pictures/SnapDoc</string>
     <string name="export_saved_subtitle">Watermark removed · ready to upload</string>
@@ -168,6 +174,8 @@
 
     <!-- Print sheet -->
     <string name="printsheet_title">Print sheet</string>
+    <string name="printsheet_cd_back">Back</string>
+    <string name="printsheet_cd_share">Share</string>
     <string name="printsheet_share_chooser">Share sheet</string>
     <string name="printsheet_header_preparing">PREPARING…</string>
     <string name="printsheet_header_template">%1$s · %2$s · %3$d × %4$d MM</string>

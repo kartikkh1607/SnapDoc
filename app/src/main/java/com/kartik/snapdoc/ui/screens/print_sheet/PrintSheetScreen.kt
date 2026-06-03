@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -96,7 +98,12 @@ fun PrintSheetScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp),
             ) {
-                CircleIcon(Icons.AutoMirrored.Outlined.ArrowBack, onBack, MaterialTheme.colorScheme.onSurface)
+                CircleIcon(
+                    icon = Icons.AutoMirrored.Outlined.ArrowBack,
+                    onClick = onBack,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    contentDescription = stringResource(R.string.printsheet_cd_back),
+                )
                 Text(
                     text = stringResource(R.string.printsheet_title),
                     color = MaterialTheme.colorScheme.onSurface,
@@ -110,6 +117,7 @@ fun PrintSheetScreen(
                         if (uri != null && mime != null) share(uri, mime)
                     },
                     tint = if (state.shareUri != null) Primary else Ink4,
+                    contentDescription = stringResource(R.string.printsheet_cd_share),
                 )
             }
 
@@ -219,7 +227,11 @@ private fun SheetPicker(
                         color = if (isSelected) Primary else Hairline,
                         shape = RoundedCornerShape(14.dp),
                     )
-                    .clickable { onSelect(sheet) },
+                    .selectable(
+                        selected = isSelected,
+                        role = Role.RadioButton,
+                        onClick = { onSelect(sheet) },
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -392,14 +404,15 @@ private fun SavedBanner(
         val uri = state.shareUri
         val mime = state.shareMime
         if (uri != null && mime != null) {
+            val label = stringResource(R.string.printsheet_share)
             Text(
-                text = stringResource(R.string.printsheet_share),
+                text = label,
                 color = Primary,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.White)
-                    .clickable { onShare(uri, mime) }
+                    .clickable(role = Role.Button, onClickLabel = label) { onShare(uri, mime) }
                     .padding(horizontal = 12.dp, vertical = 6.dp),
             )
         }
@@ -414,6 +427,8 @@ private fun FooterActions(
     modifier: Modifier = Modifier,
 ) {
     val enabled = !state.locked && state.phase != PrintExportPhase.Generating
+    val saveJpgLabel = stringResource(R.string.printsheet_save_jpg)
+    val savePdfLabel = stringResource(R.string.printsheet_save_pdf)
     Row(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = modifier.fillMaxWidth(),
@@ -427,7 +442,12 @@ private fun FooterActions(
                 .clip(RoundedCornerShape(18.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .border(1.dp, Hairline, RoundedCornerShape(18.dp))
-                .clickable(enabled = enabled, onClick = onSaveJpg)
+                .clickable(
+                    enabled = enabled,
+                    role = Role.Button,
+                    onClickLabel = saveJpgLabel,
+                    onClick = onSaveJpg,
+                )
                 .padding(horizontal = 16.dp),
         ) {
             Spacer(modifier = Modifier.weight(1f))
@@ -453,7 +473,12 @@ private fun FooterActions(
                 .sGreen(18.dp)
                 .clip(RoundedCornerShape(18.dp))
                 .background(if (enabled) Primary else Primary.copy(alpha = 0.55f))
-                .clickable(enabled = enabled, onClick = onSavePdf)
+                .clickable(
+                    enabled = enabled,
+                    role = Role.Button,
+                    onClickLabel = savePdfLabel,
+                    onClick = onSavePdf,
+                )
                 .padding(horizontal = 16.dp),
         ) {
             Spacer(modifier = Modifier.weight(1f))
@@ -477,14 +502,23 @@ private fun FooterActions(
 }
 
 @Composable
-private fun CircleIcon(icon: ImageVector, onClick: () -> Unit, tint: Color) {
+private fun CircleIcon(
+    icon: ImageVector,
+    onClick: () -> Unit,
+    tint: Color,
+    contentDescription: String,
+) {
     Box(
         modifier = Modifier
             .size(40.dp)
             .s1(14.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick),
+            .clickable(
+                role = Role.Button,
+                onClickLabel = contentDescription,
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -496,5 +530,3 @@ private fun CircleIcon(icon: ImageVector, onClick: () -> Unit, tint: Color) {
     }
 }
 
-@Suppress("unused")
-private fun SheetLayout.dummy(): Int = copies

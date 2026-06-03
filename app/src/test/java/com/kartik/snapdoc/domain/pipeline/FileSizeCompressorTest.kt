@@ -44,6 +44,16 @@ class FileSizeCompressorTest {
         assertThat(result.qualityUsed).isAtMost(100)
     }
 
+    @Test
+    fun `dimensions on result match the bitmap that was actually compressed`() {
+        // No downscale path — the source already fits the size band, so result
+        // dimensions equal the input dimensions.
+        val bitmap = makeNoisyBitmap(413, 531)
+        val result = compressor.compressToTarget(bitmap, minKb = 0, maxKb = 1000)
+        assertThat(result.widthPx).isEqualTo(413)
+        assertThat(result.heightPx).isEqualTo(531)
+    }
+
     private fun makeNoisyBitmap(width: Int, height: Int): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)

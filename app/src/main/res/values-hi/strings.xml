@@ -117,12 +117,18 @@
     <string name="processing_step_done">पूर्ण</string>
     <string name="processing_footer">डिवाइस पर प्रोसेस · कोई इमेज सेव नहीं</string>
     <string name="processing_cd_cancel">प्रोसेसिंग रद्द करें</string>
+    <string name="export_error_connection">Google Play से कनेक्ट नहीं हो पाया। इंटरनेट जाँचें और फिर कोशिश करें।</string>
+    <string name="export_error_purchase_failed">पेमेंट पूरा नहीं हुआ। दोबारा कोशिश करें या कोई दूसरा पेमेंट तरीका चुनें।</string>
+    <string name="export_error_purchase_unavailable">अभी पेमेंट उपलब्ध नहीं है। थोड़ी देर में फिर कोशिश करें।</string>
+    <string name="export_error_missing_processed">प्रोसेस्ड फ़ोटो नहीं मिली — फिर से क्लिक करें।</string>
+    <string name="export_error_save_failed">फ़ोटो सेव नहीं हो पाई। फिर कोशिश करें।</string>
 
     <!-- Export / paywall -->
     <string name="export_eyebrow">एक बार भुगतान · कोई सदस्यता नहीं</string>
     <string name="export_title">अपना एक्सपोर्ट चुनें</string>
     <string name="export_subtitle">एक बार भुगतान। कभी भी फिर से डाउनलोड करें। हमेशा के लिए आपका।</string>
     <string name="export_share_chooser">फ़ोटो शेयर करें</string>
+    <string name="preview_share_chooser">फ़ोटो शेयर करें</string>
     <string name="export_saving">गैलरी में सेव हो रहा है…</string>
     <string name="export_saved_title">Pictures/SnapDoc में सेव हो गया</string>
     <string name="export_saved_subtitle">वॉटरमार्क हटा · अपलोड के लिए तैयार</string>
@@ -168,6 +174,8 @@
 
     <!-- Print sheet -->
     <string name="printsheet_title">प्रिंट शीट</string>
+    <string name="printsheet_cd_back">वापस</string>
+    <string name="printsheet_cd_share">शेयर</string>
     <string name="printsheet_share_chooser">शीट शेयर करें</string>
     <string name="printsheet_header_preparing">तैयार हो रहा है…</string>
     <string name="printsheet_header_template">%1$s · %2$s · %3$d × %4$d मिमी</string>

@@ -1,5 +1,6 @@
 package com.kartik.snapdoc.ui.screens.preview
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -72,6 +74,19 @@ fun PreviewScreen(
     viewModel: PreviewViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val shareChooserTitle = stringResource(R.string.preview_share_chooser)
+    val shareProcessed: () -> Unit = {
+        val uri = state.processedUri
+        if (uri != null) {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/jpeg"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(intent, shareChooserTitle))
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,7 +117,7 @@ fun PreviewScreen(
                 )
                 CircleIcon(
                     icon = Icons.Outlined.Share,
-                    onClick = {},
+                    onClick = shareProcessed,
                     contentDescription = stringResource(R.string.cd_share),
                 )
             }

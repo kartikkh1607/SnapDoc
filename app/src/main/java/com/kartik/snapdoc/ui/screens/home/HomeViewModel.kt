@@ -24,7 +24,6 @@ class HomeViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     categories = repo.categories(),
-                    popular = repo.popular(5),
                     documents = repo.search("", null),
                     loading = false,
                 )

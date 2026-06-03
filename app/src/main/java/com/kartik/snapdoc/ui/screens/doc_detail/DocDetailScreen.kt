@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -338,6 +339,7 @@ private fun StickyCta(onClick: () -> Unit, modifier: Modifier = Modifier) {
             )
             .padding(start = 22.dp, end = 22.dp, top = 18.dp, bottom = 32.dp),
     ) {
+        val ctaLabel = stringResource(R.string.docdetail_cta_take)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -347,7 +349,7 @@ private fun StickyCta(onClick: () -> Unit, modifier: Modifier = Modifier) {
                 .sGreen(20.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(Primary)
-                .clickable(onClick = onClick)
+                .clickable(role = Role.Button, onClickLabel = ctaLabel, onClick = onClick)
                 .padding(horizontal = 16.dp),
         ) {
             Spacer(modifier = Modifier.weight(1f))
@@ -358,7 +360,7 @@ private fun StickyCta(onClick: () -> Unit, modifier: Modifier = Modifier) {
                 modifier = Modifier.size(20.dp),
             )
             Text(
-                text = stringResource(R.string.docdetail_cta_take),
+                text = ctaLabel,
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             )

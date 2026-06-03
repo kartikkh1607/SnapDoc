@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import android.util.Log
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.data.billing.BillingError
 import com.kartik.snapdoc.data.billing.EntitlementState
 import com.kartik.snapdoc.data.billing.ProductIds
@@ -54,20 +56,18 @@ class ExportViewModel @Inject constructor(
         }
         viewModelScope.launch {
             purchases.errors.collect { error ->
-                val message = error.userMessage()
+                val messageRes = error.userMessageRes()
                 _state.update {
                     val nextPhase = if (it.phase == ExportPhase.Purchasing) ExportPhase.Paywall else it.phase
-                    it.copy(phase = nextPhase, error = message)
+                    it.copy(phase = nextPhase, errorRes = messageRes)
                 }
             }
         }
     }
 
-    private fun BillingError.userMessage(): String = when (this) {
-        is BillingError.ConnectionFailed ->
-            "Couldn't reach Google Play. Check your connection and try again."
-        is BillingError.PurchaseFailed ->
-            "Payment didn't go through. Try again or use a different payment method."
+    private fun BillingError.userMessageRes(): Int = when (this) {
+        is BillingError.ConnectionFailed -> R.string.export_error_connection
+        is BillingError.PurchaseFailed -> R.string.export_error_purchase_failed
     }
 
     fun selectProduct(productId: String) {
@@ -76,13 +76,13 @@ class ExportViewModel @Inject constructor(
 
     fun pay(activity: Activity) {
         val productId = _state.value.selectedProductId ?: ProductIds.PHOTO_EXPORT
-        _state.update { it.copy(phase = ExportPhase.Purchasing, error = null) }
+        _state.update { it.copy(phase = ExportPhase.Purchasing, errorRes = null) }
         val launched = purchases.launchPurchase(activity, productId)
         if (!launched) {
             _state.update {
                 it.copy(
                     phase = ExportPhase.Paywall,
-                    error = "Payments aren't available right now. Try again in a moment.",
+                    errorRes = R.string.export_error_purchase_unavailable,
                 )
             }
         }
@@ -92,7 +92,9 @@ class ExportViewModel @Inject constructor(
         viewModelScope.launch {
             val entry = resultStore.get(decodedUri)
             if (entry == null) {
-                _state.update { it.copy(phase = ExportPhase.Error, error = "Processed photo missing — retake.") }
+                _state.update {
+                    it.copy(phase = ExportPhase.Error, errorRes = R.string.export_error_missing_processed)
+                }
                 return@launch
             }
             runCatching { exporter.saveToGallery(entry.rawJpegBytes, docId) }
@@ -100,17 +102,19 @@ class ExportViewModel @Inject constructor(
                     _state.update { it.copy(phase = ExportPhase.Saved, savedUri = uri) }
                 }
                 .onFailure { t ->
-                    _state.update { it.copy(phase = ExportPhase.Error, error = t.message ?: "Save failed") }
+                    Log.w(TAG, "Save failed", t)
+                    _state.update {
+                        it.copy(phase = ExportPhase.Error, errorRes = R.string.export_error_save_failed)
+                    }
                 }
         }
     }
 
-    fun retrySave() {
-        _state.update { it.copy(phase = ExportPhase.Saving, error = null) }
-        save()
-    }
-
     fun restore() {
         viewModelScope.launch { purchases.restorePurchases() }
+    }
+
+    private companion object {
+        const val TAG = "ExportViewModel"
     }
 }

@@ -5,12 +5,20 @@ import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
-class CompressedImage(val bytes: ByteArray, val qualityUsed: Int, val sizeKb: Int) {
+class CompressedImage(
+    val bytes: ByteArray,
+    val qualityUsed: Int,
+    val sizeKb: Int,
+    val widthPx: Int,
+    val heightPx: Int,
+) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is CompressedImage) return false
         return qualityUsed == other.qualityUsed &&
             sizeKb == other.sizeKb &&
+            widthPx == other.widthPx &&
+            heightPx == other.heightPx &&
             bytes.contentEquals(other.bytes)
     }
 
@@ -18,6 +26,8 @@ class CompressedImage(val bytes: ByteArray, val qualityUsed: Int, val sizeKb: In
         var result = bytes.contentHashCode()
         result = 31 * result + qualityUsed
         result = 31 * result + sizeKb
+        result = 31 * result + widthPx
+        result = 31 * result + heightPx
         return result
     }
 }
@@ -32,6 +42,9 @@ class FileSizeCompressor @Inject constructor() {
         while (attempts < 5) {
             val result = searchQuality(current, minKb, maxKb)
             if (result != null) {
+                // Drop the internal downscaled copy if we made one. The caller
+                // owns the original `bitmap` and recycles it separately.
+                if (current !== bitmap) current.recycle()
                 return result
             }
             // Too large even at quality 30 -> downscale 10%, retry.
@@ -47,7 +60,15 @@ class FileSizeCompressor @Inject constructor() {
         val out = ByteArrayOutputStream()
         current.compress(Bitmap.CompressFormat.JPEG, 30, out)
         val bytes = out.toByteArray()
-        return CompressedImage(bytes, 30, bytes.size.toKbRounded())
+        val result = CompressedImage(
+            bytes = bytes,
+            qualityUsed = 30,
+            sizeKb = bytes.size.toKbRounded(),
+            widthPx = current.width,
+            heightPx = current.height,
+        )
+        if (current !== bitmap) current.recycle()
+        return result
     }
 
     private fun searchQuality(bitmap: Bitmap, minKb: Int, maxKb: Int): CompressedImage? {
@@ -63,7 +84,13 @@ class FileSizeCompressor @Inject constructor() {
             val sizeKb = bytes.size.toKbRounded()
             when {
                 sizeKb in minKb..maxKb -> {
-                    best = CompressedImage(bytes, mid, sizeKb)
+                    best = CompressedImage(
+                        bytes = bytes,
+                        qualityUsed = mid,
+                        sizeKb = sizeKb,
+                        widthPx = bitmap.width,
+                        heightPx = bitmap.height,
+                    )
                     lo = mid + 1
                 }
                 sizeKb < minKb -> lo = mid + 1

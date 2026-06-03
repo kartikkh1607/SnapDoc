@@ -9,6 +9,6 @@ data class ExportUiState(
     val phase: ExportPhase = ExportPhase.Paywall,
     val entitlement: EntitlementState = EntitlementState.Locked,
     val savedUri: Uri? = null,
-    val error: String? = null,
+    val errorRes: Int? = null,
     val selectedProductId: String? = null,
 )

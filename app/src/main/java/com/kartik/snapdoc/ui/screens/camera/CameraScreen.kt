@@ -394,6 +394,8 @@ private fun PermissionGate(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            val cancelLabel = stringResource(R.string.camera_perm_cancel)
+            val grantLabel = stringResource(R.string.camera_perm_grant)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -401,11 +403,11 @@ private fun PermissionGate(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable(onClick = onClose)
+                        .clickable(role = Role.Button, onClickLabel = cancelLabel, onClick = onClose)
                         .padding(horizontal = 24.dp, vertical = 14.dp),
                 ) {
                     Text(
-                        text = stringResource(R.string.camera_perm_cancel),
+                        text = cancelLabel,
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleMedium,
                     )
@@ -414,11 +416,11 @@ private fun PermissionGate(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
                         .background(Primary)
-                        .clickable(onClick = onRequest)
+                        .clickable(role = Role.Button, onClickLabel = grantLabel, onClick = onRequest)
                         .padding(horizontal = 24.dp, vertical = 14.dp),
                 ) {
                     Text(
-                        text = stringResource(R.string.camera_perm_grant),
+                        text = grantLabel,
                         color = Color.White,
                         style = MaterialTheme.typography.titleMedium,
                     )

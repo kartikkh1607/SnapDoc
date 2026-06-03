@@ -183,9 +183,10 @@ fun ExportScreen(
                 return@Column
             }
 
-            if (state.error != null) {
+            val errorRes = state.errorRes
+            if (errorRes != null) {
                 Text(
-                    text = state.error ?: "",
+                    text = stringResource(errorRes),
                     color = Amber,
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier
