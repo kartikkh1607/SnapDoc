@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -86,6 +88,7 @@ private fun buildSteps(current: ProcessingStage): List<Step> {
 fun ProcessingScreen(
     onDone: (docId: String, imageUri: String) -> Unit,
     onError: () -> Unit,
+    onCancel: () -> Unit,
     viewModel: ProcessingViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -127,12 +130,18 @@ fun ProcessingScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp),
             ) {
+                val cancelLabel = stringResource(R.string.processing_cd_cancel)
                 Box(
                     modifier = Modifier
                         .size(40.dp)
                         .s1(14.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(MaterialTheme.colorScheme.surface),
+                        .background(MaterialTheme.colorScheme.surface)
+                        .clickable(
+                            role = Role.Button,
+                            onClickLabel = cancelLabel,
+                            onClick = onCancel,
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -272,10 +281,7 @@ private fun Timeline(steps: List<Step>, modifier: Modifier = Modifier) {
             .padding(horizontal = 18.dp),
     ) {
         steps.forEachIndexed { idx, step ->
-            TimelineRow(
-                step = step,
-                isLast = idx == steps.lastIndex,
-            )
+            TimelineRow(step = step)
             if (idx != steps.lastIndex) {
                 Box(
                     modifier = Modifier
@@ -289,7 +295,7 @@ private fun Timeline(steps: List<Step>, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TimelineRow(step: Step, isLast: Boolean) {
+private fun TimelineRow(step: Step) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -329,7 +335,6 @@ private fun TimelineRow(step: Step, isLast: Boolean) {
             StepState.Idle -> {}
         }
     }
-    @Suppress("UNUSED_EXPRESSION") isLast
 }
 
 @Composable

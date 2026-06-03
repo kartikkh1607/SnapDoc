@@ -116,6 +116,7 @@
     <string name="processing_step_validate">Verifying compliance</string>
     <string name="processing_step_done">Done</string>
     <string name="processing_footer">PROCESSED ON-DEVICE · NO IMAGES STORED</string>
+    <string name="processing_cd_cancel">Cancel processing</string>
 
     <!-- Export / paywall -->
     <string name="export_eyebrow">ONE-TIME PAYMENT · NO SUBSCRIPTION</string>

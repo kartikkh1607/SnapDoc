@@ -97,6 +97,7 @@ fun SnapDocNavGraph(
                     }
                 },
                 onError = { navController.popBackStack<Routes.Camera>(inclusive = false) },
+                onCancel = { navController.popBackStack<Routes.Camera>(inclusive = false) },
             )
         }
 

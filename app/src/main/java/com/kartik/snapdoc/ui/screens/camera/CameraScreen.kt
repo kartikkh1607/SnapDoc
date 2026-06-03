@@ -71,7 +71,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import com.kartik.snapdoc.R
-import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.domain.camera.FaceGuidanceAnalyzer
 import com.kartik.snapdoc.domain.camera.FaceGuidanceState
 import com.kartik.snapdoc.domain.camera.GuidanceChecks
@@ -599,8 +598,5 @@ private fun FlipButton(onClick: () -> Unit) {
         )
     }
 }
-
-@Suppress("unused")
-private fun DocumentSpec.unused(): Int = popularity
 
 private const val TAG = "CameraScreen"

@@ -116,6 +116,7 @@
     <string name="processing_step_validate">पालन की जाँच</string>
     <string name="processing_step_done">पूर्ण</string>
     <string name="processing_footer">डिवाइस पर प्रोसेस · कोई इमेज सेव नहीं</string>
+    <string name="processing_cd_cancel">प्रोसेसिंग रद्द करें</string>
 
     <!-- Export / paywall -->
     <string name="export_eyebrow">एक बार भुगतान · कोई सदस्यता नहीं</string>
