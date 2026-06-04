@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_doc_default">डॉक्यूमेंट</string>
+    <string name="camera_doc_subtitle">%1$d × %2$d मिमी · %3$s BG</string>
+    <string name="camera_check_face_centered">चेहरा बीच में</string>
+    <string name="camera_check_eyes_open">आँखें खुली</string>
+    <string name="camera_perm_title">कैमरा अनुमति चाहिए</string>
+    <string name="camera_perm_subtitle">SnapDoc सही माप की डॉक्यूमेंट फ़ोटो लेने के लिए कैमरा इस्तेमाल करता है। फ़ोटो आपके फ़ोन पर ही रहती हैं।</string>
+    <string name="camera_perm_cancel">रद्द करें</string>
+    <string name="camera_perm_grant">अनुमति दें</string>
+    <string name="camera_capture_error">फ़ोटो नहीं ली जा सकी। कृपया फिर से कोशिश करें।</string>
+    <string name="camera_cd_flash">फ़्लैश बदलें</string>
+    <string name="camera_cd_gallery">गैलरी से चुनें</string>
+    <string name="camera_cd_close">कैमरा बंद करें</string>
+    <string name="camera_cd_capture">फ़ोटो लें</string>
+    <string name="camera_cd_flip">कैमरा बदलें</string>
+
+    <string name="guidance_no_face">कोई चेहरा नहीं मिला</string>
+    <string name="guidance_multiple_faces">फ्रेम में सिर्फ़ एक व्यक्ति रखें</string>
+    <string name="guidance_too_far">पास आइए</string>
+    <string name="guidance_too_close">पीछे हटिए</string>
+    <string name="guidance_not_centered">चेहरा बीच में लाइए</string>
+    <string name="guidance_not_straight">कैमरे की ओर सीधा देखिए</string>
+    <string name="guidance_eyes_closed">आँखें खोलिए</string>
+    <string name="guidance_mouth_open">मुँह बंद कीजिए</string>
+    <string name="guidance_ready">बढ़िया — स्थिर रहिए</string>
+</resources>

@@ -1,7 +1,7 @@
 package com.kartik.snapdoc.ui.screens.camera
 
 import androidx.annotation.StringRes
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.feature.camera.R
 import com.kartik.snapdoc.domain.camera.FaceGuidanceState
 
 @StringRes
