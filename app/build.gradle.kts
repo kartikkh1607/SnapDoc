@@ -141,6 +141,7 @@ android {
 dependencies {
     // Modules
     implementation(project(":core:designsystem"))
+    implementation(project(":data:specs"))
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
