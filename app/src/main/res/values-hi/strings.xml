@@ -22,39 +22,12 @@
 
     <!-- Processing -->
     <!-- Processing strings live in :feature:processing -->
-    <string name="export_error_connection">Google Play से कनेक्ट नहीं हो पाया। इंटरनेट जाँचें और फिर कोशिश करें।</string>
-    <string name="export_error_purchase_failed">पेमेंट पूरा नहीं हुआ। दोबारा कोशिश करें या कोई दूसरा पेमेंट तरीका चुनें।</string>
-    <string name="export_error_purchase_unavailable">अभी पेमेंट उपलब्ध नहीं है। थोड़ी देर में फिर कोशिश करें।</string>
-    <string name="export_error_missing_processed">प्रोसेस्ड फ़ोटो नहीं मिली — फिर से क्लिक करें।</string>
-    <string name="export_error_save_failed">फ़ोटो सेव नहीं हो पाई। फिर कोशिश करें।</string>
+    <!-- Export error strings live in :feature:export -->
 
     <!-- Export / paywall -->
-    <string name="export_eyebrow">एक बार भुगतान · कोई सदस्यता नहीं</string>
-    <string name="export_title">अपना एक्सपोर्ट चुनें</string>
-    <string name="export_subtitle">एक बार भुगतान। कभी भी फिर से डाउनलोड करें। हमेशा के लिए आपका।</string>
-    <string name="export_share_chooser">फ़ोटो शेयर करें</string>
+    <!-- Export strings live in :feature:export -->
     <!-- preview_share_chooser moved to :feature:preview -->
-    <string name="export_saving">गैलरी में सेव हो रहा है…</string>
-    <string name="export_saved_title">Pictures/SnapDoc में सेव हो गया</string>
-    <string name="export_saved_subtitle">वॉटरमार्क हटा · अपलोड के लिए तैयार</string>
-    <string name="export_cd_saved">सेव की गई फ़ोटो</string>
-    <string name="export_share_button">शेयर करें</string>
-    <string name="export_done">पूर्ण</string>
-    <string name="export_plan_photo_title">फ़ोटो एक्सपोर्ट</string>
-    <string name="export_plan_photo_subtitle">वॉटरमार्क हटाएँ · असीमित फ़ोटो एक्सपोर्ट</string>
-    <string name="export_plan_photo_price">₹49</string>
-    <string name="export_plan_studio_title">स्टूडियो बंडल</string>
-    <string name="export_plan_studio_subtitle">फ़ोटो एक्सपोर्ट + मल्टी-कॉपी प्रिंट शीट (4×6 / A4)</string>
-    <string name="export_plan_studio_price">₹99</string>
-    <string name="export_plan_studio_strike">₹149</string>
-    <string name="export_plan_studio_badge">बेस्ट वैल्यू</string>
-    <string name="export_trust_secure">सुरक्षित भुगतान</string>
-    <string name="export_trust_redownload">फिर डाउनलोड</string>
-    <string name="export_trust_private">निजी</string>
-    <string name="export_cta_purchasing">Play Billing खुल रहा है…</string>
-    <string name="export_cta_pay">%1$s भुगतान करें</string>
-    <string name="export_payment_methods">Google Play · UPI · कार्ड · वॉलेट</string>
-    <string name="export_restore">खरीद बहाल करें</string>
+    <!-- More export strings live in :feature:export -->
 
     <!-- Doc detail -->
     <!-- Doc detail strings live in :feature:doc_detail -->

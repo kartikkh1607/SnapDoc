@@ -42,7 +42,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.feature.export.R
 import com.kartik.snapdoc.data.billing.ProductIds
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip

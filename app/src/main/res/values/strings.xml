@@ -22,39 +22,12 @@
 
     <!-- Processing -->
     <!-- Processing strings live in :feature:processing -->
-    <string name="export_error_connection">Couldn\'t reach Google Play. Check your connection and try again.</string>
-    <string name="export_error_purchase_failed">Payment didn\'t go through. Try again or use a different payment method.</string>
-    <string name="export_error_purchase_unavailable">Payments aren\'t available right now. Try again in a moment.</string>
-    <string name="export_error_missing_processed">Processed photo missing — retake.</string>
-    <string name="export_error_save_failed">Couldn\'t save the photo. Try again.</string>
+    <!-- Export error strings live in :feature:export -->
 
     <!-- Export / paywall -->
-    <string name="export_eyebrow">ONE-TIME PAYMENT · NO SUBSCRIPTION</string>
-    <string name="export_title">Pick your export</string>
-    <string name="export_subtitle">Pay once. Re-download anytime. Keep it forever.</string>
-    <string name="export_share_chooser">Share photo</string>
+    <!-- Export strings live in :feature:export -->
     <!-- preview_share_chooser moved to :feature:preview -->
-    <string name="export_saving">Saving to your gallery…</string>
-    <string name="export_saved_title">Saved to Pictures/SnapDoc</string>
-    <string name="export_saved_subtitle">Watermark removed · ready to upload</string>
-    <string name="export_cd_saved">Saved photo</string>
-    <string name="export_share_button">Share</string>
-    <string name="export_done">Done</string>
-    <string name="export_plan_photo_title">Photo Export</string>
-    <string name="export_plan_photo_subtitle">Remove watermark · export unlimited photos</string>
-    <string name="export_plan_photo_price">₹49</string>
-    <string name="export_plan_studio_title">Studio Bundle</string>
-    <string name="export_plan_studio_subtitle">Photo Export + multi-copy print sheets (4×6 / A4)</string>
-    <string name="export_plan_studio_price">₹99</string>
-    <string name="export_plan_studio_strike">₹149</string>
-    <string name="export_plan_studio_badge">BEST VALUE</string>
-    <string name="export_trust_secure">Secure pay</string>
-    <string name="export_trust_redownload">Re-download</string>
-    <string name="export_trust_private">Private</string>
-    <string name="export_cta_purchasing">Opening Play Billing…</string>
-    <string name="export_cta_pay">Pay %1$s</string>
-    <string name="export_payment_methods">Google Play · UPI · Cards · Wallets</string>
-    <string name="export_restore">Restore purchase</string>
+    <!-- More export strings live in :feature:export -->
 
     <!-- Doc detail -->
     <!-- Doc detail strings live in :feature:doc_detail -->

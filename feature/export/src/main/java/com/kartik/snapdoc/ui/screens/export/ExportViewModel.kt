@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import android.util.Log
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.feature.export.R
 import com.kartik.snapdoc.data.billing.BillingError
 import com.kartik.snapdoc.data.billing.EntitlementState
 import com.kartik.snapdoc.data.billing.ProductIds
