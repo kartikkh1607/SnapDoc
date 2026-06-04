@@ -127,12 +127,7 @@
     <string name="printsheet_error_jpg">JPG नहीं बन सकी। फिर कोशिश करें।</string>
 
     <!-- Review -->
-    <string name="review_title">अपनी फ़ोटो की समीक्षा करें</string>
-    <string name="review_chip">1:1 · कैप्चर</string>
-    <string name="review_quality_title">बढ़िया दिख रही है</string>
-    <string name="review_quality_subtitle">तेज़ फ़ोकस · साफ़ बैकग्राउंड · चेहरा बीच में</string>
-    <string name="review_retake">फिर से लें</string>
-    <string name="review_use_photo">यह फ़ोटो इस्तेमाल करें</string>
+    <!-- Review strings live in :feature:review -->
 
     <!-- Onboarding -->
     <!-- Onboarding strings moved to :feature:onboarding/src/main/res/values-hi/strings.xml -->

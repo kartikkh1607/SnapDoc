@@ -45,7 +45,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import coil.compose.AsyncImage
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.feature.review.R
 import com.kartik.snapdoc.core.designsystem.R as DesignR
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.navigation.Routes

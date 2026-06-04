@@ -127,12 +127,7 @@
     <string name="printsheet_error_jpg">Couldn\'t generate the JPG. Try again.</string>
 
     <!-- Review -->
-    <string name="review_title">Review your photo</string>
-    <string name="review_chip">1:1 · CAPTURED</string>
-    <string name="review_quality_title">Looks great</string>
-    <string name="review_quality_subtitle">Sharp focus · clean background · face centered</string>
-    <string name="review_retake">Retake</string>
-    <string name="review_use_photo">Use this photo</string>
+    <!-- Review strings live in :feature:review -->
 
     <!-- Onboarding -->
     <!-- Onboarding strings moved to :feature:onboarding/src/main/res/values/strings.xml -->
