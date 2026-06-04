@@ -7,11 +7,11 @@
   - Exclude the user_prefs DataStore because it also caches the billing
     entitlement; restoring it from cloud could grant a refunded user
     continued access. Onboarding flag re-displaying after a restore is fine.
-  - Exclude cache (processed photos) and external storage.
+  - Cache files are never included in Auto Backup by default — no exclude needed.
+  - Exclude external storage.
   - No files explicitly included -> nothing else is backed up.
 -->
 <full-backup-content>
     <exclude domain="file" path="datastore/user_prefs.preferences_pb" />
-    <exclude domain="cache" path="." />
     <exclude domain="external" path="." />
 </full-backup-content>

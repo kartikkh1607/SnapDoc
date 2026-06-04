@@ -51,8 +51,12 @@ android {
         applicationId = "com.kartik.snapdoc"
         minSdk = 24
         targetSdk = 36
+        // Versioning policy: versionName follows semver (MAJOR.MINOR.PATCH);
+        // versionCode is a monotonic integer that MUST be bumped on every
+        // Play Store upload, even if the version name does not change.
+        // First public release will be 1.0.0 / versionCode 1.
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -110,6 +114,27 @@ android {
         unitTests {
             isIncludeAndroidResources = true
         }
+    }
+
+    lint {
+        // Fail release builds on lint errors so a regression can never ship.
+        abortOnError = true
+        checkReleaseBuilds = true
+        // Don't scan downstream module/library code we don't own.
+        checkDependencies = false
+        // Hindi (values-hi) currently has minor gaps that are tracked separately;
+        // also silence Material Icons internal lint noise that doesn't surface
+        // user-visible issues.
+        disable += setOf("MissingTranslation", "ExtraTranslation")
+        // Treat unhandled exceptions and a11y issues as errors instead of warnings.
+        warning += setOf("Unused")
+        error += setOf(
+            "ContentDescription",
+            "ClickableViewAccessibility",
+            "VisibleForTests",
+        )
+        // Baseline so existing findings are tracked separately from new ones.
+        baseline = file("lint-baseline.xml")
     }
 }
 

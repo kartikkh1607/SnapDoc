@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 9.2.1" type="baseline" client="gradle" dependencies="false" name="AGP (9.2.1)" variant="all" version="9.2.1">
+
+    <issue
+        id="UnknownIssueId"
+        message="Unknown issue id &quot;Unused&quot;. Did you mean:&#xA;&apos;UnusedAttribute&apos; (Attribute unused on older versions)&#xA;&apos;UnusedBoxWithConstraintsScope&apos; (BoxWithConstraints content should use the constraints provided via BoxWithConstraintsScope)&#xA;&apos;UnusedContentLambdaTargetStateParameter&apos; (AnimatedContent calls should use the provided `T` parameter in the content lambda)&#xA;&apos;UnusedCrossfadeTargetStateParameter&apos; (Crossfade calls should use the provided `T` parameter in the content lambda)&#xA;&apos;UnusedIds&apos; (Unused id)&#xA;&apos;UnusedMaterial3ScaffoldPaddingParameter&apos; (Scaffold content should use the padding provided as a lambda parameter)&#xA;&apos;UnusedNamespace&apos; (Unused namespace)&#xA;&apos;UnusedQuantity&apos; (Unused quantity translations)&#xA;&apos;UnusedResources&apos; (Unused resources)&#xA;&apos;UnusedSharedTransitionModifierParameter&apos; (SharedTransitionScope calls should use the provided Modifier parameter.)&#xA;&apos;UnusedTargetStateInContentKeyLambda&apos; (`contentKey` lambda in AnimatedContent should always use the provided `T` parameter.)&#xA;&apos;UnusedTransitionTargetStateParameter&apos; (Transition.animate* calls should use the provided targetState when defining values)&#xA;&apos;UnusedTranslation&apos; (Unused Translation)&#xA;?"
+        errorLine1="        warning += setOf(&quot;Unused&quot;)"
+        errorLine2="                          ~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="130"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="ExifInterface"
+        message="Avoid using `android.media.ExifInterface`; use `androidx.exifinterface.media.ExifInterface` instead"
+        errorLine1="import android.media.ExifInterface"
+        errorLine2="       ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/PhotoProcessor.kt"
+            line="8"
+            column="8"/>
+    </issue>
+
+    <issue
+        id="ExifInterface"
+        message="Avoid using `android.media.ExifInterface`; use `androidx.exifinterface.media.ExifInterface` instead"
+        errorLine1="            ByteArrayInputStream(bytes).use { ExifInterface(it).getAttributeInt("
+        errorLine2="                                              ^">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/PhotoProcessor.kt"
+            line="144"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="OldTargetApi"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
+        errorLine1="        targetSdk = 36"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="53"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="RedundantLabel"
+        message="Redundant label can be removed"
+        errorLine1="            android:label=&quot;@string/app_name&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of `compileSdk` than 36 is available: 37"
+        errorLine1="    compileSdk = 36"
+        errorLine2="    ~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="48"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.core:core-ktx than 1.18.0 is available: 1.19.0"
+        errorLine1="coreKtx = &quot;1.18.0&quot;"
+        errorLine2="          ~~~~~~~~">
+        <location
+            file="../gradle/libs.versions.toml"
+            line="6"
+            column="11"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.firebase:firebase-bom than 33.7.0 is available: 34.14.0"
+        errorLine1="firebaseBom = &quot;33.7.0&quot;"
+        errorLine2="              ~~~~~~~~">
+        <location
+            file="../gradle/libs.versions.toml"
+            line="31"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.gms.google-services than 4.4.2 is available: 4.4.4"
+        errorLine1="googleServices = &quot;4.4.2&quot;"
+        errorLine2="                 ~~~~~~~">
+        <location
+            file="../gradle/libs.versions.toml"
+            line="32"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of com.google.firebase.crashlytics than 3.0.2 is available: 3.0.7"
+        errorLine1="firebaseCrashlyticsGradle = &quot;3.0.2&quot;"
+        errorLine2="                            ~~~~~~~">
+        <location
+            file="../gradle/libs.versions.toml"
+            line="33"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlin.android than 2.3.21 is available: 2.4.0"
+        errorLine1="kotlin = &quot;2.3.21&quot;"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="../gradle/libs.versions.toml"
+            line="3"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlin.plugin.compose than 2.3.21 is available: 2.4.0"
+        errorLine1="kotlin = &quot;2.3.21&quot;"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="../gradle/libs.versions.toml"
+            line="3"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="NewerVersionAvailable"
+        message="A newer version of org.jetbrains.kotlin.plugin.serialization than 2.3.21 is available: 2.4.0"
+        errorLine1="kotlin = &quot;2.3.21&quot;"
+        errorLine2="         ~~~~~~~~">
+        <location
+            file="../gradle/libs.versions.toml"
+            line="3"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="                            Intent.createChooser(intent, context.getString(R.string.export_share_chooser)),"
+        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/ui/screens/export/ExportScreen.kt"
+            line="173"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="LocalContextGetResourceValueCall"
+        message="Querying resource values using LocalContext.current"
+        errorLine1="            Intent.createChooser(intent, context.getString(R.string.printsheet_share_chooser)),"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/ui/screens/print_sheet/PrintSheetScreen.kt"
+            line="80"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="Unnecessary; `SDK_INT` is always >= 23"
+        errorLine1="        &lt;item name=&quot;android:windowLightStatusBar&quot; tools:targetApi=&quot;m&quot;>true&lt;/item>"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="12"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+        errorLine1="    var progress by remember { mutableStateOf(0f) }"
+        errorLine2="                               ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/ui/screens/splash/SplashScreen.kt"
+            line="69"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.black` appears to be unused"
+        errorLine1="    &lt;color name=&quot;black&quot;>#FF000000&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="3"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.white` appears to be unused"
+        errorLine1="    &lt;color name=&quot;white&quot;>#FFFFFFFF&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="4"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.snap_primary` appears to be unused"
+        errorLine1="    &lt;color name=&quot;snap_primary&quot;>#FF1B5E20&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="7"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.color.snap_primary_dark` appears to be unused"
+        errorLine1="    &lt;color name=&quot;snap_primary_dark&quot;>#FF143F16&lt;/color>"
+        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/colors.xml"
+            line="8"
+            column="12"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX function `createBitmap` instead?"
+        errorLine1="            val out = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)"
+        errorLine2="                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/BackgroundCompositor.kt"
+            line="47"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX function `createBitmap` instead?"
+        errorLine1="        val out = Bitmap.createBitmap(outW, outH, Bitmap.Config.ARGB_8888)"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/FaceCropper.kt"
+            line="99"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Bitmap.get` instead?"
+        errorLine1="            bitmap.getPixel(inset, inset),"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/FaceCropper.kt"
+            line="114"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Bitmap.get` instead?"
+        errorLine1="            bitmap.getPixel(rightX, inset),"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/FaceCropper.kt"
+            line="115"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Bitmap.get` instead?"
+        errorLine1="            bitmap.getPixel(inset, bottomY),"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/FaceCropper.kt"
+            line="116"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Bitmap.get` instead?"
+        errorLine1="            bitmap.getPixel(rightX, bottomY),"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/FaceCropper.kt"
+            line="117"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Bitmap.scale` instead?"
+        errorLine1="            val next = Bitmap.createScaledBitmap(current, w, h, true)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/FileSizeCompressor.kt"
+            line="53"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Bitmap.scale` instead?"
+        errorLine1="            val next = Bitmap.createScaledBitmap(current, nextW, nextH, true)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/ImageResizer.kt"
+            line="19"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Bitmap.scale` instead?"
+        errorLine1="        val out = Bitmap.createScaledBitmap(current, targetWidth, targetHeight, true)"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/ImageResizer.kt"
+            line="26"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `String.toUri` instead?"
+        errorLine1="            processedUri = Uri.parse(decodedUri),"
+        errorLine2="                           ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/ui/screens/preview/PreviewViewModel.kt"
+            line="41"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX function `createBitmap` instead?"
+        errorLine1="        val bitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/print/PrintSheetGenerator.kt"
+            line="54"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Canvas.withRotation` instead?"
+        errorLine1="                    canvas.save()"
+        errorLine2="                    ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/print/PrintSheetGenerator.kt"
+            line="77"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `String.toUri` instead?"
+        errorLine1="            when (val outcome = processor.process(Uri.parse(decodedImageUri), spec)) {"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/ui/screens/processing/ProcessingViewModel.kt"
+            line="78"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Bitmap.get` instead?"
+        errorLine1="                    val px = bitmap.getPixel(x + dx, y + dy)"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/pipeline/SpecValidator.kt"
+            line="163"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UseKtx"
+        message="Use the KTX extension function `Canvas.withRotation` instead?"
+        errorLine1="            canvas.save()"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/kartik/snapdoc/domain/watermark/WatermarkApplier.kt"
+            line="35"
+            column="13"/>
+    </issue>
+
+</issues>

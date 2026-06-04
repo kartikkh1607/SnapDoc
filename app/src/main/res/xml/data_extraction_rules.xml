@@ -4,19 +4,18 @@
   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
 
   Strategy mirrors backup_rules.xml:
-  - Cloud backup: exclude the DataStore (entitlement cache) and cached photos.
+  - Cloud backup: exclude the DataStore (entitlement cache). Cache files are
+    never included by Auto Backup; external storage is excluded explicitly.
   - Device transfer: same exclusions — user re-onboards on the new device and
     Play Billing re-issues entitlements.
 -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="file" path="datastore/user_prefs.preferences_pb" />
-        <exclude domain="cache" path="." />
         <exclude domain="external" path="." />
     </cloud-backup>
     <device-transfer>
         <exclude domain="file" path="datastore/user_prefs.preferences_pb" />
-        <exclude domain="cache" path="." />
         <exclude domain="external" path="." />
     </device-transfer>
 </data-extraction-rules>
