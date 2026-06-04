@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.feature.preview.R
 import com.kartik.snapdoc.core.designsystem.R as DesignR
 import com.kartik.snapdoc.domain.pipeline.ValidationCheck
 import com.kartik.snapdoc.domain.pipeline.ValidationCheckKind

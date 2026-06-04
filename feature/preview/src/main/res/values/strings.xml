@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preview_title">Your photo</string>
+    <string name="preview_chip_ready">READY</string>
+    <string name="preview_chip_review">REVIEW</string>
+    <string name="preview_processing">Processing</string>
+    <string name="preview_loading">Loading…</string>
+    <string name="preview_actual_expected">%1$s · expected %2$s</string>
+    <string name="preview_check_dimensions">Dimensions</string>
+    <string name="preview_check_file_size">File size</string>
+    <string name="preview_check_background">Background</string>
+    <string name="preview_check_face">Face detected</string>
+    <string name="preview_check_head_ratio">Head ratio</string>
+    <string name="preview_check_eye_line">Eye line from top</string>
+    <string name="preview_print_sheet_title_unlocked">Make a print sheet</string>
+    <string name="preview_print_sheet_title_locked">Print sheet</string>
+    <string name="preview_print_sheet_subtitle_unlocked">Tile copies on 4×6 or A4 for the print shop.</string>
+    <string name="preview_print_sheet_subtitle_locked">Unlock Studio Bundle to print multi-copy sheets.</string>
+    <string name="preview_export_save_title">Save &amp; export</string>
+    <string name="preview_export_save_subtitle">Save to gallery · share</string>
+    <string name="preview_export_paid_title">Export photo</string>
+    <string name="preview_export_paid_subtitle">One-time · no subscription</string>
+    <string name="preview_export_price">₹49</string>
+    <string name="preview_watermark_label">PREVIEW</string>
+    <string name="preview_watermark_cta">Remove watermark · %1$s</string>
+    <string name="preview_footer_trust">Secure payment · 1.2M happy customers</string>
+    <string name="preview_cd_processed">Processed photo</string>
+    <string name="preview_share_chooser">Share photo</string>
+</resources>
