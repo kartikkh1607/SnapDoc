@@ -27,7 +27,7 @@ import javax.inject.Singleton
 
 sealed interface ProcessingOutcome {
     data class Success(val entry: ProcessingResultStore.Entry) : ProcessingOutcome
-    data class Failure(val message: String) : ProcessingOutcome
+    data class Failure(val reason: PipelineFailureReason) : ProcessingOutcome
 }
 
 @Singleton
@@ -53,7 +53,8 @@ class PhotoProcessor @Inject constructor(
         try {
             _stage.value = ProcessingStage.DetectingFace
             ensureActive()
-            val source = decodeOriented(sourceUri) ?: return@withContext ProcessingOutcome.Failure("Couldn't read photo")
+            val source = decodeOriented(sourceUri)
+                ?: return@withContext ProcessingOutcome.Failure(PipelineFailureReason.SourceUnreadable)
 
             _stage.value = ProcessingStage.RemovingBackground
             ensureActive()
@@ -91,7 +92,7 @@ class PhotoProcessor @Inject constructor(
             // downscaled `resized` past us when the size target was too tight,
             // so decoding the final JPEG is the only way to validate truth.
             val finalBitmap = BitmapFactory.decodeByteArray(compressed.bytes, 0, compressed.bytes.size)
-                ?: return@withContext ProcessingOutcome.Failure("Couldn't decode compressed photo")
+                ?: return@withContext ProcessingOutcome.Failure(PipelineFailureReason.FinalDecodeFailed)
             val validation = try {
                 validator.validate(finalBitmap, compressed.sizeKb, spec)
             } finally {
@@ -119,7 +120,7 @@ class PhotoProcessor @Inject constructor(
             crashReporter.setKey("pipeline_stage", _stage.value.name)
             crashReporter.setKey("spec_id", spec.id)
             crashReporter.recordException(t, message = "PhotoProcessor failed at ${_stage.value}")
-            ProcessingOutcome.Failure(t.message ?: "Processing failed")
+            ProcessingOutcome.Failure(PipelineFailureReason.Unexpected(t.message))
         }
       }
     }

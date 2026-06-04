@@ -19,7 +19,7 @@ import kotlin.math.roundToInt
 
 sealed interface CropResult {
     data class Success(val bitmap: Bitmap) : CropResult
-    data class Failure(val reason: String) : CropResult
+    data class Failure(val reason: PipelineFailureReason) : CropResult
 }
 
 @Singleton
@@ -34,7 +34,7 @@ class FaceCropper @Inject constructor() : Closeable {
     )
 
     suspend fun cropToSpec(composited: Bitmap, spec: DocumentSpec): CropResult {
-        val face = detect(composited) ?: return CropResult.Failure("No face detected")
+        val face = detect(composited) ?: return CropResult.Failure(PipelineFailureReason.NoFaceDetected)
 
         val faceBox = face.boundingBox
         val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)?.position
@@ -55,7 +55,7 @@ class FaceCropper @Inject constructor() : Closeable {
         val rect = when (geom) {
             is CropRectResult.Ok -> geom.rect
             CropRectResult.FaceTooClose ->
-                return CropResult.Failure("Move further from the camera and retake")
+                return CropResult.Failure(PipelineFailureReason.FaceTooClose)
         }
 
         val cropLeft = rect.left

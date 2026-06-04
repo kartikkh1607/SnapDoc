@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.domain.pipeline.PhotoProcessor
+import com.kartik.snapdoc.domain.pipeline.PipelineFailureReason
 import com.kartik.snapdoc.domain.pipeline.ProcessingOutcome
 import com.kartik.snapdoc.domain.pipeline.ProcessingStage
 import com.kartik.snapdoc.ui.navigation.Routes
@@ -71,7 +72,7 @@ class ProcessingViewModel @Inject constructor(
         viewModelScope.launch {
             val spec = repo.byId(docId)
             if (spec == null) {
-                _state.update { it.copy(error = "Unknown document") }
+                _state.update { it.copy(error = PipelineFailureReason.UnknownDocument) }
                 return@launch
             }
             when (val outcome = processor.process(Uri.parse(decodedImageUri), spec)) {
@@ -87,7 +88,7 @@ class ProcessingViewModel @Inject constructor(
                     _events.trySend(ProcessingEvent.Done(docId, uri))
                 }
                 is ProcessingOutcome.Failure -> {
-                    _state.update { it.copy(error = outcome.message) }
+                    _state.update { it.copy(error = outcome.reason) }
                 }
             }
         }

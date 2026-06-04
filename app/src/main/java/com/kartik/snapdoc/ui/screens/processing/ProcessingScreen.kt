@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kartik.snapdoc.R
+import com.kartik.snapdoc.domain.pipeline.PipelineFailureReason
 import com.kartik.snapdoc.domain.pipeline.ProcessingStage
 import com.kartik.snapdoc.ui.theme.Hairline
 import com.kartik.snapdoc.ui.theme.Hairline2
@@ -119,7 +120,7 @@ fun ProcessingScreen(
     val error = state.error
     if (error != null) {
         ProcessingErrorContent(
-            message = error,
+            message = stringResource(error.stringRes()),
             onRetry = viewModel::retry,
             onRetake = onError,
         )
@@ -417,6 +418,15 @@ private fun ActiveDots() {
             )
         }
     }
+}
+
+private fun PipelineFailureReason.stringRes(): Int = when (this) {
+    PipelineFailureReason.SourceUnreadable -> R.string.processing_error_source_unreadable
+    PipelineFailureReason.NoFaceDetected -> R.string.processing_error_no_face
+    PipelineFailureReason.FaceTooClose -> R.string.processing_error_face_too_close
+    PipelineFailureReason.FinalDecodeFailed -> R.string.processing_error_final_decode
+    PipelineFailureReason.UnknownDocument -> R.string.processing_error_unknown_document
+    is PipelineFailureReason.Unexpected -> R.string.processing_error_unexpected
 }
 
 @Composable
