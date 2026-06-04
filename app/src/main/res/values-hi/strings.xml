@@ -123,6 +123,9 @@
     <string name="processing_step_done">पूर्ण</string>
     <string name="processing_footer">डिवाइस पर प्रोसेस · कोई इमेज सेव नहीं</string>
     <string name="processing_cd_cancel">प्रोसेसिंग रद्द करें</string>
+    <string name="processing_error_title">आपकी फ़ोटो पूरी नहीं हो सकी</string>
+    <string name="processing_error_retry">फिर कोशिश करें</string>
+    <string name="processing_error_retake">दोबारा क्लिक करें</string>
     <string name="export_error_connection">Google Play से कनेक्ट नहीं हो पाया। इंटरनेट जाँचें और फिर कोशिश करें।</string>
     <string name="export_error_purchase_failed">पेमेंट पूरा नहीं हुआ। दोबारा कोशिश करें या कोई दूसरा पेमेंट तरीका चुनें।</string>
     <string name="export_error_purchase_unavailable">अभी पेमेंट उपलब्ध नहीं है। थोड़ी देर में फिर कोशिश करें।</string>

@@ -23,7 +23,6 @@ import javax.inject.Inject
 
 sealed interface ProcessingEvent {
     data class Done(val docId: String, val imageUri: String) : ProcessingEvent
-    data object Failed : ProcessingEvent
 }
 
 @HiltViewModel
@@ -55,12 +54,24 @@ class ProcessingViewModel @Inject constructor(
         start()
     }
 
+    fun retry() {
+        if (_state.value.error == null) return
+        _state.update {
+            it.copy(
+                stage = ProcessingStage.DetectingFace,
+                progress = 0f,
+                error = null,
+                resultUri = null,
+            )
+        }
+        start()
+    }
+
     private fun start() {
         viewModelScope.launch {
             val spec = repo.byId(docId)
             if (spec == null) {
                 _state.update { it.copy(error = "Unknown document") }
-                _events.trySend(ProcessingEvent.Failed)
                 return@launch
             }
             when (val outcome = processor.process(Uri.parse(decodedImageUri), spec)) {
@@ -77,7 +88,6 @@ class ProcessingViewModel @Inject constructor(
                 }
                 is ProcessingOutcome.Failure -> {
                     _state.update { it.copy(error = outcome.message) }
-                    _events.trySend(ProcessingEvent.Failed)
                 }
             }
         }

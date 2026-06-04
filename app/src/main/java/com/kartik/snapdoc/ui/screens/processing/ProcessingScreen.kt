@@ -111,10 +111,19 @@ fun ProcessingScreen(
             viewModel.events.collect { event ->
                 when (event) {
                     is ProcessingEvent.Done -> onDone(event.docId, event.imageUri)
-                    ProcessingEvent.Failed -> onError()
                 }
             }
         }
+    }
+
+    val error = state.error
+    if (error != null) {
+        ProcessingErrorContent(
+            message = error,
+            onRetry = viewModel::retry,
+            onRetake = onError,
+        )
+        return
     }
 
     val steps = buildSteps(state.stage)
@@ -406,6 +415,73 @@ private fun ActiveDots() {
                     .clip(CircleShape)
                     .background(if (i == 1) Primary else Primary.copy(alpha = 0.35f)),
             )
+        }
+    }
+}
+
+@Composable
+private fun ProcessingErrorContent(
+    message: String,
+    onRetry: () -> Unit,
+    onRetake: () -> Unit,
+) {
+    val title = stringResource(R.string.processing_error_title)
+    val retryLabel = stringResource(R.string.processing_error_retry)
+    val retakeLabel = stringResource(R.string.processing_error_retake)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 32.dp),
+    ) {
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.semantics {
+                    heading()
+                    liveRegion = LiveRegionMode.Polite
+                },
+            )
+            Text(
+                text = message,
+                color = Ink3,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable(role = Role.Button, onClickLabel = retakeLabel, onClick = onRetake)
+                        .padding(horizontal = 24.dp, vertical = 14.dp),
+                ) {
+                    Text(
+                        text = retakeLabel,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Primary)
+                        .clickable(role = Role.Button, onClickLabel = retryLabel, onClick = onRetry)
+                        .padding(horizontal = 24.dp, vertical = 14.dp),
+                ) {
+                    Text(
+                        text = retryLabel,
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
+            }
         }
     }
 }

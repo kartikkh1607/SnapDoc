@@ -123,6 +123,9 @@
     <string name="processing_step_done">Done</string>
     <string name="processing_footer">PROCESSED ON-DEVICE · NO IMAGES STORED</string>
     <string name="processing_cd_cancel">Cancel processing</string>
+    <string name="processing_error_title">Couldn\'t finish your photo</string>
+    <string name="processing_error_retry">Try again</string>
+    <string name="processing_error_retake">Retake</string>
     <string name="export_error_connection">Couldn\'t reach Google Play. Check your connection and try again.</string>
     <string name="export_error_purchase_failed">Payment didn\'t go through. Try again or use a different payment method.</string>
     <string name="export_error_purchase_unavailable">Payments aren\'t available right now. Try again in a moment.</string>

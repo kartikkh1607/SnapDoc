@@ -20,6 +20,10 @@ class SpecCatalogRepository @Inject constructor(
     // always hits the cached value instead of doing the 22KB JSON parse on UI.
     private val catalogLazy: Lazy<SpecCatalog> = lazy { loader.load() }
     private val catalog: SpecCatalog get() = catalogLazy.value
+    // Built once on first access so byId() stays O(1) regardless of catalog size.
+    private val byIdIndex: Map<String, DocumentSpec> by lazy {
+        catalog.documents.associateBy { it.id }
+    }
 
     private val warmScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -31,7 +35,7 @@ class SpecCatalogRepository @Inject constructor(
 
     fun categories(): List<CategorySpec> = catalog.categories
 
-    fun byId(id: String): DocumentSpec? = catalog.documents.firstOrNull { it.id == id }
+    fun byId(id: String): DocumentSpec? = byIdIndex[id]
 
     fun popular(limit: Int = 5): List<DocumentSpec> =
         catalog.documents.sortedByDescending { it.popularity }.take(limit)
