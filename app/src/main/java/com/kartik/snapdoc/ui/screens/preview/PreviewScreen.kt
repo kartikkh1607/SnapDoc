@@ -45,6 +45,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.kartik.snapdoc.R
+import com.kartik.snapdoc.core.designsystem.R as DesignR
 import com.kartik.snapdoc.domain.pipeline.ValidationCheck
 import com.kartik.snapdoc.domain.pipeline.ValidationCheckKind
 import androidx.compose.animation.AnimatedContentScope
@@ -109,7 +110,7 @@ fun PreviewScreen(
                 CircleIcon(
                     icon = Icons.AutoMirrored.Outlined.ArrowBack,
                     onClick = onBack,
-                    contentDescription = stringResource(R.string.cd_back),
+                    contentDescription = stringResource(DesignR.string.cd_back),
                 )
                 Text(
                     text = stringResource(R.string.preview_title),
@@ -119,7 +120,7 @@ fun PreviewScreen(
                 CircleIcon(
                     icon = Icons.Outlined.Share,
                     onClick = shareProcessed,
-                    contentDescription = stringResource(R.string.cd_share),
+                    contentDescription = stringResource(DesignR.string.cd_share),
                 )
             }
 

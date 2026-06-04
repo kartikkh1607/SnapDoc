@@ -94,9 +94,7 @@
     <string name="camera_cd_close">Close camera</string>
     <string name="camera_cd_capture">Take photo</string>
     <string name="camera_cd_flip">Switch camera</string>
-    <string name="cd_back">Back</string>
-    <string name="cd_share">Share</string>
-    <string name="cd_info">Info</string>
+    <!-- cd_back/cd_share/cd_info moved to :core:designsystem (transitive to all features) -->
 
     <!-- Face guidance -->
     <string name="guidance_no_face">No face detected</string>
@@ -167,25 +165,7 @@
     <string name="export_restore">Restore purchase</string>
 
     <!-- Doc detail -->
-    <string name="docdetail_not_found">Document not found.</string>
-    <string name="docdetail_loading">Loading…</string>
-    <string name="docdetail_verified_badge">MEA verified spec</string>
-    <string name="docdetail_eyebrow">GOVERNMENT OF INDIA · %1$s</string>
-    <string name="docdetail_source">Source · %1$s</string>
-    <string name="docdetail_spec_size">Size</string>
-    <string name="docdetail_spec_resolution">Resolution</string>
-    <string name="docdetail_spec_background">Background</string>
-    <string name="docdetail_spec_file">File size</string>
-    <string name="docdetail_spec_size_value">%1$d × %2$d mm</string>
-    <string name="docdetail_spec_resolution_value">%1$d × %2$d px</string>
-    <string name="docdetail_spec_file_value">%1$d–%2$d KB</string>
-    <string name="docdetail_requirements_title">Photo requirements</string>
-    <string name="docdetail_req_background_template">%1$s background</string>
-    <string name="docdetail_req_face">Face centered, eyes open</string>
-    <string name="docdetail_req_neutral">Neutral expression, mouth closed</string>
-    <string name="docdetail_req_no_glasses">No spectacles or shadows</string>
-    <string name="docdetail_req_recent">Taken within the last 6 months</string>
-    <string name="docdetail_cta_take">Take photo</string>
+    <!-- Doc detail strings live in :feature:doc_detail -->
 
     <!-- Print sheet -->
     <string name="printsheet_title">Print sheet</string>

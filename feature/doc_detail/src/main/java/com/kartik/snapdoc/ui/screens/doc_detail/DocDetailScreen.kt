@@ -37,7 +37,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.feature.doc_detail.R
+import com.kartik.snapdoc.core.designsystem.R as DesignR
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.ui.components.CircleIconButton
 import com.kartik.snapdoc.ui.components.DocPreviewHero
@@ -120,12 +121,12 @@ private fun HeroSection(onBack: () -> Unit) {
             CircleIconButton(
                 icon = Icons.AutoMirrored.Outlined.ArrowBack,
                 onClick = onBack,
-                contentDescription = stringResource(R.string.cd_back),
+                contentDescription = stringResource(DesignR.string.cd_back),
             )
             CircleIconButton(
                 icon = Icons.Outlined.Info,
                 onClick = {},
-                contentDescription = stringResource(R.string.cd_info),
+                contentDescription = stringResource(DesignR.string.cd_info),
             )
         }
 

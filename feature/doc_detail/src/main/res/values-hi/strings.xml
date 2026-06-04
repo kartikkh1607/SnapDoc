@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="docdetail_not_found">डॉक्यूमेंट नहीं मिला।</string>
+    <string name="docdetail_loading">लोड हो रहा है…</string>
+    <string name="docdetail_verified_badge">MEA सत्यापित स्पेक</string>
+    <string name="docdetail_eyebrow">भारत सरकार · %1$s</string>
+    <string name="docdetail_source">स्रोत · %1$s</string>
+    <string name="docdetail_spec_size">माप</string>
+    <string name="docdetail_spec_resolution">रिज़ॉल्यूशन</string>
+    <string name="docdetail_spec_background">बैकग्राउंड</string>
+    <string name="docdetail_spec_file">फ़ाइल आकार</string>
+    <string name="docdetail_spec_size_value">%1$d × %2$d मिमी</string>
+    <string name="docdetail_spec_resolution_value">%1$d × %2$d पिक्सेल</string>
+    <string name="docdetail_spec_file_value">%1$d–%2$d KB</string>
+    <string name="docdetail_requirements_title">फ़ोटो की आवश्यकताएँ</string>
+    <string name="docdetail_req_background_template">%1$s बैकग्राउंड</string>
+    <string name="docdetail_req_face">चेहरा बीच में, आँखें खुली</string>
+    <string name="docdetail_req_neutral">तटस्थ भाव, मुँह बंद</string>
+    <string name="docdetail_req_no_glasses">चश्मा या परछाई नहीं</string>
+    <string name="docdetail_req_recent">पिछले 6 महीनों में ली गई</string>
+    <string name="docdetail_cta_take">फ़ोटो लें</string>
+</resources>

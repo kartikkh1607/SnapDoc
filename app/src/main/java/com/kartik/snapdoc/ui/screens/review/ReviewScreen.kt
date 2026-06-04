@@ -46,6 +46,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import coil.compose.AsyncImage
 import com.kartik.snapdoc.R
+import com.kartik.snapdoc.core.designsystem.R as DesignR
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.navigation.Routes
 import com.kartik.snapdoc.ui.theme.Ink3
@@ -101,7 +102,7 @@ fun ReviewScreen(
             DarkIconButton(
                 icon = Icons.Outlined.Info,
                 onClick = {},
-                contentDescription = stringResource(R.string.cd_info),
+                contentDescription = stringResource(DesignR.string.cd_info),
             )
         }
 
