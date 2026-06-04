@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -27,4 +29,14 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
+}
+
+dependencies {
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    // Firebase Crashlytics is opt-in: when google-services.json is absent the
+    // CrashReporter falls back to logcat. The compile-time dependency is safe
+    // because FirebaseCrashlytics.getInstance() is resolved lazily.
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
 }

@@ -2,7 +2,6 @@ package com.kartik.snapdoc.data.billing
 
 import android.util.Base64
 import android.util.Log
-import com.kartik.snapdoc.BuildConfig
 import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.Signature

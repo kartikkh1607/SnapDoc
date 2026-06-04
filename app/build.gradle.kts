@@ -33,16 +33,6 @@ val hasReleaseKeystore = keystoreProps.getProperty("storeFile")?.let {
     rootProject.file(it).exists()
 } == true
 
-// Play Console base64-encoded RSA public key, used by PurchaseVerifier to check
-// that purchase JSON came from Google Play. Sourced from local.properties so it
-// stays out of source control; absent on CI / fresh clones (verifier returns
-// permissive in that mode and logs a warning).
-val localProps = Properties().apply {
-    val f = rootProject.file("local.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
-}
-val billingLicenseKey: String = localProps.getProperty("billing.licenseKey", "")
-
 android {
     namespace = "com.kartik.snapdoc"
     compileSdk = 36
@@ -59,8 +49,6 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("String", "BILLING_LICENSE_KEY", "\"$billingLicenseKey\"")
     }
 
     signingConfigs {
@@ -142,6 +130,7 @@ dependencies {
     // Modules
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
+    implementation(project(":data:billing"))
     implementation(project(":data:prefs"))
     implementation(project(":data:specs"))
 
@@ -181,22 +170,13 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
-    // Billing
-    implementation(libs.billing.ktx)
-
-    // Firebase (Crashlytics + Analytics). The runtime CrashReporter no-ops when
-    // Firebase isn't initialized, so these deps are safe to ship without
-    // google-services.json — they just stay dormant.
+    // Firebase Analytics (Crashlytics ships transitively via :core:common).
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
 
     // Serialization + Coroutines
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
-
-    // DataStore
-    implementation(libs.androidx.datastore.preferences)
 
     // Splash
     implementation(libs.androidx.core.splashscreen)
