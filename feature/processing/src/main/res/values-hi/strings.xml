@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="processing_step_of">स्टेप %1$d / %2$d</string>
+    <string name="processing_title">आपकी फ़ोटो पर काम हो रहा है</string>
+    <string name="processing_subtitle">हमारी AI हर विवरण को आधिकारिक पासपोर्ट स्पेक से मिला रही है।</string>
+    <string name="processing_step_face">चेहरा पहचान रहा है</string>
+    <string name="processing_step_bg_remove">बैकग्राउंड हटाया जा रहा है</string>
+    <string name="processing_step_bg_apply">बैकग्राउंड लगाया जा रहा है</string>
+    <string name="processing_step_crop">सही माप पर क्रॉप</string>
+    <string name="processing_step_resize">स्पेक के अनुसार आकार</string>
+    <string name="processing_step_compress">फ़ाइल कंप्रेस हो रही है</string>
+    <string name="processing_step_validate">पालन की जाँच</string>
+    <string name="processing_step_done">पूर्ण</string>
+    <string name="processing_footer">डिवाइस पर प्रोसेस · कोई इमेज सेव नहीं</string>
+    <string name="processing_cd_cancel">प्रोसेसिंग रद्द करें</string>
+    <string name="processing_error_title">आपकी फ़ोटो पूरी नहीं हो सकी</string>
+    <string name="processing_error_retry">फिर कोशिश करें</string>
+    <string name="processing_error_retake">दोबारा क्लिक करें</string>
+    <string name="processing_error_source_unreadable">फ़ोटो पढ़ी नहीं जा सकी। दूसरी चुनें या दोबारा क्लिक करें।</string>
+    <string name="processing_error_no_face">कोई चेहरा नहीं मिला। सुनिश्चित करें कि आपका चेहरा साफ़ दिख रहा है।</string>
+    <string name="processing_error_face_too_close">आपका चेहरा फ्रेम में बहुत बड़ा है। पीछे हटें और दोबारा क्लिक करें।</string>
+    <string name="processing_error_final_decode">फ़ाइनल फ़ोटो सेव नहीं हो सकी। फिर कोशिश करें।</string>
+    <string name="processing_error_unknown_document">यह डॉक्यूमेंट टाइप अब उपलब्ध नहीं है।</string>
+    <string name="processing_error_unexpected">कुछ गड़बड़ हो गई। फिर कोशिश करें।</string>
+</resources>

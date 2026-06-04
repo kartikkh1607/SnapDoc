@@ -45,28 +45,7 @@
     <!-- Guidance strings live in :feature:camera -->
 
     <!-- Processing -->
-    <string name="processing_step_of">Step %1$d of %2$d</string>
-    <string name="processing_title">Working on your photo</string>
-    <string name="processing_subtitle">Our AI is checking every detail against the official passport spec.</string>
-    <string name="processing_step_face">Detecting face</string>
-    <string name="processing_step_bg_remove">Removing background</string>
-    <string name="processing_step_bg_apply">Applying background</string>
-    <string name="processing_step_crop">Cropping to size</string>
-    <string name="processing_step_resize">Resizing to spec</string>
-    <string name="processing_step_compress">Compressing file</string>
-    <string name="processing_step_validate">Verifying compliance</string>
-    <string name="processing_step_done">Done</string>
-    <string name="processing_footer">PROCESSED ON-DEVICE · NO IMAGES STORED</string>
-    <string name="processing_cd_cancel">Cancel processing</string>
-    <string name="processing_error_title">Couldn\'t finish your photo</string>
-    <string name="processing_error_retry">Try again</string>
-    <string name="processing_error_retake">Retake</string>
-    <string name="processing_error_source_unreadable">Couldn\'t read the photo. Pick another or retake.</string>
-    <string name="processing_error_no_face">No face detected. Make sure your face is clearly visible.</string>
-    <string name="processing_error_face_too_close">Your face fills too much of the frame. Step back and retake.</string>
-    <string name="processing_error_final_decode">The final photo couldn\'t be saved. Try again.</string>
-    <string name="processing_error_unknown_document">This document spec is no longer available.</string>
-    <string name="processing_error_unexpected">Something went wrong. Try again.</string>
+    <!-- Processing strings live in :feature:processing -->
     <string name="export_error_connection">Couldn\'t reach Google Play. Check your connection and try again.</string>
     <string name="export_error_purchase_failed">Payment didn\'t go through. Try again or use a different payment method.</string>
     <string name="export_error_purchase_unavailable">Payments aren\'t available right now. Try again in a moment.</string>

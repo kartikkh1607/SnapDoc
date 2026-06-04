@@ -53,7 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.feature.processing.R
 import com.kartik.snapdoc.domain.pipeline.PipelineFailureReason
 import com.kartik.snapdoc.domain.pipeline.ProcessingStage
 import com.kartik.snapdoc.ui.theme.Hairline
