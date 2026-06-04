@@ -140,6 +140,7 @@ dependencies {
     implementation(project(":domain:print"))
     implementation(project(":domain:watermark"))
     implementation(project(":feature:doc_detail"))
+    implementation(project(":feature:home"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:splash"))

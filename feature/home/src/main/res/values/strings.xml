@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_eyebrow">SnapDoc</string>
+    <string name="home_title">Pick a document</string>
+    <string name="home_cd_notifications">Notifications</string>
+    <string name="home_continue_step_left">1 STEP LEFT</string>
+    <string name="home_continue_title">Continue Aadhaar photo</string>
+    <string name="home_continue_subtitle">Pay ₹49 · ready for download</string>
+    <string name="home_reminder_title">Passport expires Mar 2027</string>
+    <string name="home_reminder_subtitle">Renew in 10 months · get fresh photos ready</string>
+    <string name="home_reminder_cta">Plan</string>
+    <string name="home_category_all">All</string>
+    <string name="home_suggested_title">Popular documents</string>
+    <string name="home_suggested_action">See all</string>
+    <string name="home_featured_badge">FOR YOU</string>
+</resources>

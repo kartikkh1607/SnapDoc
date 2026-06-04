@@ -5,19 +5,7 @@
     <!-- Splash strings live in :feature:splash -->
 
     <!-- Home -->
-    <string name="home_eyebrow">SnapDoc</string>
-    <string name="home_title">डॉक्यूमेंट चुनें</string>
-    <string name="home_cd_notifications">सूचनाएँ</string>
-    <string name="home_continue_step_left">1 स्टेप बाकी</string>
-    <string name="home_continue_title">आधार फ़ोटो जारी रखें</string>
-    <string name="home_continue_subtitle">₹49 भुगतान · डाउनलोड के लिए तैयार</string>
-    <string name="home_reminder_title">पासपोर्ट मार्च 2027 में समाप्त</string>
-    <string name="home_reminder_subtitle">10 महीने में नवीनीकरण · नए फ़ोटो तैयार रखें</string>
-    <string name="home_reminder_cta">योजना</string>
-    <string name="home_category_all">सभी</string>
-    <string name="home_suggested_title">लोकप्रिय डॉक्यूमेंट</string>
-    <string name="home_suggested_action">सभी देखें</string>
-    <string name="home_featured_badge">आपके लिए</string>
+    <!-- Home strings live in :feature:home -->
 
     <!-- Settings -->
     <!-- Settings strings live in :feature:settings -->
