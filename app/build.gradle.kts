@@ -142,6 +142,7 @@ dependencies {
     // Modules
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
+    implementation(project(":data:prefs"))
     implementation(project(":data:specs"))
 
     // Compose

@@ -26,5 +26,6 @@ rootProject.name = "SnapDoc"
 include(":app")
 include(":core:common")
 include(":core:designsystem")
+include(":data:prefs")
 include(":data:specs")
  
