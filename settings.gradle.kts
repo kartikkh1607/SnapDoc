@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "SnapDoc"
 include(":app")
+include(":core:designsystem")
  
