@@ -13,7 +13,7 @@ import org.junit.Test
 
 class SpecCatalogSearchTest {
 
-    private val repo = SpecCatalogRepository(FakeLoader())
+    private val repo = DefaultSpecCatalogRepository(FakeLoader())
 
     @Test
     fun `exact substring matches and ranks above looser matches`() {

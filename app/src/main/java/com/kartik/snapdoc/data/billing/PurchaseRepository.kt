@@ -2,6 +2,10 @@ package com.kartik.snapdoc.data.billing
 
 import android.app.Activity
 import com.kartik.snapdoc.data.prefs.UserPrefsRepository
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,11 +22,26 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
+interface PurchaseRepository {
+    val entitlement: StateFlow<EntitlementState>
+    val errors: SharedFlow<BillingError>
+    suspend fun launchPurchase(activity: Activity, productId: String): Boolean
+    suspend fun restorePurchases()
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class PurchaseRepositoryModule {
+    @Binds
+    @Singleton
+    abstract fun bindPurchaseRepository(impl: DefaultPurchaseRepository): PurchaseRepository
+}
+
 @Singleton
-class PurchaseRepository @Inject constructor(
+class DefaultPurchaseRepository @Inject constructor(
     private val billing: BillingClientWrapper,
     private val prefs: UserPrefsRepository,
-) : Closeable {
+) : PurchaseRepository, Closeable {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val started = AtomicBoolean(false)
 
@@ -36,7 +55,7 @@ class PurchaseRepository @Inject constructor(
      * navigate to a paid surface (settings, export) don't pay the Play Services
      * round-trip during startup.
      */
-    val entitlement: StateFlow<EntitlementState> = combine(
+    override val entitlement: StateFlow<EntitlementState> = combine(
         billing.entitlement,
         billing.connected,
         prefs.entitlement,
@@ -46,7 +65,7 @@ class PurchaseRepository @Inject constructor(
         .onStart { ensureStarted() }
         .stateIn(scope, SharingStarted.Lazily, EntitlementState.Locked)
 
-    val errors: SharedFlow<BillingError> = billing.errors
+    override val errors: SharedFlow<BillingError> = billing.errors
 
     private fun ensureStarted() {
         if (!started.compareAndSet(false, true)) return
@@ -63,12 +82,12 @@ class PurchaseRepository @Inject constructor(
         }
     }
 
-    suspend fun launchPurchase(activity: Activity, productId: String): Boolean {
+    override suspend fun launchPurchase(activity: Activity, productId: String): Boolean {
         ensureStarted()
         return billing.launchPurchase(activity, productId, obfuscatedAccountId = prefs.installId())
     }
 
-    suspend fun restorePurchases() {
+    override suspend fun restorePurchases() {
         ensureStarted()
         billing.queryPurchases()
     }

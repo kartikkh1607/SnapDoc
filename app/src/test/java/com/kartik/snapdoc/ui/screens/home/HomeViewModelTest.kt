@@ -1,8 +1,8 @@
 package com.kartik.snapdoc.ui.screens.home
 
 import com.google.common.truth.Truth.assertThat
+import com.kartik.snapdoc.data.specs.DefaultSpecCatalogRepository
 import com.kartik.snapdoc.data.specs.SpecCatalogLoader
-import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.data.specs.model.BackgroundSpec
 import com.kartik.snapdoc.data.specs.model.CategorySpec
 import com.kartik.snapdoc.data.specs.model.DimensionsSpec
@@ -25,7 +25,7 @@ import org.junit.Test
 class HomeViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
-    private val repo = SpecCatalogRepository(FakeLoader())
+    private val repo = DefaultSpecCatalogRepository(FakeLoader())
 
     @Before
     fun setUp() {

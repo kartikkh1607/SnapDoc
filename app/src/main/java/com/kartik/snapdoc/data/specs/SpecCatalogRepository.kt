@@ -3,6 +3,10 @@ package com.kartik.snapdoc.data.specs
 import com.kartik.snapdoc.data.specs.model.CategorySpec
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.data.specs.model.SpecCatalog
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -10,10 +14,27 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+interface SpecCatalogRepository {
+    fun all(): List<DocumentSpec>
+    fun categories(): List<CategorySpec>
+    fun byId(id: String): DocumentSpec?
+    fun popular(limit: Int = 5): List<DocumentSpec>
+    fun byCategory(categoryId: String): List<DocumentSpec>
+    fun search(query: String, categoryId: String? = null): List<DocumentSpec>
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class SpecCatalogRepositoryModule {
+    @Binds
+    @Singleton
+    abstract fun bindSpecCatalogRepository(impl: DefaultSpecCatalogRepository): SpecCatalogRepository
+}
+
 @Singleton
-class SpecCatalogRepository @Inject constructor(
+class DefaultSpecCatalogRepository @Inject constructor(
     private val loader: SpecCatalogLoader,
-) {
+) : SpecCatalogRepository {
     // Synchronized Lazy: whichever thread touches it first does the parse,
     // the rest block until it's ready. The init block below kicks the IO
     // thread off immediately so the main-thread first-access (via a VM) almost
@@ -31,16 +52,16 @@ class SpecCatalogRepository @Inject constructor(
         warmScope.launch { catalogLazy.value }
     }
 
-    fun all(): List<DocumentSpec> = catalog.documents
+    override fun all(): List<DocumentSpec> = catalog.documents
 
-    fun categories(): List<CategorySpec> = catalog.categories
+    override fun categories(): List<CategorySpec> = catalog.categories
 
-    fun byId(id: String): DocumentSpec? = byIdIndex[id]
+    override fun byId(id: String): DocumentSpec? = byIdIndex[id]
 
-    fun popular(limit: Int = 5): List<DocumentSpec> =
+    override fun popular(limit: Int): List<DocumentSpec> =
         catalog.documents.sortedByDescending { it.popularity }.take(limit)
 
-    fun byCategory(categoryId: String): List<DocumentSpec> =
+    override fun byCategory(categoryId: String): List<DocumentSpec> =
         catalog.documents.filter { it.categoryId == categoryId }
 
     /**
@@ -54,7 +75,7 @@ class SpecCatalogRepository @Inject constructor(
      *
      * Docs scoring 0 are filtered out so we never show random results.
      */
-    fun search(query: String, categoryId: String? = null): List<DocumentSpec> {
+    override fun search(query: String, categoryId: String?): List<DocumentSpec> {
         val pool = if (categoryId == null) catalog.documents else byCategory(categoryId)
         if (query.isBlank()) return pool.sortedByDescending { it.popularity }
         val tokens = query.trim().lowercase().split(WHITESPACE).filter { it.isNotEmpty() }
