@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="printsheet_title">Print sheet</string>
+    <string name="printsheet_cd_back">Back</string>
+    <string name="printsheet_cd_share">Share</string>
+    <string name="printsheet_share_chooser">Share sheet</string>
+    <string name="printsheet_header_preparing">PREPARING…</string>
+    <string name="printsheet_header_template">%1$s · %2$s · %3$d × %4$d MM</string>
+    <string name="printsheet_subtitle">Cut along the dotted lines</string>
+    <string name="printsheet_sheet_dims">%1$d × %2$d mm</string>
+    <string name="printsheet_locked_title">Studio Bundle required</string>
+    <string name="printsheet_locked_subtitle">Unlock print sheets for ₹99 from the export screen.</string>
+    <string name="printsheet_saved_pdf">PDF saved to Downloads/SnapDoc</string>
+    <string name="printsheet_saved_jpg">JPG saved to Pictures/SnapDoc</string>
+    <string name="printsheet_saved_subtitle">Ready for the print shop.</string>
+    <string name="printsheet_save_jpg">Save JPG</string>
+    <string name="printsheet_save_pdf">Save PDF</string>
+    <string name="printsheet_generating">Generating…</string>
+    <string name="printsheet_share">Share</string>
+    <string name="printsheet_error_missing">Processed photo missing — retake.</string>
+    <string name="printsheet_error_pdf">Couldn\'t generate the PDF. Try again.</string>
+    <string name="printsheet_error_jpg">Couldn\'t generate the JPG. Try again.</string>
+</resources>

@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.feature.print_sheet.R
 import com.kartik.snapdoc.domain.print.SheetLayout
 import com.kartik.snapdoc.domain.print.SheetSize
 import com.kartik.snapdoc.ui.theme.AmberDark

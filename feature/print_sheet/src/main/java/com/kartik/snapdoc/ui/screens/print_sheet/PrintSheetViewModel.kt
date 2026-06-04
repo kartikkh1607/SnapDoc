@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.feature.print_sheet.R
 import com.kartik.snapdoc.data.billing.PurchaseRepository
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.domain.export.DocumentExporter

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="printsheet_title">प्रिंट शीट</string>
+    <string name="printsheet_cd_back">वापस</string>
+    <string name="printsheet_cd_share">शेयर</string>
+    <string name="printsheet_share_chooser">शीट शेयर करें</string>
+    <string name="printsheet_header_preparing">तैयार हो रहा है…</string>
+    <string name="printsheet_header_template">%1$s · %2$s · %3$d × %4$d मिमी</string>
+    <string name="printsheet_subtitle">डॉटेड लाइन पर काटें</string>
+    <string name="printsheet_sheet_dims">%1$d × %2$d मिमी</string>
+    <string name="printsheet_locked_title">स्टूडियो बंडल चाहिए</string>
+    <string name="printsheet_locked_subtitle">एक्सपोर्ट स्क्रीन से ₹99 में प्रिंट शीट अनलॉक करें।</string>
+    <string name="printsheet_saved_pdf">PDF Downloads/SnapDoc में सेव हो गई</string>
+    <string name="printsheet_saved_jpg">JPG Pictures/SnapDoc में सेव हो गई</string>
+    <string name="printsheet_saved_subtitle">प्रिंट शॉप के लिए तैयार।</string>
+    <string name="printsheet_save_jpg">JPG सेव करें</string>
+    <string name="printsheet_save_pdf">PDF सेव करें</string>
+    <string name="printsheet_generating">बन रहा है…</string>
+    <string name="printsheet_share">शेयर करें</string>
+    <string name="printsheet_error_missing">प्रोसेस्ड फ़ोटो नहीं मिली — फिर से क्लिक करें।</string>
+    <string name="printsheet_error_pdf">PDF नहीं बन सकी। फिर कोशिश करें।</string>
+    <string name="printsheet_error_jpg">JPG नहीं बन सकी। फिर कोशिश करें।</string>
+</resources>

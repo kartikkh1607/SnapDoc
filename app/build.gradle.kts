@@ -145,6 +145,7 @@ dependencies {
     implementation(project(":feature:home"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:preview"))
+    implementation(project(":feature:print_sheet"))
     implementation(project(":feature:processing"))
     implementation(project(":feature:review"))
     implementation(project(":feature:settings"))
