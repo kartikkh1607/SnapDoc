@@ -35,4 +35,5 @@ include(":domain:export")
 include(":domain:pipeline")
 include(":domain:print")
 include(":domain:watermark")
+include(":feature:onboarding")
  

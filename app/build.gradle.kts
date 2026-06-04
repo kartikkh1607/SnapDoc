@@ -139,6 +139,7 @@ dependencies {
     implementation(project(":domain:pipeline"))
     implementation(project(":domain:print"))
     implementation(project(":domain:watermark"))
+    implementation(project(":feature:onboarding"))
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_before">BEFORE</string>
+    <string name="onboarding_verified">Verified</string>
+    <string name="onboarding_slide1_title">Exact document\nspecs, every time.</string>
+    <string name="onboarding_slide1_subtitle">We keep dimensions, background colour, file size and head height in sync with the official source for 90+ Indian documents.</string>
+    <string name="onboarding_slide2_title">AI background\ncleanup, in a tap.</string>
+    <string name="onboarding_slide2_subtitle">Auto-detect your face, remove distractions, and apply the exact background colour your document needs.</string>
+    <string name="onboarding_slide3_title">Instant export &amp;\nprint-ready sheets.</string>
+    <string name="onboarding_slide3_subtitle">Download the digital photo, or grab an A4 sheet pre-arranged for your local print shop.</string>
+    <string name="onboarding_cd_next">Next</string>
+    <string name="onboarding_cd_skip">Skip onboarding</string>
+</resources>
