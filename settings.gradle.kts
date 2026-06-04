@@ -29,4 +29,5 @@ include(":core:designsystem")
 include(":data:billing")
 include(":data:prefs")
 include(":data:specs")
+include(":domain:pipeline")
  

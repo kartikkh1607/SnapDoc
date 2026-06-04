@@ -102,7 +102,7 @@ class SpecValidator @Inject constructor() : Closeable {
     }
 
     /** Synchronous checks that don't require ML Kit — useful for unit tests. */
-    internal fun staticChecks(
+    fun staticChecks(
         bitmap: Bitmap,
         fileSizeKb: Int,
         spec: DocumentSpec,
