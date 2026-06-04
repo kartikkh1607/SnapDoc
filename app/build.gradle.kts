@@ -140,6 +140,7 @@ android {
 
 dependencies {
     // Modules
+    implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
     implementation(project(":data:specs"))
 
