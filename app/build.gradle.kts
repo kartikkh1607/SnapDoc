@@ -130,6 +130,7 @@ dependencies {
     // Modules
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:navigation"))
     implementation(project(":data:billing"))
     implementation(project(":data:prefs"))
     implementation(project(":data:specs"))
