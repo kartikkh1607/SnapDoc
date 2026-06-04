@@ -37,5 +37,6 @@ include(":domain:print")
 include(":domain:watermark")
 include(":feature:doc_detail")
 include(":feature:onboarding")
+include(":feature:settings")
 include(":feature:splash")
  

@@ -3,9 +3,9 @@ package com.kartik.snapdoc.ui.screens.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kartik.snapdoc.BuildConfig
-import com.kartik.snapdoc.R
+import com.kartik.snapdoc.core.common.AppInfo
 import com.kartik.snapdoc.data.billing.PurchaseRepository
+import com.kartik.snapdoc.feature.settings.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,12 +19,13 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val purchases: PurchaseRepository,
+    appInfo: AppInfo,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
         SettingsUiState(
-            versionName = BuildConfig.VERSION_NAME,
-            versionCode = BuildConfig.VERSION_CODE,
+            versionName = appInfo.versionName,
+            versionCode = appInfo.versionCode,
         ),
     )
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
