@@ -129,6 +129,7 @@ fun PreviewScreen(
                 docId = viewModel.docId,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedContentScope = animatedContentScope,
+                onRemoveWatermark = { onExport(viewModel.docId, viewModel.imageUri) },
             )
 
             Spacer(modifier = Modifier.height(22.dp))
@@ -168,6 +169,7 @@ private fun WatermarkedPreview(
     docId: String,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
+    onRemoveWatermark: () -> Unit,
 ) {
     val doc = state.doc
     val aspect = if (doc != null) doc.dimensions.widthPx.toFloat() / doc.dimensions.heightPx else 0.82f
@@ -202,18 +204,40 @@ private fun WatermarkedPreview(
                 DocPreviewHero(modifier = Modifier.fillMaxSize())
             }
             if (state.watermarked) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .rotate(-22f),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "SNAPDOC · SNAPDOC",
-                        color = Primary.copy(alpha = 0.10f),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                WatermarkOverlay(label = stringResource(R.string.preview_watermark_label))
+            }
+        }
+        if (state.watermarked) {
+            val ctaLabel = stringResource(
+                R.string.preview_watermark_cta,
+                stringResource(R.string.preview_export_price),
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 12.dp)
+                    .clip(RoundedCornerShape(99.dp))
+                    .background(Color.Black.copy(alpha = 0.78f))
+                    .clickable(
+                        role = Role.Button,
+                        onClickLabel = ctaLabel,
+                        onClick = onRemoveWatermark,
                     )
-                }
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Lock,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(14.dp),
+                )
+                Text(
+                    text = ctaLabel,
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                )
             }
         }
         val chipColor = if (state.allPassed) Primary else ErrorRed
@@ -234,6 +258,33 @@ private fun WatermarkedPreview(
                 color = Color.White,
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
             )
+        }
+    }
+}
+
+@Composable
+private fun WatermarkOverlay(label: String) {
+    // Tiled diagonal watermark. Strong enough that users can see it on the
+    // preview (and won't mistake it for a usable export) but uses theme primary
+    // so it still feels like an in-product treatment rather than an alert.
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .rotate(-22f),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            Spacer(modifier = Modifier.height(18.dp))
+            repeat(4) {
+                Text(
+                    text = "$label · $label · $label",
+                    color = Primary.copy(alpha = 0.32f),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                )
+            }
         }
     }
 }

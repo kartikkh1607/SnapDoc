@@ -76,6 +76,8 @@
     <string name="preview_export_paid_title">Export photo</string>
     <string name="preview_export_paid_subtitle">One-time · no subscription</string>
     <string name="preview_export_price">₹49</string>
+    <string name="preview_watermark_label">PREVIEW</string>
+    <string name="preview_watermark_cta">Remove watermark · %1$s</string>
     <string name="preview_footer_trust">Secure payment · 1.2M happy customers</string>
     <string name="preview_cd_processed">Processed photo</string>
 

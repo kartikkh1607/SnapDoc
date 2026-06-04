@@ -76,6 +76,8 @@
     <string name="preview_export_paid_title">फ़ोटो एक्सपोर्ट करें</string>
     <string name="preview_export_paid_subtitle">एक बार · कोई सदस्यता नहीं</string>
     <string name="preview_export_price">₹49</string>
+    <string name="preview_watermark_label">प्रीव्यू</string>
+    <string name="preview_watermark_cta">वॉटरमार्क हटाएँ · %1$s</string>
     <string name="preview_footer_trust">सुरक्षित भुगतान · 12 लाख खुश ग्राहक</string>
     <string name="preview_cd_processed">प्रोसेस की गई फ़ोटो</string>
 
