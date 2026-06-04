@@ -18,6 +18,10 @@
     <string name="settings_row_language_value">हिन्दी</string>
     <string name="settings_row_on_device">डिवाइस पर प्रोसेसिंग</string>
     <string name="settings_row_on_device_value">हमेशा</string>
+    <string name="settings_row_save_to_gallery">गैलरी में सहेजें</string>
+    <string name="settings_row_save_to_gallery_on">चालू</string>
+    <string name="settings_row_save_to_gallery_off">बंद</string>
+    <string name="settings_cd_save_to_gallery_toggle">एक्सपोर्ट किए फ़ोटो गैलरी में सहेजें</string>
     <string name="settings_group_support">सहायता</string>
     <string name="settings_row_help">मदद और FAQ</string>
     <string name="settings_row_contact">सहायता से संपर्क करें</string>

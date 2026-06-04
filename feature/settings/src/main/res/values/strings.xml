@@ -18,6 +18,10 @@
     <string name="settings_row_language_value">English (India)</string>
     <string name="settings_row_on_device">On-device processing</string>
     <string name="settings_row_on_device_value">Always</string>
+    <string name="settings_row_save_to_gallery">Save to gallery</string>
+    <string name="settings_row_save_to_gallery_on">On</string>
+    <string name="settings_row_save_to_gallery_off">Off</string>
+    <string name="settings_cd_save_to_gallery_toggle">Save exported photos to gallery</string>
     <string name="settings_group_support">Support</string>
     <string name="settings_row_help">Help &amp; FAQ</string>
     <string name="settings_row_contact">Contact support</string>

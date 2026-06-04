@@ -20,6 +20,7 @@ android {
 
 dependencies {
     implementation(project(":core:designsystem"))
+    implementation(project(":data:prefs"))
     implementation(project(":data:specs"))
 
     implementation(platform(libs.androidx.compose.bom))

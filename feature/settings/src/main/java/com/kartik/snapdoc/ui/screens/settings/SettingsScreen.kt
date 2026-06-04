@@ -20,8 +20,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Help
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
-import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Info
@@ -37,10 +37,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -52,11 +52,15 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kartik.snapdoc.data.prefs.UserProfile
 import com.kartik.snapdoc.feature.settings.R
 import com.kartik.snapdoc.ui.theme.Hairline2
 import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Ink4
 import com.kartik.snapdoc.ui.theme.Primary
+import com.kartik.snapdoc.ui.theme.PrimaryDark
 import com.kartik.snapdoc.ui.theme.PrimaryFaint
 import com.kartik.snapdoc.ui.theme.s1
 import com.kartik.snapdoc.ui.theme.sGreen
@@ -65,14 +69,20 @@ private data class SettingsRow(
     val label: String,
     val subtitle: String? = null,
     val icon: ImageVector,
-    val toggle: Boolean = false,
+    val toggleState: Boolean? = null,
+    val toggleLabel: String? = null,
+    val onToggle: (() -> Unit)? = null,
     val onClick: (() -> Unit)? = null,
 )
 
 private data class SettingsGroup(val title: String, val rows: List<SettingsRow>)
 
 @Composable
-private fun buildGroups(state: SettingsUiState, onRestore: () -> Unit): List<SettingsGroup> = listOf(
+private fun buildGroups(
+    state: SettingsUiState,
+    onRestore: () -> Unit,
+    onToggleSaveToGallery: () -> Unit,
+): List<SettingsGroup> = listOf(
     SettingsGroup(
         title = stringResource(R.string.settings_group_purchases),
         rows = listOf(
@@ -115,6 +125,17 @@ private fun buildGroups(state: SettingsUiState, onRestore: () -> Unit): List<Set
                 Icons.Outlined.Language,
             ),
             SettingsRow(
+                label = stringResource(R.string.settings_row_save_to_gallery),
+                subtitle = stringResource(
+                    if (state.saveToGallery) R.string.settings_row_save_to_gallery_on
+                    else R.string.settings_row_save_to_gallery_off,
+                ),
+                icon = Icons.Outlined.Image,
+                toggleState = state.saveToGallery,
+                toggleLabel = stringResource(R.string.settings_cd_save_to_gallery_toggle),
+                onToggle = onToggleSaveToGallery,
+            ),
+            SettingsRow(
                 stringResource(R.string.settings_row_on_device),
                 stringResource(R.string.settings_row_on_device_value),
                 Icons.Outlined.Bolt,
@@ -149,7 +170,11 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val groups = buildGroups(state, onRestore = viewModel::restore)
+    val groups = buildGroups(
+        state,
+        onRestore = viewModel::restore,
+        onToggleSaveToGallery = viewModel::toggleSaveToGallery,
+    )
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -159,9 +184,8 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(top = 56.dp, bottom = 64.dp),
+                .padding(top = 56.dp, bottom = 48.dp),
         ) {
-            // Header
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -172,7 +196,9 @@ fun SettingsScreen(
                 Text(
                     text = stringResource(R.string.settings_title),
                     color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
                     modifier = Modifier.semantics { heading() },
                 )
                 val closeLabel = stringResource(R.string.settings_cd_close)
@@ -198,14 +224,14 @@ fun SettingsScreen(
                 }
             }
 
-            // Profile card
-            ProfileCard(modifier = Modifier.padding(horizontal = 22.dp))
+            ProfileCard(
+                profile = state.profile,
+                modifier = Modifier.padding(horizontal = 22.dp),
+            )
 
             Spacer(modifier = Modifier.height(18.dp))
             Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                groups.forEach { group ->
-                    GroupCard(group = group)
-                }
+                groups.forEach { group -> GroupCard(group = group) }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -223,13 +249,19 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun ProfileCard(modifier: Modifier = Modifier) {
+private fun ProfileCard(profile: UserProfile, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .sGreen(20.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(Primary)
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(Primary, PrimaryDark),
+                    start = Offset(0f, 0f),
+                    end = Offset(800f, 800f),
+                ),
+            )
             .padding(16.dp),
     ) {
         Box(
@@ -251,25 +283,30 @@ private fun ProfileCard(modifier: Modifier = Modifier) {
                     .background(Color.White.copy(alpha = 0.16f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Shield,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp),
+                Text(
+                    text = profile.initials,
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.settings_profile_title),
+                    text = profile.displayName,
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 )
                 Text(
-                    text = stringResource(R.string.settings_profile_subtitle),
-                    color = Color.White.copy(alpha = 0.85f),
+                    text = profile.email,
+                    color = Color.White.copy(alpha = 0.78f),
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(22.dp),
+            )
         }
     }
 }
@@ -352,8 +389,13 @@ private fun SettingsRowItem(row: SettingsRow) {
                 )
             }
         }
-        if (row.toggle) {
-            Toggle(on = true)
+        val toggleState = row.toggleState
+        if (toggleState != null && row.onToggle != null) {
+            Toggle(
+                on = toggleState,
+                onToggle = row.onToggle,
+                label = row.toggleLabel ?: row.label,
+            )
         } else {
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
@@ -366,12 +408,13 @@ private fun SettingsRowItem(row: SettingsRow) {
 }
 
 @Composable
-private fun Toggle(on: Boolean) {
+private fun Toggle(on: Boolean, onToggle: () -> Unit, label: String) {
     Box(
         modifier = Modifier
             .size(width = 36.dp, height = 22.dp)
             .clip(RoundedCornerShape(11.dp))
             .background(if (on) Primary else Hairline2)
+            .clickable(role = Role.Switch, onClickLabel = label, onClick = onToggle)
             .semantics {
                 role = Role.Switch
                 toggleableState = if (on) ToggleableState.On else ToggleableState.Off

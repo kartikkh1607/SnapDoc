@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kartik.snapdoc.core.common.AppInfo
 import com.kartik.snapdoc.data.billing.PurchaseRepository
+import com.kartik.snapdoc.data.prefs.UserPrefsRepository
 import com.kartik.snapdoc.feature.settings.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val purchases: PurchaseRepository,
+    private val prefs: UserPrefsRepository,
     appInfo: AppInfo,
 ) : ViewModel() {
 
@@ -34,6 +36,16 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             purchases.entitlement.collect { e -> _state.update { it.copy(entitlement = e) } }
         }
+        viewModelScope.launch {
+            prefs.profile.collect { p -> _state.update { it.copy(profile = p) } }
+        }
+        viewModelScope.launch {
+            prefs.saveToGallery.collect { v -> _state.update { it.copy(saveToGallery = v) } }
+        }
+    }
+
+    fun toggleSaveToGallery() {
+        viewModelScope.launch { prefs.setSaveToGallery(!_state.value.saveToGallery) }
     }
 
     fun restore() {

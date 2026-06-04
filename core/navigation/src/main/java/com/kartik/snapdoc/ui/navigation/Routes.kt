@@ -19,6 +19,10 @@ object Routes {
 
     @Serializable object Home
 
+    @Serializable object History
+
+    @Serializable object Documents
+
     @Serializable object Settings
 
     @Serializable data class DocDetail(val docId: String)

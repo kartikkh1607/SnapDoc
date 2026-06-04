@@ -3,4 +3,9 @@
     <string name="splash_tagline">डॉक्यूमेंट फ़ोटो, बिल्कुल सही।</string>
     <string name="splash_loading">आपके डॉक्यूमेंट लोड हो रहे हैं…</string>
     <string name="splash_made_for_india">भारत के लिए बना</string>
+    <string name="splash_welcome_back">वापस आपका स्वागत है</string>
+    <string name="splash_stats">12 फ़ोटो · ₹480 प्रिंट पर बचाए</string>
+    <string name="splash_resume_title">आधार फ़ोटो जारी रखें</string>
+    <string name="splash_resume_subtitle">2 दिन पहले शुरू · 1 चरण बाकी</string>
+    <string name="splash_trust_footer">UIDAI · MEA · UPSC · SSC · NTA</string>
 </resources>

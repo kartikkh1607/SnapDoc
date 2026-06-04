@@ -3,12 +3,15 @@ package com.kartik.snapdoc.ui.navigation
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kartik.snapdoc.ui.screens.camera.CameraScreen
 import com.kartik.snapdoc.ui.screens.doc_detail.DocDetailScreen
+import com.kartik.snapdoc.ui.screens.documents.DocumentsScreen
 import com.kartik.snapdoc.ui.screens.export.ExportScreen
+import com.kartik.snapdoc.ui.screens.history.HistoryScreen
 import com.kartik.snapdoc.ui.screens.home.HomeScreen
 import com.kartik.snapdoc.ui.screens.onboarding.OnboardingScreen
 import com.kartik.snapdoc.ui.screens.preview.PreviewScreen
@@ -22,13 +25,10 @@ import com.kartik.snapdoc.ui.screens.splash.SplashScreen
 @Composable
 fun SnapDocNavGraph(
     navController: NavHostController,
+    modifier: Modifier = Modifier,
     startDestination: Any = Routes.Splash,
 ) {
-    // Wrap the whole NavHost in a SharedTransitionLayout so the captured photo
-    // can animate continuously across Review -> Processing -> Preview. Each of
-    // those screens claims `Modifier.sharedElement(... key = "photo-$docId")`
-    // on its photo container; everything else ignores the scope.
-    SharedTransitionLayout {
+    SharedTransitionLayout(modifier = modifier) {
       NavHost(navController = navController, startDestination = startDestination) {
         composable<Routes.Splash> {
             SplashScreen(
@@ -61,6 +61,10 @@ fun SnapDocNavGraph(
                 onSettingsClick = { navController.navigate(Routes.Settings) },
             )
         }
+
+        composable<Routes.History> { HistoryScreen() }
+
+        composable<Routes.Documents> { DocumentsScreen() }
 
         composable<Routes.DocDetail> {
             DocDetailScreen(

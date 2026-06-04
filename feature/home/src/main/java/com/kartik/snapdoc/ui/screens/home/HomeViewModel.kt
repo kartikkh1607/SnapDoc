@@ -2,6 +2,7 @@ package com.kartik.snapdoc.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kartik.snapdoc.data.prefs.UserPrefsRepository
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repo: SpecCatalogRepository,
+    prefs: UserPrefsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -28,6 +30,9 @@ class HomeViewModel @Inject constructor(
                     loading = false,
                 )
             }
+        }
+        viewModelScope.launch {
+            prefs.profile.collect { p -> _state.update { it.copy(profile = p) } }
         }
     }
 

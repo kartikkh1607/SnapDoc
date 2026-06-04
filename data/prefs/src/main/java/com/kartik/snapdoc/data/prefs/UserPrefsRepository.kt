@@ -20,10 +20,29 @@ import javax.inject.Singleton
 interface UserPrefsRepository {
     val onboardingSeen: Flow<Boolean>
     val entitlement: Flow<EntitlementState>
+    val profile: Flow<UserProfile>
+    val saveToGallery: Flow<Boolean>
     suspend fun setOnboardingSeen(seen: Boolean)
     suspend fun setPhotoExportUnlocked(value: Boolean)
     suspend fun setStudioBundleUnlocked(value: Boolean)
+    suspend fun setDisplayName(name: String)
+    suspend fun setEmail(email: String)
+    suspend fun setSaveToGallery(value: Boolean)
     suspend fun installId(): String
+}
+
+data class UserProfile(
+    val displayName: String,
+    val email: String,
+) {
+    val initials: String
+        get() = displayName
+            .split(' ')
+            .filter { it.isNotBlank() }
+            .take(2)
+            .map { it.first().uppercaseChar() }
+            .joinToString("")
+            .ifEmpty { "?" }
 }
 
 @Module
@@ -46,6 +65,28 @@ class DefaultUserPrefsRepository @Inject constructor(
             photoExportUnlocked = it[Keys.PHOTO_EXPORT] ?: false,
             studioBundleUnlocked = it[Keys.STUDIO_BUNDLE] ?: false,
         )
+    }
+
+    override val profile: Flow<UserProfile> = store.data.map {
+        UserProfile(
+            displayName = it[Keys.DISPLAY_NAME] ?: "Riya Sharma",
+            email = it[Keys.EMAIL] ?: "riya.sharma@gmail.com",
+        )
+    }
+
+    override val saveToGallery: Flow<Boolean> =
+        store.data.map { it[Keys.SAVE_TO_GALLERY] ?: true }
+
+    override suspend fun setDisplayName(name: String) {
+        store.edit { it[Keys.DISPLAY_NAME] = name }
+    }
+
+    override suspend fun setEmail(email: String) {
+        store.edit { it[Keys.EMAIL] = email }
+    }
+
+    override suspend fun setSaveToGallery(value: Boolean) {
+        store.edit { it[Keys.SAVE_TO_GALLERY] = value }
     }
 
     override suspend fun setOnboardingSeen(seen: Boolean) {
@@ -82,5 +123,8 @@ class DefaultUserPrefsRepository @Inject constructor(
         val PHOTO_EXPORT = booleanPreferencesKey("photo_export_unlocked")
         val STUDIO_BUNDLE = booleanPreferencesKey("studio_bundle_unlocked")
         val INSTALL_ID = stringPreferencesKey("install_id")
+        val DISPLAY_NAME = stringPreferencesKey("display_name")
+        val EMAIL = stringPreferencesKey("email")
+        val SAVE_TO_GALLERY = booleanPreferencesKey("save_to_gallery")
     }
 }
