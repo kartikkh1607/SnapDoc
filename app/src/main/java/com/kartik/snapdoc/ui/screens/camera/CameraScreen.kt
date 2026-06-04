@@ -77,6 +77,8 @@ import com.kartik.snapdoc.domain.camera.GuidanceChecks
 import com.kartik.snapdoc.domain.camera.headlineRes
 import com.kartik.snapdoc.ui.components.FaceOvalGuide
 import com.kartik.snapdoc.ui.theme.Amber
+import com.kartik.snapdoc.ui.theme.CameraChipScrim
+import com.kartik.snapdoc.ui.theme.CameraVignette
 import com.kartik.snapdoc.ui.theme.ErrorRed
 import com.kartik.snapdoc.ui.theme.Primary
 import com.kartik.snapdoc.ui.theme.Success
@@ -218,7 +220,7 @@ private fun CameraContent(
                 .padding(start = 16.dp, end = 16.dp, top = 56.dp)
                 .height(52.dp)
                 .clip(RoundedCornerShape(18.dp))
-                .background(Color(0xFF14141B).copy(alpha = 0.42f))
+                .background(CameraChipScrim.copy(alpha = 0.42f))
                 .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(18.dp))
                 .padding(horizontal = 8.dp),
         ) {
@@ -298,7 +300,7 @@ private fun CameraContent(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color(0xFF080A08).copy(alpha = 0.7f),
+                            CameraVignette.copy(alpha = 0.7f),
                         ),
                     ),
                 ),
@@ -435,7 +437,7 @@ private fun GuidancePill(guidance: FaceGuidanceState, modifier: Modifier = Modif
     val background = when (guidance) {
         FaceGuidanceState.Ready -> Primary.copy(alpha = 0.92f)
         FaceGuidanceState.NoFace, FaceGuidanceState.MultipleFaces -> ErrorRed.copy(alpha = 0.92f)
-        else -> Color(0xFF14141B).copy(alpha = 0.78f)
+        else -> CameraChipScrim.copy(alpha = 0.78f)
     }
     val headline = stringResource(guidance.headlineRes())
     Row(
@@ -479,7 +481,7 @@ private fun CheckChip(label: String, passed: Boolean) {
         horizontalArrangement = Arrangement.spacedBy(7.dp),
         modifier = Modifier
             .clip(RoundedCornerShape(99.dp))
-            .background(Color(0xFF080A08).copy(alpha = 0.42f))
+            .background(CameraVignette.copy(alpha = 0.42f))
             .padding(start = 6.dp, end = 10.dp, top = 6.dp, bottom = 6.dp),
     ) {
         Box(

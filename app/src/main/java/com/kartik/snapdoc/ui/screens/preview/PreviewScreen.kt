@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.kartik.snapdoc.R
 import com.kartik.snapdoc.domain.pipeline.ValidationCheck
+import com.kartik.snapdoc.domain.pipeline.ValidationCheckKind
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -239,16 +240,8 @@ private fun WatermarkedPreview(
 
 @Composable
 private fun VerificationChecklist(checks: List<ValidationCheck>, modifier: Modifier = Modifier) {
-    val items = checks.ifEmpty {
-        listOf(
-            ValidationCheck(
-                stringResource(R.string.preview_processing),
-                "—",
-                stringResource(R.string.preview_loading),
-                true,
-            ),
-        )
-    }
+    val processingLabel = stringResource(R.string.preview_processing)
+    val loadingLabel = stringResource(R.string.preview_loading)
     Column(
         modifier = modifier
             .s1(20.dp)
@@ -256,51 +249,79 @@ private fun VerificationChecklist(checks: List<ValidationCheck>, modifier: Modif
             .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp),
     ) {
-        items.forEachIndexed { idx, item ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(if (item.passed) Primary else ErrorRed),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Check,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(14.dp),
-                    )
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.name,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                    )
-                    Text(
-                        text = stringResource(R.string.preview_actual_expected, item.actual, item.expected),
-                        color = if (item.passed) Ink3 else ErrorRed,
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                }
-            }
-            if (idx != items.lastIndex) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(Hairline2),
+        if (checks.isEmpty()) {
+            ChecklistRow(
+                label = processingLabel,
+                detail = loadingLabel,
+                passed = true,
+                showDivider = false,
+            )
+        } else {
+            checks.forEachIndexed { idx, item ->
+                ChecklistRow(
+                    label = stringResource(item.kind.labelRes()),
+                    detail = stringResource(R.string.preview_actual_expected, item.actual, item.expected),
+                    passed = item.passed,
+                    showDivider = idx != checks.lastIndex,
                 )
             }
         }
     }
+}
+
+@Composable
+private fun ChecklistRow(label: String, detail: String, passed: Boolean, showDivider: Boolean) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(26.dp)
+                .clip(CircleShape)
+                .background(if (passed) Primary else ErrorRed),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Check,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(14.dp),
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            )
+            Text(
+                text = detail,
+                color = if (passed) Ink3 else ErrorRed,
+                style = MaterialTheme.typography.labelMedium,
+            )
+        }
+    }
+    if (showDivider) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Hairline2),
+        )
+    }
+}
+
+private fun ValidationCheckKind.labelRes(): Int = when (this) {
+    ValidationCheckKind.Dimensions -> R.string.preview_check_dimensions
+    ValidationCheckKind.FileSize -> R.string.preview_check_file_size
+    ValidationCheckKind.Background -> R.string.preview_check_background
+    ValidationCheckKind.FaceDetected -> R.string.preview_check_face
+    ValidationCheckKind.HeadRatio -> R.string.preview_check_head_ratio
+    ValidationCheckKind.EyeLine -> R.string.preview_check_eye_line
 }
 
 @Composable

@@ -17,8 +17,17 @@ import kotlin.coroutines.resumeWithException
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+enum class ValidationCheckKind {
+    Dimensions,
+    FileSize,
+    Background,
+    FaceDetected,
+    HeadRatio,
+    EyeLine,
+}
+
 data class ValidationCheck(
-    val name: String,
+    val kind: ValidationCheckKind,
     val expected: String,
     val actual: String,
     val passed: Boolean,
@@ -54,9 +63,9 @@ class SpecValidator @Inject constructor() : Closeable {
 
         val face = detect(bitmap)
         checks += ValidationCheck(
-            name = "Face detected",
-            expected = "1 face",
-            actual = if (face != null) "1 face" else "no face",
+            kind = ValidationCheckKind.FaceDetected,
+            expected = "1",
+            actual = if (face != null) "1" else "0",
             passed = face != null,
         )
 
@@ -64,7 +73,7 @@ class SpecValidator @Inject constructor() : Closeable {
             val ratio = face.boundingBox.height().toFloat() / bitmap.height * 100f
             val ratioPassed = ratio >= spec.face.headHeightPercentMin && ratio <= spec.face.headHeightPercentMax
             checks += ValidationCheck(
-                name = "Head ratio",
+                kind = ValidationCheckKind.HeadRatio,
                 expected = "${spec.face.headHeightPercentMin}–${spec.face.headHeightPercentMax}%",
                 actual = "${ratio.toInt()}%",
                 passed = ratioPassed,
@@ -82,8 +91,8 @@ class SpecValidator @Inject constructor() : Closeable {
             val eyePassed = eyePercent >= spec.face.eyeLineFromTopPercentMin &&
                 eyePercent <= spec.face.eyeLineFromTopPercentMax
             checks += ValidationCheck(
-                name = "Eye line",
-                expected = "${spec.face.eyeLineFromTopPercentMin}–${spec.face.eyeLineFromTopPercentMax}% from top",
+                kind = ValidationCheckKind.EyeLine,
+                expected = "${spec.face.eyeLineFromTopPercentMin}–${spec.face.eyeLineFromTopPercentMax}%",
                 actual = "${eyePercent.toInt()}%",
                 passed = eyePassed,
             )
@@ -99,14 +108,14 @@ class SpecValidator @Inject constructor() : Closeable {
         spec: DocumentSpec,
     ): List<ValidationCheck> {
         val dims = ValidationCheck(
-            name = "Dimensions",
+            kind = ValidationCheckKind.Dimensions,
             expected = "${spec.dimensions.widthPx} × ${spec.dimensions.heightPx} px",
             actual = "${bitmap.width} × ${bitmap.height} px",
             passed = bitmap.width == spec.dimensions.widthPx &&
                 bitmap.height == spec.dimensions.heightPx,
         )
         val size = ValidationCheck(
-            name = "File size",
+            kind = ValidationCheckKind.FileSize,
             expected = "${spec.file.minSizeKb}–${spec.file.maxSizeKb} KB",
             actual = "$fileSizeKb KB",
             passed = fileSizeKb in spec.file.minSizeKb..spec.file.maxSizeKb,
@@ -115,7 +124,7 @@ class SpecValidator @Inject constructor() : Closeable {
         val targetBg = parseHexColor(spec.background.colorHex)
         val deltaE = labDelta(avgBg, targetBg)
         val bg = ValidationCheck(
-            name = "Background",
+            kind = ValidationCheckKind.Background,
             expected = "${spec.background.displayName} (${spec.background.colorHex})",
             actual = "#%02X%02X%02X".format(Color.red(avgBg), Color.green(avgBg), Color.blue(avgBg)),
             // Tolerance multiplier widens the acceptance band because the corner-pixel

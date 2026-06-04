@@ -50,6 +50,7 @@ import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.navigation.Routes
 import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Primary
+import com.kartik.snapdoc.ui.theme.ReviewSurface
 import com.kartik.snapdoc.ui.theme.Success
 import com.kartik.snapdoc.ui.theme.sGreen
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -76,7 +77,7 @@ fun ReviewScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D0E0D)),
+            .background(ReviewSurface),
     ) {
         // Top bar
         Row(
@@ -171,6 +172,7 @@ fun ReviewScreen(
     }
 }
 
+// Hand-picked lighter green for icon contrast against Success.copy(alpha = 0.2f).
 private val QualityBadgeIconTint = Color(0xFF7ED28A)
 
 @Composable

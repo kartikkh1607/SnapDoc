@@ -3,6 +3,10 @@ package com.kartik.snapdoc.data.specs
 import com.kartik.snapdoc.data.specs.model.CategorySpec
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.data.specs.model.SpecCatalog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -10,7 +14,18 @@ import javax.inject.Singleton
 class SpecCatalogRepository @Inject constructor(
     private val loader: SpecCatalogLoader,
 ) {
-    private val catalog: SpecCatalog by lazy { loader.load() }
+    // Synchronized Lazy: whichever thread touches it first does the parse,
+    // the rest block until it's ready. The init block below kicks the IO
+    // thread off immediately so the main-thread first-access (via a VM) almost
+    // always hits the cached value instead of doing the 22KB JSON parse on UI.
+    private val catalogLazy: Lazy<SpecCatalog> = lazy { loader.load() }
+    private val catalog: SpecCatalog get() = catalogLazy.value
+
+    private val warmScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    init {
+        warmScope.launch { catalogLazy.value }
+    }
 
     fun all(): List<DocumentSpec> = catalog.documents
 
@@ -58,22 +73,22 @@ class SpecCatalogRepository @Inject constructor(
         var score = 0
 
         // Whole-query substring matches — strongest signal.
-        if (display.contains(rawQuery)) score += 100
-        if (short.contains(rawQuery)) score += 80
-        if (notes.contains(rawQuery)) score += 20
+        if (display.contains(rawQuery)) score += W_DISPLAY_SUBSTRING
+        if (short.contains(rawQuery)) score += W_SHORT_SUBSTRING
+        if (notes.contains(rawQuery)) score += W_NOTES_SUBSTRING
 
         // Acronym match: "pcc" → "Police Clearance Certificate".
-        if (display.acronym() == rawQuery) score += 90
-        if (short.acronym() == rawQuery) score += 70
+        if (display.acronym() == rawQuery) score += W_DISPLAY_ACRONYM
+        if (short.acronym() == rawQuery) score += W_SHORT_ACRONYM
 
         // Per-token prefix presence on word boundaries.
         val displayWords = display.split(WHITESPACE)
         val shortWords = short.split(WHITESPACE)
         for (token in tokens) {
-            if (displayWords.any { it.startsWith(token) }) score += 25
-            else if (display.contains(token)) score += 10
-            if (shortWords.any { it.startsWith(token) }) score += 20
-            if (notes.contains(token)) score += 5
+            if (displayWords.any { it.startsWith(token) }) score += W_DISPLAY_PREFIX
+            else if (display.contains(token)) score += W_DISPLAY_CONTAINS
+            if (shortWords.any { it.startsWith(token) }) score += W_SHORT_PREFIX
+            if (notes.contains(token)) score += W_NOTES_TOKEN
         }
         return score
     }
@@ -83,5 +98,17 @@ class SpecCatalogRepository @Inject constructor(
 
     private companion object {
         val WHITESPACE = "\\s+".toRegex()
+
+        // Search scoring weights. Picked so that whole-query and acronym hits
+        // dominate, prefix hits matter, and notes only nudge the ranking.
+        const val W_DISPLAY_SUBSTRING = 100
+        const val W_DISPLAY_ACRONYM = 90
+        const val W_SHORT_SUBSTRING = 80
+        const val W_SHORT_ACRONYM = 70
+        const val W_DISPLAY_PREFIX = 25
+        const val W_SHORT_PREFIX = 20
+        const val W_NOTES_SUBSTRING = 20
+        const val W_DISPLAY_CONTAINS = 10
+        const val W_NOTES_TOKEN = 5
     }
 }

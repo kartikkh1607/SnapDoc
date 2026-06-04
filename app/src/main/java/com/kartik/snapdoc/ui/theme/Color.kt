@@ -41,6 +41,13 @@ val Outline = Hairline
 // Legacy alias kept for the dark-mode color scheme.
 val PrimaryVariant = Success
 
+// Permanent-dark surface tokens for screens that stay dark regardless of theme
+// (camera, review). These are NOT the dark color scheme — they're hand-picked
+// constants for camera-style chrome.
+val ReviewSurface = Color(0xFF0D0E0D)
+val CameraChipScrim = Color(0xFF14141B)
+val CameraVignette = Color(0xFF080A08)
+
 // Dark scheme tokens. These power [DarkColors] in Theme.kt. Screens that hardcode
 // dark surfaces (camera, review) remain dark in both themes — intentional.
 val DarkBackground = Color(0xFF0F1110)

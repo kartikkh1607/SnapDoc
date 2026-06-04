@@ -33,6 +33,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -102,10 +105,16 @@ fun ProcessingScreen(
         label = "processing-progress",
     )
 
-    LaunchedEffect(state.resultUri, state.error) {
-        val uri = state.resultUri
-        if (uri != null) onDone(viewModel.docId, uri)
-        else if (state.error != null) onError()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(viewModel) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is ProcessingEvent.Done -> onDone(event.docId, event.imageUri)
+                    ProcessingEvent.Failed -> onError()
+                }
+            }
+        }
     }
 
     val steps = buildSteps(state.stage)

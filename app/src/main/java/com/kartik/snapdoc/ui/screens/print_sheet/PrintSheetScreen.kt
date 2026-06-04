@@ -148,14 +148,17 @@ fun PrintSheetScreen(
             if (state.phase == PrintExportPhase.Saved) {
                 Spacer(modifier = Modifier.height(14.dp))
                 SavedBanner(state = state, onShare = share, modifier = Modifier.padding(horizontal = 22.dp))
-            } else if (state.error != null) {
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = state.error ?: "",
-                    color = ErrorRed,
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(horizontal = 22.dp),
-                )
+            } else {
+                val errorRes = state.errorRes
+                if (errorRes != null) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = stringResource(errorRes),
+                        color = ErrorRed,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 22.dp),
+                    )
+                }
             }
         }
 

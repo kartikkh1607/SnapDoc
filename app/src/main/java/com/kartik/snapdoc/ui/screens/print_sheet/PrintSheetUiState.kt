@@ -1,6 +1,7 @@
 package com.kartik.snapdoc.ui.screens.print_sheet
 
 import android.net.Uri
+import androidx.annotation.StringRes
 import com.kartik.snapdoc.data.billing.EntitlementState
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.domain.print.SheetLayout
@@ -17,7 +18,7 @@ data class PrintSheetUiState(
     val savedUri: Uri? = null,
     val shareUri: Uri? = null,
     val shareMime: String? = null,
-    val error: String? = null,
+    @param:StringRes val errorRes: Int? = null,
 ) {
     val locked: Boolean get() = !entitlement.canPrintSheet
 }

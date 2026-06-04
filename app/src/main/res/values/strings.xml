@@ -61,6 +61,12 @@
     <string name="preview_processing">Processing</string>
     <string name="preview_loading">Loading…</string>
     <string name="preview_actual_expected">%1$s · expected %2$s</string>
+    <string name="preview_check_dimensions">Dimensions</string>
+    <string name="preview_check_file_size">File size</string>
+    <string name="preview_check_background">Background</string>
+    <string name="preview_check_face">Face detected</string>
+    <string name="preview_check_head_ratio">Head ratio</string>
+    <string name="preview_check_eye_line">Eye line from top</string>
     <string name="preview_print_sheet_title_unlocked">Make a print sheet</string>
     <string name="preview_print_sheet_title_locked">Print sheet</string>
     <string name="preview_print_sheet_subtitle_unlocked">Tile copies on 4×6 or A4 for the print shop.</string>
@@ -190,6 +196,9 @@
     <string name="printsheet_save_pdf">Save PDF</string>
     <string name="printsheet_generating">Generating…</string>
     <string name="printsheet_share">Share</string>
+    <string name="printsheet_error_missing">Processed photo missing — retake.</string>
+    <string name="printsheet_error_pdf">Couldn\'t generate the PDF. Try again.</string>
+    <string name="printsheet_error_jpg">Couldn\'t generate the JPG. Try again.</string>
 
     <!-- Review -->
     <string name="review_title">Review your photo</string>

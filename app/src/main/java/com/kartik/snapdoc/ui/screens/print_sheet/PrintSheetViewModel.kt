@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.kartik.snapdoc.R
 import com.kartik.snapdoc.data.billing.PurchaseRepository
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.domain.export.DocumentExporter
@@ -68,10 +69,12 @@ class PrintSheetViewModel @Inject constructor(
         val doc = s.doc ?: return
         val layout = s.layout ?: return
         val entry = resultStore.get(decodedUri) ?: run {
-            _state.update { it.copy(phase = PrintExportPhase.Error, error = "Processed photo missing — retake.") }
+            _state.update {
+                it.copy(phase = PrintExportPhase.Error, errorRes = R.string.printsheet_error_missing)
+            }
             return
         }
-        _state.update { it.copy(phase = PrintExportPhase.Generating, error = null) }
+        _state.update { it.copy(phase = PrintExportPhase.Generating, errorRes = null) }
         viewModelScope.launch {
             runCatching {
                 val bytes = entry.readBytes()
@@ -93,8 +96,10 @@ class PrintSheetViewModel @Inject constructor(
                         shareMime = "application/pdf",
                     )
                 }
-            }.onFailure { t ->
-                _state.update { it.copy(phase = PrintExportPhase.Error, error = t.message ?: "PDF export failed") }
+            }.onFailure {
+                _state.update {
+                    it.copy(phase = PrintExportPhase.Error, errorRes = R.string.printsheet_error_pdf)
+                }
             }
         }
     }
@@ -104,10 +109,12 @@ class PrintSheetViewModel @Inject constructor(
         val doc = s.doc ?: return
         val layout = s.layout ?: return
         val entry = resultStore.get(decodedUri) ?: run {
-            _state.update { it.copy(phase = PrintExportPhase.Error, error = "Processed photo missing — retake.") }
+            _state.update {
+                it.copy(phase = PrintExportPhase.Error, errorRes = R.string.printsheet_error_missing)
+            }
             return
         }
-        _state.update { it.copy(phase = PrintExportPhase.Generating, error = null) }
+        _state.update { it.copy(phase = PrintExportPhase.Generating, errorRes = null) }
         viewModelScope.launch {
             runCatching {
                 val bytes = entry.readBytes()
@@ -124,13 +131,15 @@ class PrintSheetViewModel @Inject constructor(
                         shareMime = "image/jpeg",
                     )
                 }
-            }.onFailure { t ->
-                _state.update { it.copy(phase = PrintExportPhase.Error, error = t.message ?: "JPG export failed") }
+            }.onFailure {
+                _state.update {
+                    it.copy(phase = PrintExportPhase.Error, errorRes = R.string.printsheet_error_jpg)
+                }
             }
         }
     }
 
     fun resetPhase() {
-        _state.update { it.copy(phase = PrintExportPhase.Idle, error = null) }
+        _state.update { it.copy(phase = PrintExportPhase.Idle, errorRes = null) }
     }
 }

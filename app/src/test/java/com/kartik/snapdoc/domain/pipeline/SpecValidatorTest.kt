@@ -31,7 +31,7 @@ class SpecValidatorTest {
         val spec = passportSpec()
 
         val check = validator.staticChecks(bitmap, fileSizeKb = 50, spec = spec)
-            .first { it.name == "Dimensions" }
+            .first { it.kind == ValidationCheckKind.Dimensions }
 
         assertThat(check.passed).isTrue()
         assertThat(check.actual).isEqualTo("413 × 531 px")
@@ -43,7 +43,7 @@ class SpecValidatorTest {
         val spec = passportSpec()
 
         val check = validator.staticChecks(bitmap, fileSizeKb = 50, spec = spec)
-            .first { it.name == "Dimensions" }
+            .first { it.kind == ValidationCheckKind.Dimensions }
 
         assertThat(check.passed).isFalse()
     }
@@ -53,9 +53,9 @@ class SpecValidatorTest {
         val bitmap = solidBitmap(413, 531, Color.WHITE)
         val spec = passportSpec()
 
-        val inWindow = validator.staticChecks(bitmap, 50, spec).first { it.name == "File size" }
-        val tooSmall = validator.staticChecks(bitmap, 5, spec).first { it.name == "File size" }
-        val tooLarge = validator.staticChecks(bitmap, 500, spec).first { it.name == "File size" }
+        val inWindow = validator.staticChecks(bitmap, 50, spec).first { it.kind == ValidationCheckKind.FileSize }
+        val tooSmall = validator.staticChecks(bitmap, 5, spec).first { it.kind == ValidationCheckKind.FileSize }
+        val tooLarge = validator.staticChecks(bitmap, 500, spec).first { it.kind == ValidationCheckKind.FileSize }
 
         assertThat(inWindow.passed).isTrue()
         assertThat(tooSmall.passed).isFalse()
@@ -67,7 +67,7 @@ class SpecValidatorTest {
         val bitmap = solidBitmap(413, 531, Color.WHITE)
         val spec = passportSpec()
 
-        val check = validator.staticChecks(bitmap, 50, spec).first { it.name == "Background" }
+        val check = validator.staticChecks(bitmap, 50, spec).first { it.kind == ValidationCheckKind.Background }
 
         assertThat(check.passed).isTrue()
     }
@@ -77,7 +77,7 @@ class SpecValidatorTest {
         val bitmap = solidBitmap(413, 531, Color.BLACK)
         val spec = passportSpec()
 
-        val check = validator.staticChecks(bitmap, 50, spec).first { it.name == "Background" }
+        val check = validator.staticChecks(bitmap, 50, spec).first { it.kind == ValidationCheckKind.Background }
 
         assertThat(check.passed).isFalse()
     }
