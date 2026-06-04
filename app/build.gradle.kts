@@ -133,7 +133,11 @@ dependencies {
     implementation(project(":data:billing"))
     implementation(project(":data:prefs"))
     implementation(project(":data:specs"))
+    implementation(project(":domain:camera"))
+    implementation(project(":domain:export"))
     implementation(project(":domain:pipeline"))
+    implementation(project(":domain:print"))
+    implementation(project(":domain:watermark"))
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))

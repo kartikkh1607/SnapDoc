@@ -74,7 +74,6 @@ import com.kartik.snapdoc.R
 import com.kartik.snapdoc.domain.camera.FaceGuidanceAnalyzer
 import com.kartik.snapdoc.domain.camera.FaceGuidanceState
 import com.kartik.snapdoc.domain.camera.GuidanceChecks
-import com.kartik.snapdoc.domain.camera.headlineRes
 import com.kartik.snapdoc.ui.components.FaceOvalGuide
 import com.kartik.snapdoc.ui.theme.Amber
 import com.kartik.snapdoc.ui.theme.CameraChipScrim
