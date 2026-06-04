@@ -2,9 +2,7 @@
     <string name="app_name">SnapDoc</string>
 
     <!-- Splash -->
-    <string name="splash_tagline">Document photos, done right.</string>
-    <string name="splash_loading">Loading your documents…</string>
-    <string name="splash_made_for_india">MADE FOR INDIA</string>
+    <!-- Splash strings live in :feature:splash -->
 
     <!-- Home -->
     <string name="home_eyebrow">SnapDoc</string>

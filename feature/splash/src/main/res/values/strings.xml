@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="splash_tagline">Document photos, done right.</string>
+    <string name="splash_loading">Loading your documents…</string>
+    <string name="splash_made_for_india">MADE FOR INDIA</string>
+</resources>
