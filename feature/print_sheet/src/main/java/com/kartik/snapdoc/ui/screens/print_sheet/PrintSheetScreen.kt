@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +22,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.ContentCut
+import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Share
@@ -126,18 +129,22 @@ fun PrintSheetScreen(
             Header(state = state, modifier = Modifier.padding(horizontal = 22.dp))
 
             Spacer(modifier = Modifier.height(14.dp))
-            SheetPicker(
-                selected = state.sheet,
-                onSelect = viewModel::selectSheet,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp),
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
             SheetPreview(
                 state = state,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+            SheetSettingsCard(
+                state = state,
+                onCycleSheet = {
+                    val all = SheetSize.entries
+                    val next = all[(all.indexOf(state.sheet) + 1) % all.size]
+                    viewModel.selectSheet(next)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 22.dp),
             )
 
             if (state.locked) {
@@ -209,42 +216,107 @@ private fun Header(state: PrintSheetUiState, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun SheetPicker(
-    selected: SheetSize,
-    onSelect: (SheetSize) -> Unit,
+private fun SheetSettingsCard(
+    state: PrintSheetUiState,
+    onCycleSheet: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier,
+    val sheet = state.sheet
+    val copies = state.layout?.copies ?: 0
+    Column(
+        modifier = modifier
+            .s1(18.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 14.dp),
     ) {
-        SheetSize.entries.forEach { sheet ->
-            val isSelected = sheet == selected
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(if (isSelected) Primary else MaterialTheme.colorScheme.surface)
-                    .border(
-                        width = 1.dp,
-                        color = if (isSelected) Primary else Hairline,
-                        shape = RoundedCornerShape(14.dp),
-                    )
-                    .selectable(
-                        selected = isSelected,
-                        role = Role.RadioButton,
-                        onClick = { onSelect(sheet) },
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = sheet.displayName,
-                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                )
-            }
+        SettingsRow(
+            icon = Icons.Outlined.CreditCard,
+            label = stringResource(R.string.printsheet_opt_paper_size),
+            value = stringResource(
+                R.string.printsheet_opt_paper_size_value,
+                sheet.displayName,
+                sheet.widthMm.toInt(),
+                sheet.heightMm.toInt(),
+            ),
+            onClick = onCycleSheet,
+            showDivider = true,
+        )
+        SettingsRow(
+            icon = Icons.Outlined.GridView,
+            label = stringResource(R.string.printsheet_opt_copies),
+            value = stringResource(R.string.printsheet_opt_copies_value, copies),
+            onClick = null,
+            showDivider = true,
+        )
+        SettingsRow(
+            icon = Icons.Outlined.ContentCut,
+            label = stringResource(R.string.printsheet_opt_cut_lines),
+            value = stringResource(R.string.printsheet_opt_cut_lines_value),
+            onClick = null,
+            showDivider = false,
+        )
+    }
+}
+
+@Composable
+private fun SettingsRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    onClick: (() -> Unit)?,
+    showDivider: Boolean,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClickLabel = label, onClick = onClick) else Modifier)
+            .padding(vertical = 12.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(PrimaryFaint),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Primary,
+                modifier = Modifier.size(16.dp),
+            )
         }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                color = Ink3,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+            )
+            Text(
+                text = value,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            )
+        }
+        if (onClick != null) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Ink4,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+    }
+    if (showDivider) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Hairline2),
+        )
     }
 }
 

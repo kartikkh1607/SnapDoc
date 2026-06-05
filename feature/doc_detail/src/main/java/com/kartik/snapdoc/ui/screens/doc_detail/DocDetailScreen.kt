@@ -91,7 +91,7 @@ fun DocDetailScreen(
                 .padding(bottom = 120.dp),
         ) {
             HeroSection(onBack = onBack)
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
             BodyContent(doc = doc)
         }
 
@@ -135,7 +135,7 @@ private fun HeroSection(onBack: () -> Unit) {
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .offset(y = (-12).dp)
+                .offset(y = (-26).dp)
                 .size(width = 152.dp, height = 192.dp)
                 .s3(18.dp)
                 .clip(RoundedCornerShape(18.dp))
@@ -144,6 +144,47 @@ private fun HeroSection(onBack: () -> Unit) {
         ) {
             DocPreviewHero(modifier = Modifier.fillMaxSize())
         }
+
+        // Verified badge — straddles the bottom edge of the hero card,
+        // matching the design's floating chip.
+        VerifiedBadge(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = (-14).dp),
+        )
+    }
+}
+
+@Composable
+private fun VerifiedBadge(modifier: Modifier = Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = modifier
+            .s2(99.dp)
+            .clip(RoundedCornerShape(99.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(start = 8.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(14.dp)
+                .clip(CircleShape)
+                .background(Primary),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Check,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(9.dp),
+            )
+        }
+        Text(
+            text = stringResource(R.string.docdetail_verified_badge),
+            color = Primary,
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+        )
     }
 }
 
@@ -151,41 +192,8 @@ private fun HeroSection(onBack: () -> Unit) {
 @Composable
 private fun BodyContent(doc: DocumentSpec) {
     Column(modifier = Modifier.padding(horizontal = 22.dp)) {
-        // Verified badge.
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier
-                .s2(99.dp)
-                .clip(RoundedCornerShape(99.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(start = 8.dp, end = 12.dp, top = 6.dp, bottom = 6.dp)
-                .align(Alignment.CenterHorizontally),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(14.dp)
-                    .clip(CircleShape)
-                    .background(Primary),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Check,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(9.dp),
-                )
-            }
-            Text(
-                text = stringResource(R.string.docdetail_verified_badge),
-                color = Primary,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-            )
-        }
-
-        Spacer(modifier = Modifier.height(18.dp))
         Text(
-            text = stringResource(R.string.docdetail_eyebrow, doc.categoryId.uppercase()),
+            text = stringResource(R.string.docdetail_eyebrow, doc.shortName.uppercase()),
             color = Primary,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
         )
