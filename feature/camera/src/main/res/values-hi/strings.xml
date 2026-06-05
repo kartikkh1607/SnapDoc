@@ -3,7 +3,11 @@
     <string name="camera_doc_default">डॉक्यूमेंट</string>
     <string name="camera_doc_subtitle">%1$d × %2$d मिमी · %3$s BG</string>
     <string name="camera_check_face_centered">चेहरा बीच में</string>
+    <string name="camera_check_even_lighting">समान रोशनी</string>
+    <string name="camera_check_plain_bg">सादा बैकग्राउंड</string>
     <string name="camera_check_eyes_open">आँखें खुली</string>
+    <string name="camera_mode_upload">अपलोड</string>
+    <string name="camera_mode_camera">कैमरा</string>
     <string name="camera_perm_title">कैमरा अनुमति चाहिए</string>
     <string name="camera_perm_subtitle">SnapDoc सही माप की डॉक्यूमेंट फ़ोटो लेने के लिए कैमरा इस्तेमाल करता है। फ़ोटो आपके फ़ोन पर ही रहती हैं।</string>
     <string name="camera_perm_cancel">रद्द करें</string>

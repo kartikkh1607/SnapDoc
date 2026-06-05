@@ -11,6 +11,13 @@
     <string name="processing_step_compress">Compressing file</string>
     <string name="processing_step_validate">Verifying compliance</string>
     <string name="processing_step_done">Done</string>
+    <string name="processing_detail_face">Locating face landmarks…</string>
+    <string name="processing_detail_bg_remove">Cutting clean edges…</string>
+    <string name="processing_detail_bg_apply">Painting plain backdrop…</string>
+    <string name="processing_detail_crop">Aligning to spec frame…</string>
+    <string name="processing_detail_resize">Resizing to spec pixels…</string>
+    <string name="processing_detail_compress">Targeting print KB…</string>
+    <string name="processing_detail_validate">Checking against spec…</string>
     <string name="processing_footer">PROCESSED ON-DEVICE · NO IMAGES STORED</string>
     <string name="processing_cd_cancel">Cancel processing</string>
     <string name="processing_error_title">Couldn\'t finish your photo</string>

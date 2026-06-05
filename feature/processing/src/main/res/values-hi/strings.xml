@@ -11,6 +11,13 @@
     <string name="processing_step_compress">फ़ाइल कंप्रेस हो रही है</string>
     <string name="processing_step_validate">पालन की जाँच</string>
     <string name="processing_step_done">पूर्ण</string>
+    <string name="processing_detail_face">चेहरे के लैंडमार्क ढूँढ रहे हैं…</string>
+    <string name="processing_detail_bg_remove">किनारे साफ़ कर रहे हैं…</string>
+    <string name="processing_detail_bg_apply">सादा बैकग्राउंड लगा रहे हैं…</string>
+    <string name="processing_detail_crop">स्पेक फ्रेम के अनुसार…</string>
+    <string name="processing_detail_resize">स्पेक पिक्सेल में बदल रहे हैं…</string>
+    <string name="processing_detail_compress">प्रिंट KB के लिए कंप्रेस…</string>
+    <string name="processing_detail_validate">स्पेक से मिलान…</string>
     <string name="processing_footer">डिवाइस पर प्रोसेस · कोई इमेज सेव नहीं</string>
     <string name="processing_cd_cancel">प्रोसेसिंग रद्द करें</string>
     <string name="processing_error_title">आपकी फ़ोटो पूरी नहीं हो सकी</string>

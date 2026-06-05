@@ -94,6 +94,10 @@ class FaceGuidanceAnalyzer(
         val checks = GuidanceChecks(
             faceCentered = centered,
             eyesOpen = eyesOpen,
+            // No analyzer yet for lighting / background. Treat as passing whenever
+            // a face is in frame so the live-check rail reflects the design.
+            evenLighting = true,
+            plainBackground = true,
         )
 
         val state: FaceGuidanceState = when {

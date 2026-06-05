@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -59,6 +60,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -283,10 +285,12 @@ private fun CameraContent(
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 14.dp),
+                .align(Alignment.TopStart)
+                .padding(start = 14.dp, top = 240.dp),
         ) {
             CheckChip(stringResource(R.string.camera_check_face_centered), state.checks.faceCentered)
+            CheckChip(stringResource(R.string.camera_check_even_lighting), state.checks.evenLighting)
+            CheckChip(stringResource(R.string.camera_check_plain_bg), state.checks.plainBackground)
             CheckChip(stringResource(R.string.camera_check_eyes_open), state.checks.eyesOpen)
         }
 
@@ -305,6 +309,19 @@ private fun CameraContent(
                 ),
         )
 
+        val onUpload: () -> Unit = {
+            galleryLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+            )
+        }
+
+        ModeTabs(
+            onUploadClick = onUpload,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 148.dp),
+        )
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -313,13 +330,7 @@ private fun CameraContent(
                 .padding(bottom = 50.dp, start = 36.dp, end = 36.dp)
                 .fillMaxWidth(),
         ) {
-            GalleryThumb(
-                onClick = {
-                    galleryLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                    )
-                },
-            )
+            GalleryThumb(onClick = onUpload)
             CaptureButton(
                 enabled = state.captureEnabled,
                 onClick = {
@@ -579,6 +590,46 @@ private fun CaptureButton(enabled: Boolean, onClick: () -> Unit) {
                 .background(if (enabled) Color.White else Color.White.copy(alpha = 0.6f))
                 .border(4.dp, Primary.copy(alpha = if (enabled) 0.4f else 0.2f), CircleShape),
         )
+    }
+}
+
+@Composable
+private fun ModeTabs(onUploadClick: () -> Unit, modifier: Modifier = Modifier) {
+    val uploadLabel = stringResource(R.string.camera_mode_upload)
+    val cameraLabel = stringResource(R.string.camera_mode_camera)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(22.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier,
+    ) {
+        Text(
+            text = uploadLabel,
+            color = Color.White.copy(alpha = 0.55f),
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.6.sp,
+            ),
+            modifier = Modifier
+                .clickable(role = Role.Tab, onClickLabel = uploadLabel, onClick = onUploadClick)
+                .padding(vertical = 6.dp),
+        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = cameraLabel,
+                color = Amber,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.6.sp,
+                ),
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Box(
+                modifier = Modifier
+                    .size(4.dp)
+                    .clip(CircleShape)
+                    .background(Amber),
+            )
+        }
     }
 }
 

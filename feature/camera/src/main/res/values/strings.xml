@@ -3,7 +3,11 @@
     <string name="camera_doc_default">Document</string>
     <string name="camera_doc_subtitle">%1$d × %2$d mm · %3$s BG</string>
     <string name="camera_check_face_centered">Face centered</string>
+    <string name="camera_check_even_lighting">Even lighting</string>
+    <string name="camera_check_plain_bg">Plain background</string>
     <string name="camera_check_eyes_open">Eyes open</string>
+    <string name="camera_mode_upload">UPLOAD</string>
+    <string name="camera_mode_camera">CAMERA</string>
     <string name="camera_perm_title">Camera permission needed</string>
     <string name="camera_perm_subtitle">SnapDoc uses your camera to take a perfectly-sized document photo. Photos stay on your device.</string>
     <string name="camera_perm_cancel">Cancel</string>

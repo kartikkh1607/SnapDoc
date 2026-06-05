@@ -15,4 +15,6 @@ sealed interface FaceGuidanceState {
 data class GuidanceChecks(
     val faceCentered: Boolean = false,
     val eyesOpen: Boolean = false,
+    val evenLighting: Boolean = false,
+    val plainBackground: Boolean = false,
 )

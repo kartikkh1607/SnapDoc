@@ -68,14 +68,16 @@ import com.kartik.snapdoc.ui.theme.s2
 private data class Step(val label: String, val state: StepState, val detail: String? = null)
 private enum class StepState { Done, Active, Idle }
 
+private data class StageRes(val labelRes: Int, val detailRes: Int)
+
 private val PipelineStageRes = listOf(
-    ProcessingStage.DetectingFace to R.string.processing_step_face,
-    ProcessingStage.RemovingBackground to R.string.processing_step_bg_remove,
-    ProcessingStage.ApplyingBackground to R.string.processing_step_bg_apply,
-    ProcessingStage.Cropping to R.string.processing_step_crop,
-    ProcessingStage.Resizing to R.string.processing_step_resize,
-    ProcessingStage.Compressing to R.string.processing_step_compress,
-    ProcessingStage.Validating to R.string.processing_step_validate,
+    ProcessingStage.DetectingFace to StageRes(R.string.processing_step_face, R.string.processing_detail_face),
+    ProcessingStage.RemovingBackground to StageRes(R.string.processing_step_bg_remove, R.string.processing_detail_bg_remove),
+    ProcessingStage.ApplyingBackground to StageRes(R.string.processing_step_bg_apply, R.string.processing_detail_bg_apply),
+    ProcessingStage.Cropping to StageRes(R.string.processing_step_crop, R.string.processing_detail_crop),
+    ProcessingStage.Resizing to StageRes(R.string.processing_step_resize, R.string.processing_detail_resize),
+    ProcessingStage.Compressing to StageRes(R.string.processing_step_compress, R.string.processing_detail_compress),
+    ProcessingStage.Validating to StageRes(R.string.processing_step_validate, R.string.processing_detail_validate),
 )
 
 @Composable
@@ -88,7 +90,11 @@ private fun buildSteps(current: ProcessingStage): List<Step> {
             idx == currentIdx -> StepState.Active
             else -> StepState.Idle
         }
-        Step(stringResource(res), state)
+        Step(
+            label = stringResource(res.labelRes),
+            state = state,
+            detail = if (state == StepState.Active) stringResource(res.detailRes) else null,
+        )
     }
 }
 
