@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
@@ -31,6 +31,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <!--
+            AppLovin MAX SDK key. The key itself is read from AdsConfig.SDK_KEY in
+            code so swapping environments doesn't require an APK rebuild via
+            manifest placeholders; this meta-data is here for AppLovin's static
+            discovery.
+        -->
+        <meta-data
+            android:name="applovin.sdk.key"
+            android:value="REPLACE_WITH_APPLOVIN_SDK_KEY" />
 
         <activity
             android:name=".MainActivity"

@@ -127,32 +127,6 @@ android {
 }
 
 dependencies {
-    // Modules
-    implementation(project(":core:common"))
-    implementation(project(":core:designsystem"))
-    implementation(project(":core:navigation"))
-    implementation(project(":data:billing"))
-    implementation(project(":data:prefs"))
-    implementation(project(":data:specs"))
-    implementation(project(":domain:camera"))
-    implementation(project(":domain:export"))
-    implementation(project(":domain:pipeline"))
-    implementation(project(":domain:print"))
-    implementation(project(":domain:watermark"))
-    implementation(project(":feature:camera"))
-    implementation(project(":feature:doc_detail"))
-    implementation(project(":feature:documents"))
-    implementation(project(":feature:export"))
-    implementation(project(":feature:history"))
-    implementation(project(":feature:home"))
-    implementation(project(":feature:onboarding"))
-    implementation(project(":feature:preview"))
-    implementation(project(":feature:print_sheet"))
-    implementation(project(":feature:processing"))
-    implementation(project(":feature:review"))
-    implementation(project(":feature:settings"))
-    implementation(project(":feature:splash"))
-
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -189,9 +163,16 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
-    // Firebase Analytics (Crashlytics ships transitively via :core:common).
+    // AppLovin MAX
+    implementation(libs.applovin.sdk)
+
+    // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     // Serialization + Coroutines
     implementation(libs.kotlinx.serialization.json)

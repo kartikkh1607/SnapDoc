@@ -1,6 +1,8 @@
 package com.kartik.snapdoc.ui.screens.home
 
 import com.google.common.truth.Truth.assertThat
+import com.kartik.snapdoc.data.prefs.UserPrefsRepository
+import com.kartik.snapdoc.data.prefs.UserProfile
 import com.kartik.snapdoc.data.specs.DefaultSpecCatalogRepository
 import com.kartik.snapdoc.data.specs.SpecCatalogLoader
 import com.kartik.snapdoc.data.specs.model.BackgroundSpec
@@ -13,6 +15,8 @@ import com.kartik.snapdoc.data.specs.model.RulesSpec
 import com.kartik.snapdoc.data.specs.model.SpecCatalog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -26,6 +30,7 @@ class HomeViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
     private val repo = DefaultSpecCatalogRepository(FakeLoader())
+    private val prefs = FakePrefs()
 
     @Before
     fun setUp() {
@@ -39,7 +44,7 @@ class HomeViewModelTest {
 
     @Test
     fun `init loads categories and documents and clears loading`() = runTest {
-        val viewModel = HomeViewModel(repo)
+        val viewModel = HomeViewModel(repo, prefs)
 
         val state = viewModel.state.value
         assertThat(state.loading).isFalse()
@@ -49,7 +54,7 @@ class HomeViewModelTest {
 
     @Test
     fun `init documents are ordered by popularity (blank search)`() = runTest {
-        val viewModel = HomeViewModel(repo)
+        val viewModel = HomeViewModel(repo, prefs)
 
         val popularities = viewModel.state.value.documents.map { it.popularity }
         assertThat(popularities).isInOrder(Comparator.reverseOrder<Int>())
@@ -57,7 +62,7 @@ class HomeViewModelTest {
 
     @Test
     fun `onCategorySelect filters documents to that category`() = runTest {
-        val viewModel = HomeViewModel(repo)
+        val viewModel = HomeViewModel(repo, prefs)
 
         viewModel.onCategorySelect("in_government")
 
@@ -69,7 +74,7 @@ class HomeViewModelTest {
 
     @Test
     fun `onCategorySelect null restores the full document list`() = runTest {
-        val viewModel = HomeViewModel(repo)
+        val viewModel = HomeViewModel(repo, prefs)
         viewModel.onCategorySelect("in_government")
 
         viewModel.onCategorySelect(null)
@@ -78,6 +83,16 @@ class HomeViewModelTest {
         assertThat(state.selectedCategoryId).isNull()
         assertThat(state.documents.map { it.categoryId }.toSet())
             .containsAtLeast("in_government", "intl_visa")
+    }
+
+    private class FakePrefs : UserPrefsRepository {
+        override val onboardingSeen: Flow<Boolean> = MutableStateFlow(true)
+        override val profile: Flow<UserProfile> = MutableStateFlow(UserProfile("Test User", "test@test.com"))
+        override val saveToGallery: Flow<Boolean> = MutableStateFlow(true)
+        override suspend fun setOnboardingSeen(seen: Boolean) {}
+        override suspend fun setDisplayName(name: String) {}
+        override suspend fun setEmail(email: String) {}
+        override suspend fun setSaveToGallery(value: Boolean) {}
     }
 
     private class FakeLoader : SpecCatalogLoader {

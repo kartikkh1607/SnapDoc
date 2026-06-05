@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="documents_title">Documents</string>
-    <string name="documents_empty_title">No saved documents</string>
-    <string name="documents_empty_subtitle">Photos you keep for re-export will live here.</string>
-</resources>
