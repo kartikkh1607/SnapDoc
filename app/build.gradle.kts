@@ -163,9 +163,6 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
-    // AppLovin MAX
-    implementation(libs.applovin.sdk)
-
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)

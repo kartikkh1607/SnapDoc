@@ -68,28 +68,35 @@ class FaceGuidanceAnalyzer(
         val face = faces.first()
         val box = face.boundingBox
 
-        val headRatio = box.height().toFloat() / frameHeight
-        val targetMin = faceSpec.headHeightPercentMin / 100f
-        val targetMax = faceSpec.headHeightPercentMax / 100f
-        val targetMid = (targetMin + targetMax) / 2f
+        // Live framing gate is independent of the document's strict head-height spec
+        // (that's checked at export). Here we just want "face is reasonably framed
+        // inside the on-screen oval" — face box covering ~22–70% of frame height.
+        val faceBoxRatio = box.height().toFloat() / frameHeight
+        val targetMid = (FACE_BOX_MIN + FACE_BOX_MAX) / 2f
 
         val centerX = box.exactCenterX()
         val centerY = box.exactCenterY()
         val frameCenterX = frameWidth / 2f
         val frameCenterY = frameHeight * 0.45f
-        val centerToleranceX = frameWidth * 0.10f
-        val centerToleranceY = frameHeight * 0.12f
+        val centerToleranceX = frameWidth * 0.15f
+        val centerToleranceY = frameHeight * 0.18f
         val centered = abs(centerX - frameCenterX) < centerToleranceX &&
             abs(centerY - frameCenterY) < centerToleranceY
 
-        val straight = abs(face.headEulerAngleY) < POSE_TOLERANCE_DEG &&
-            abs(face.headEulerAngleZ) < POSE_TOLERANCE_DEG &&
-            abs(face.headEulerAngleX) < POSE_TOLERANCE_DEG
+        // Yaw/roll matter most for ID photos; pitch (looking up/down) is the
+        // least visually obvious on a small preview, so we allow a bit more
+        // slack on the X axis.
+        val straight = abs(face.headEulerAngleY) < POSE_TOLERANCE_YAW_DEG &&
+            abs(face.headEulerAngleZ) < POSE_TOLERANCE_ROLL_DEG &&
+            abs(face.headEulerAngleX) < POSE_TOLERANCE_PITCH_DEG
 
-        val leftEyeOpen = (face.leftEyeOpenProbability ?: 1f) > 0.5f
-        val rightEyeOpen = (face.rightEyeOpenProbability ?: 1f) > 0.5f
+        val leftEyeOpen = (face.leftEyeOpenProbability ?: 1f) > 0.4f
+        val rightEyeOpen = (face.rightEyeOpenProbability ?: 1f) > 0.4f
         val eyesOpen = leftEyeOpen && rightEyeOpen
-        val mouthClosed = (face.smilingProbability ?: 0f) < 0.7f
+        // ML Kit's "smiling" is generous — anything above ~0.85 is a real grin.
+        // Anything below that we still count as a neutral-enough expression so
+        // users with a slight upturned mouth aren't permanently blocked.
+        val mouthClosed = (face.smilingProbability ?: 0f) < 0.85f
 
         val checks = GuidanceChecks(
             faceCentered = centered,
@@ -101,8 +108,8 @@ class FaceGuidanceAnalyzer(
         )
 
         val state: FaceGuidanceState = when {
-            headRatio < targetMin * 0.85f -> FaceGuidanceState.TooFar(headRatio, targetMid)
-            headRatio > targetMax * 1.15f -> FaceGuidanceState.TooClose(headRatio, targetMid)
+            faceBoxRatio < FACE_BOX_MIN -> FaceGuidanceState.TooFar(faceBoxRatio, targetMid)
+            faceBoxRatio > FACE_BOX_MAX -> FaceGuidanceState.TooClose(faceBoxRatio, targetMid)
             !centered -> FaceGuidanceState.NotCentered
             !straight -> FaceGuidanceState.NotStraight
             !eyesOpen -> FaceGuidanceState.EyesClosed
@@ -117,7 +124,24 @@ class FaceGuidanceAnalyzer(
     }
 
     companion object {
-        private const val POSE_TOLERANCE_DEG = 8f
+        // Pose tolerances widened from a uniform 15° so users in normal indoor
+        // light can actually reach Ready without holding a perfectly rigid pose.
+        // Yaw/roll stay tighter because they're what make an ID photo look off.
+        private const val POSE_TOLERANCE_YAW_DEG = 20f
+        private const val POSE_TOLERANCE_ROLL_DEG = 18f
+        private const val POSE_TOLERANCE_PITCH_DEG = 25f
         private const val ANALYSIS_INTERVAL_MS = 200L
+        // Upper bound is driven by what the cropper can actually use, not by what
+        // looks framed in the preview. FaceCropGeometry needs:
+        //   faceBox <= FACE_BOX_TO_HEAD_RATIO * headHeightPercent * sourceHeight
+        // For the typical 0.70 ratio and a 70-80% head spec (mid 0.75), that
+        // works out to ~0.525. We sit just under it at 0.50 to leave a small
+        // margin against jitter between the live analyzer frame and the still
+        // capture. Anything past this and the cropper would have to pad the
+        // output with background-coloured strips — softer than the old hard
+        // reject (it still produces a photo), but the preview should steer the
+        // user away from that path in the first place.
+        private const val FACE_BOX_MIN = 0.18f
+        private const val FACE_BOX_MAX = 0.50f
     }
 }

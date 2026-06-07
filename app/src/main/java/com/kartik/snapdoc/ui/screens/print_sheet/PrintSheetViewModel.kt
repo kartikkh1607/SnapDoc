@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.kartik.snapdoc.R
-import com.kartik.snapdoc.data.ads.AdsRepository
 import com.kartik.snapdoc.data.specs.SpecCatalogRepository
 import com.kartik.snapdoc.domain.export.DocumentExporter
 import com.kartik.snapdoc.domain.export.PhotoExporter
@@ -32,7 +31,6 @@ class PrintSheetViewModel @Inject constructor(
     private val generator: PrintSheetGenerator,
     private val documentExporter: DocumentExporter,
     private val photoExporter: PhotoExporter,
-    private val ads: AdsRepository,
 ) : ViewModel() {
 
     private val args = savedStateHandle.toRoute<Routes.PrintSheet>()
@@ -94,7 +92,7 @@ class PrintSheetViewModel @Inject constructor(
                         shareMime = "application/pdf",
                     )
                 }
-                activity?.let(ads::showInterstitial)
+                // No interstitial — app is fully free.
             }.onFailure {
                 _state.update {
                     it.copy(phase = PrintExportPhase.Error, errorRes = R.string.printsheet_error_pdf)
@@ -130,7 +128,7 @@ class PrintSheetViewModel @Inject constructor(
                         shareMime = "image/jpeg",
                     )
                 }
-                activity?.let(ads::showInterstitial)
+                // No interstitial — app is fully free.
             }.onFailure {
                 _state.update {
                     it.copy(phase = PrintExportPhase.Error, errorRes = R.string.printsheet_error_jpg)

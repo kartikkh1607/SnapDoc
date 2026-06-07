@@ -64,7 +64,11 @@ fun SnapDocNavGraph(
 
         composable<Routes.History> { HistoryScreen() }
 
-        composable<Routes.Documents> { DocumentsScreen() }
+        composable<Routes.Documents> {
+            DocumentsScreen(
+                onDocClick = { docId -> navController.navigate(Routes.DocDetail(docId)) },
+            )
+        }
 
         composable<Routes.DocDetail> {
             DocDetailScreen(

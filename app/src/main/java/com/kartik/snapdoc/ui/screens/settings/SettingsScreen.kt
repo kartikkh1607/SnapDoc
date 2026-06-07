@@ -48,10 +48,15 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
 import com.kartik.snapdoc.data.prefs.UserProfile
 import com.kartik.snapdoc.R
 import com.kartik.snapdoc.ui.theme.Hairline2
@@ -79,54 +84,111 @@ private data class SettingsGroup(val title: String, val rows: List<SettingsRow>)
 private fun buildGroups(
     state: SettingsUiState,
     onToggleSaveToGallery: () -> Unit,
-): List<SettingsGroup> = listOf(
-    SettingsGroup(
-        title = stringResource(R.string.settings_group_preferences),
-        rows = listOf(
-            SettingsRow(
-                stringResource(R.string.settings_row_language),
-                stringResource(R.string.settings_row_language_value),
-                Icons.Outlined.Language,
-            ),
-            SettingsRow(
-                label = stringResource(R.string.settings_row_save_to_gallery),
-                subtitle = stringResource(
-                    if (state.saveToGallery) R.string.settings_row_save_to_gallery_on
-                    else R.string.settings_row_save_to_gallery_off,
+): List<SettingsGroup> {
+    val context = LocalContext.current
+    return listOf(
+        SettingsGroup(
+            title = stringResource(R.string.settings_group_preferences),
+            rows = listOf(
+                SettingsRow(
+                    stringResource(R.string.settings_row_language),
+                    stringResource(R.string.settings_row_language_value),
+                    Icons.Outlined.Language,
                 ),
-                icon = Icons.Outlined.Image,
-                toggleState = state.saveToGallery,
-                toggleLabel = stringResource(R.string.settings_cd_save_to_gallery_toggle),
-                onToggle = onToggleSaveToGallery,
-            ),
-            SettingsRow(
-                stringResource(R.string.settings_row_on_device),
-                stringResource(R.string.settings_row_on_device_value),
-                Icons.Outlined.Bolt,
-            ),
-        ),
-    ),
-    SettingsGroup(
-        title = stringResource(R.string.settings_group_support),
-        rows = listOf(
-            SettingsRow(stringResource(R.string.settings_row_help), null, Icons.AutoMirrored.Outlined.Help),
-            SettingsRow(stringResource(R.string.settings_row_contact), null, Icons.Outlined.Notifications),
-            SettingsRow(stringResource(R.string.settings_row_rate), null, Icons.Outlined.Star),
-        ),
-    ),
-    SettingsGroup(
-        title = stringResource(R.string.settings_group_legal),
-        rows = listOf(
-            SettingsRow(stringResource(R.string.settings_row_privacy), null, Icons.Outlined.Shield),
-            SettingsRow(stringResource(R.string.settings_row_terms), null, Icons.Outlined.Book),
-            SettingsRow(
-                label = stringResource(R.string.settings_row_about),
-                subtitle = stringResource(R.string.settings_about_version, state.versionName, state.versionCode),
-                icon = Icons.Outlined.Info,
+                SettingsRow(
+                    label = stringResource(R.string.settings_row_save_to_gallery),
+                    subtitle = stringResource(
+                        if (state.saveToGallery) R.string.settings_row_save_to_gallery_on
+                        else R.string.settings_row_save_to_gallery_off,
+                    ),
+                    icon = Icons.Outlined.Image,
+                    toggleState = state.saveToGallery,
+                    toggleLabel = stringResource(R.string.settings_cd_save_to_gallery_toggle),
+                    onToggle = onToggleSaveToGallery,
+                ),
+                SettingsRow(
+                    stringResource(R.string.settings_row_on_device),
+                    stringResource(R.string.settings_row_on_device_value),
+                    Icons.Outlined.Bolt,
+                ),
             ),
         ),
-    ),
-)
+        SettingsGroup(
+            title = stringResource(R.string.settings_group_support),
+            rows = listOf(
+                SettingsRow(
+                    stringResource(R.string.settings_row_help),
+                    null,
+                    Icons.AutoMirrored.Outlined.Help,
+                    onClick = { openUrl(context, "https://github.com/kartikkhandelwal/snapdoc#readme") },
+                ),
+                SettingsRow(
+                    stringResource(R.string.settings_row_contact),
+                    null,
+                    Icons.Outlined.Notifications,
+                    onClick = { sendEmail(context, "kartikkhandelwal1234589@gmail.com", "SnapDoc feedback") },
+                ),
+                SettingsRow(
+                    stringResource(R.string.settings_row_rate),
+                    null,
+                    Icons.Outlined.Star,
+                    onClick = { openPlayStore(context) },
+                ),
+            ),
+        ),
+        SettingsGroup(
+            title = stringResource(R.string.settings_group_legal),
+            rows = listOf(
+                SettingsRow(
+                    stringResource(R.string.settings_row_privacy),
+                    null,
+                    Icons.Outlined.Shield,
+                    onClick = { openUrl(context, "https://github.com/kartikkhandelwal/snapdoc/blob/main/PRIVACY.md") },
+                ),
+                SettingsRow(
+                    stringResource(R.string.settings_row_terms),
+                    null,
+                    Icons.Outlined.Book,
+                    onClick = { openUrl(context, "https://github.com/kartikkhandelwal/snapdoc/blob/main/TERMS.md") },
+                ),
+                SettingsRow(
+                    label = stringResource(R.string.settings_row_about),
+                    subtitle = stringResource(R.string.settings_about_version, state.versionName, state.versionCode),
+                    icon = Icons.Outlined.Info,
+                ),
+            ),
+        ),
+    )
+}
+
+private fun openUrl(context: Context, url: String) {
+    runCatching {
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, url.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+    }
+}
+
+private fun sendEmail(context: Context, to: String, subject: String) {
+    val intent = Intent(Intent.ACTION_SENDTO).apply {
+        data = "mailto:$to".toUri()
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    runCatching { context.startActivity(intent) }
+}
+
+private fun openPlayStore(context: Context) {
+    val market = "market://details?id=${context.packageName}".toUri()
+    val web = "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW, market).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    } catch (_: ActivityNotFoundException) {
+        runCatching {
+            context.startActivity(Intent(Intent.ACTION_VIEW, web).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
+    }
+}
 
 @Composable
 fun SettingsScreen(

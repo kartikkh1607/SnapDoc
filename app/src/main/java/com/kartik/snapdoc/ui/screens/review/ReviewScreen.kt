@@ -15,20 +15,30 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,9 +56,12 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import coil.compose.AsyncImage
 import com.kartik.snapdoc.R
-import com.kartik.snapdoc.R as DesignR
+import com.kartik.snapdoc.data.specs.SpecCatalogRepository
+import com.kartik.snapdoc.data.specs.model.DocumentSpec
+import com.kartik.snapdoc.data.specs.model.RulesSpec
 import com.kartik.snapdoc.ui.components.DocPreviewHero
 import com.kartik.snapdoc.ui.navigation.Routes
+import com.kartik.snapdoc.ui.theme.Hairline2
 import com.kartik.snapdoc.ui.theme.Ink3
 import com.kartik.snapdoc.ui.theme.Primary
 import com.kartik.snapdoc.ui.theme.ReviewSurface
@@ -60,13 +73,17 @@ import javax.inject.Inject
 @HiltViewModel
 class ReviewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    repo: SpecCatalogRepository,
 ) : ViewModel() {
     private val args = savedStateHandle.toRoute<Routes.Review>()
     val docId: String = args.docId
     val imageUri: String = args.imageUri
+    // May be null if the catalog was hot-swapped out from under us; the Info
+    // button hides itself in that case so we never show an empty sheet.
+    val doc: DocumentSpec? = repo.byId(docId)
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ReviewScreen(
     onRetake: () -> Unit,
@@ -75,6 +92,9 @@ fun ReviewScreen(
     animatedContentScope: AnimatedContentScope,
     viewModel: ReviewViewModel = hiltViewModel(),
 ) {
+    var showSpecSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -99,14 +119,18 @@ fun ReviewScreen(
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 modifier = Modifier.semantics { heading() },
             )
-            DarkIconButton(
-                icon = Icons.Outlined.Info,
-                onClick = {},
-                contentDescription = stringResource(DesignR.string.cd_info),
-            )
+            if (viewModel.doc != null) {
+                DarkIconButton(
+                    icon = Icons.Outlined.Info,
+                    onClick = { showSpecSheet = true },
+                    contentDescription = stringResource(R.string.cd_info),
+                )
+            } else {
+                Spacer(modifier = Modifier.size(40.dp))
+            }
         }
 
-        // Captured image Ã¢â‚¬â€ large.
+        // Captured image — large.
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -170,6 +194,180 @@ fun ReviewScreen(
             }
             Spacer(modifier = Modifier.height(12.dp))
         }
+    }
+
+    if (showSpecSheet && viewModel.doc != null) {
+        ModalBottomSheet(
+            onDismissRequest = { showSpecSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            SpecDetailSheet(doc = viewModel.doc)
+        }
+    }
+}
+
+@Composable
+private fun SpecDetailSheet(doc: DocumentSpec) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 22.dp)
+            .padding(bottom = 24.dp),
+    ) {
+        Text(
+            text = doc.displayName,
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.semantics { heading() },
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.review_spec_sheet_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            color = Ink3,
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+
+        SpecRow(
+            label = stringResource(R.string.docdetail_spec_size),
+            value = stringResource(
+                R.string.docdetail_spec_size_value,
+                doc.dimensions.widthMm.toInt(),
+                doc.dimensions.heightMm.toInt(),
+            ),
+        )
+        SpecRow(
+            label = stringResource(R.string.docdetail_spec_resolution),
+            value = stringResource(
+                R.string.docdetail_spec_resolution_value,
+                doc.dimensions.widthPx,
+                doc.dimensions.heightPx,
+            ),
+        )
+        SpecRow(
+            label = stringResource(R.string.docdetail_spec_background),
+            value = doc.background.displayName,
+        )
+        SpecRow(
+            label = stringResource(R.string.docdetail_spec_file),
+            value = stringResource(
+                R.string.docdetail_spec_file_value,
+                doc.file.minSizeKb,
+                doc.file.maxSizeKb,
+            ),
+            showDivider = false,
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = stringResource(R.string.docdetail_requirements_title),
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        RulesList(rules = doc.rules)
+        if (doc.notes.isNotBlank()) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(12.dp),
+            ) {
+                Text(
+                    text = doc.notes,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Ink3,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SpecRow(label: String, value: String, showDivider: Boolean = true) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Ink3,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+    }
+    if (showDivider) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Hairline2),
+        )
+    }
+}
+
+@Composable
+private fun RulesList(rules: RulesSpec) {
+    val items = buildList {
+        add(
+            if (rules.glassesAllowed) stringResource(R.string.review_spec_rules_glasses_yes)
+            else stringResource(R.string.review_spec_rules_glasses_no),
+        )
+        add(
+            when {
+                rules.headCoveringAllowed && rules.headCoveringReligiousOnly ->
+                    stringResource(R.string.review_spec_rules_head_cover_religious)
+                rules.headCoveringAllowed ->
+                    stringResource(R.string.review_spec_rules_head_cover_yes)
+                else -> stringResource(R.string.review_spec_rules_head_cover_no)
+            },
+        )
+        if (rules.neutralExpression) add(stringResource(R.string.review_spec_rules_neutral))
+        if (rules.mouthClosed) add(stringResource(R.string.review_spec_rules_mouth_closed))
+        if (rules.eyesOpen) add(stringResource(R.string.review_spec_rules_eyes_open))
+        if (rules.noShadows) add(stringResource(R.string.review_spec_rules_no_shadows))
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        items.forEach { RuleRow(it) }
+    }
+}
+
+@Composable
+private fun RuleRow(text: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(Success.copy(alpha = 0.18f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Check,
+                contentDescription = null,
+                tint = Success,
+                modifier = Modifier.size(12.dp),
+            )
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
@@ -302,4 +500,3 @@ private fun DarkIconButton(
         )
     }
 }
-

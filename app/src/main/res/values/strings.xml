@@ -100,6 +100,15 @@
     <string name="documents_title">Documents</string>
     <string name="documents_empty_title">No saved documents</string>
     <string name="documents_empty_subtitle">Photos you keep for re-export will live here.</string>
+    <string name="documents_search_hint">Search passport, visa, exam…</string>
+    <string name="documents_category_all">All</string>
+    <string name="documents_count_template">%1$d documents</string>
+    <string name="documents_empty_search">No documents match your search.</string>
+    <string name="history_subtitle">Photos you\'ve recently processed</string>
+    <string name="history_item_meta">%1$s · %2$s</string>
+    <string name="history_delete">Delete</string>
+    <string name="history_share">Share</string>
+    <string name="history_count_template">%1$d photos</string>
     <!-- feature/export/src/main/res/values/strings.xml -->
     <string name="export_error_connection">Couldn\'t reach Google Play. Check your connection and try again.</string>
     <string name="export_error_purchase_failed">Payment didn\'t go through. Try again or use a different payment method.</string>
@@ -163,6 +172,7 @@
     <string name="home_suggested_title">Popular documents</string>
     <string name="home_suggested_action">See all</string>
     <string name="home_featured_badge">FOR YOU</string>
+    <string name="home_doc_card_size">%1$d × %2$d mm</string>
     <!-- feature/onboarding/src/main/res/values/strings.xml -->
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_before">BEFORE</string>
@@ -266,6 +276,17 @@
     <string name="review_quality_subtitle">Sharp focus · clean background · face centered</string>
     <string name="review_retake">Retake</string>
     <string name="review_use_photo">Use this photo</string>
+    <string name="review_spec_sheet_title">Spec details</string>
+    <string name="review_spec_sheet_subtitle">What this photo needs to pass</string>
+    <string name="review_spec_rules_glasses_no">No spectacles</string>
+    <string name="review_spec_rules_glasses_yes">Spectacles allowed</string>
+    <string name="review_spec_rules_head_cover_religious">Head covering — religious only</string>
+    <string name="review_spec_rules_head_cover_yes">Head covering allowed</string>
+    <string name="review_spec_rules_head_cover_no">No head covering</string>
+    <string name="review_spec_rules_neutral">Neutral expression</string>
+    <string name="review_spec_rules_mouth_closed">Mouth closed</string>
+    <string name="review_spec_rules_eyes_open">Eyes open</string>
+    <string name="review_spec_rules_no_shadows">No harsh shadows</string>
     <!-- feature/settings/src/main/res/values/strings.xml -->
     <string name="settings_title">Settings</string>
     <string name="settings_cd_close">Close</string>

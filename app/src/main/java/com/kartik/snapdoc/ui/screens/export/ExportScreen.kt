@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.HighQuality
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
@@ -133,21 +132,14 @@ fun ExportScreen(
                 )
             }
 
+            // App is fully free — a single "Save photo" action does the full-
+            // quality save. The "HD via rewarded ad" path is gone.
             ActionCard(
                 titleRes = R.string.export_save_standard_title,
                 subtitleRes = R.string.export_save_standard_subtitle,
                 icon = Icons.Outlined.Photo,
                 primary = true,
                 onClick = { (context as? Activity)?.let(viewModel::saveStandard) },
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            ActionCard(
-                titleRes = R.string.export_save_hd_title,
-                subtitleRes = R.string.export_save_hd_subtitle,
-                icon = Icons.Outlined.HighQuality,
-                primary = false,
-                enabled = state.phase != ExportPhase.WatchingAd,
-                onClick = { (context as? Activity)?.let(viewModel::saveHdViaRewardedAd) },
             )
         }
     }

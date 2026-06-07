@@ -32,16 +32,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!--
-            AppLovin MAX SDK key. The key itself is read from AdsConfig.SDK_KEY in
-            code so swapping environments doesn't require an APK rebuild via
-            manifest placeholders; this meta-data is here for AppLovin's static
-            discovery.
-        -->
-        <meta-data
-            android:name="applovin.sdk.key"
-            android:value="REPLACE_WITH_APPLOVIN_SDK_KEY" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true"

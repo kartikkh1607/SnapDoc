@@ -2,14 +2,19 @@ package com.kartik.snapdoc.domain.pipeline
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.util.Log
 import com.kartik.snapdoc.data.specs.model.BackgroundSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import java.nio.ByteOrder
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/** Thrown when the segmentation mask is too sparse to be trustworthy. */
+class DeadMaskException(message: String) : RuntimeException(message)
 
 @Singleton
 class BackgroundCompositor @Inject constructor() {
@@ -17,12 +22,11 @@ class BackgroundCompositor @Inject constructor() {
     /**
      * Composites [removed]'s foreground onto a solid [background] colour.
      *
-     * The image is processed in horizontal bands whose pixel buffer is capped
-     * around [BAND_BUDGET_BYTES]. Each band is read into a temporary IntArray,
-     * composited in parallel (workers split the band by row), and written back
-     * into the output bitmap. Peak transient memory is therefore one band buffer
-     * (~8MB on a typical photo) plus the output bitmap, rather than the previous
-     * two full-image IntArrays.
+     * If the mask comes back implausibly empty (fewer than [MIN_FOREGROUND_RATIO]
+     * of pixels classified as foreground) we throw [DeadMaskException] instead of
+     * silently producing an all-background image. PhotoProcessor catches this
+     * and falls back to the unmodified source so the user always gets a photo
+     * with their face in it.
      */
     suspend fun composite(removed: RemovedBackground, background: BackgroundSpec): Bitmap =
         withContext(Dispatchers.Default) {
@@ -33,8 +37,38 @@ class BackgroundCompositor @Inject constructor() {
 
             val maskW = mask.width
             val maskH = mask.height
-            val buf = mask.buffer.duplicate().asReadOnlyBuffer().apply { rewind() }
-            val maskValues = FloatArray(maskW * maskH).also { buf.asFloatBuffer().get(it) }
+            // Be defensive about the buffer: ML Kit returns it in native byte
+            // order, but force it explicitly so we never read garbage on a
+            // platform that defaults the duplicate to BIG_ENDIAN.
+            val buf = mask.buffer.duplicate()
+                .order(ByteOrder.nativeOrder())
+                .apply { rewind() }
+            val expectedFloats = maskW * maskH
+            val availableFloats = buf.remaining() / 4
+            val count = minOf(expectedFloats, availableFloats)
+            val maskValues = FloatArray(expectedFloats)
+            if (count > 0) {
+                buf.asFloatBuffer().get(maskValues, 0, count)
+            }
+
+            // Sanity-check the mask. A healthy selfie should have >= 5% of the
+            // frame as foreground. If we got ~0%, the segmentation result is
+            // dead — fall back to the source rather than producing a blank image.
+            var fg = 0
+            var sum = 0f
+            for (v in maskValues) {
+                sum += v
+                if (v >= 0.5f) fg++
+            }
+            val mean = if (maskValues.isNotEmpty()) sum / maskValues.size else 0f
+            val fgRatio = if (maskValues.isNotEmpty()) fg.toFloat() / maskValues.size else 0f
+            Log.d(TAG, "mask=${maskW}x${maskH} mean=%.3f fg=%.1f%% (expected=$expectedFloats available=$availableFloats)"
+                .format(mean, fgRatio * 100))
+            if (fgRatio < MIN_FOREGROUND_RATIO) {
+                throw DeadMaskException(
+                    "Mask only ${"%.2f".format(fgRatio * 100)}% foreground — segmentation likely failed",
+                )
+            }
 
             val bgColor = parseHexColor(background.colorHex)
             val bgR = Color.red(bgColor)
@@ -132,24 +166,22 @@ class BackgroundCompositor @Inject constructor() {
                 val alpha = (top + (bot - top) * ty).coerceIn(0f, 1f)
 
                 val src = pixels[pixOffset + x]
-                pixels[pixOffset + x] = when {
-                    alpha >= 0.95f -> src
-                    alpha <= 0.05f -> Color.rgb(bgR, bgG, bgB)
-                    else -> {
-                        val r = (Color.red(src) * alpha + bgR * (1 - alpha)).toInt()
-                        val g = (Color.green(src) * alpha + bgG * (1 - alpha)).toInt()
-                        val b = (Color.blue(src) * alpha + bgB * (1 - alpha)).toInt()
-                        Color.rgb(r, g, b)
-                    }
-                }
+                // Sharp cutoff at 0.5 — preserves the face cleanly. Edges are
+                // a touch harder than a blend, but for ID photos that's fine.
+                pixels[pixOffset + x] = if (alpha >= 0.5f) src else Color.rgb(bgR, bgG, bgB)
             }
         }
     }
 
     private companion object {
+        const val TAG = "BackgroundCompositor"
         const val BYTES_PER_PIXEL = 4
         // 8MB band buffer keeps transient pipeline memory predictable: roughly
         // 524 rows at 4000px wide, 1024 rows at 2048px wide.
         const val BAND_BUDGET_BYTES = 8 * 1024 * 1024
+        // If less than 5% of the mask is classified as foreground on a selfie
+        // photo, the segmentation result is unusable. A real selfie occupies
+        // ~15-40% of the frame, so 5% is a very conservative floor.
+        const val MIN_FOREGROUND_RATIO = 0.05f
     }
 }

@@ -36,6 +36,7 @@ import androidx.compose.material.icons.outlined.FlashAuto
 import androidx.compose.material.icons.outlined.FlashOff
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -322,6 +323,24 @@ private fun CameraContent(
                 .padding(bottom = 148.dp),
         )
 
+        if (state.capturing) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.35f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(color = Color.White)
+            }
+        }
+
+        state.error?.let { msg ->
+            LaunchedEffect(msg) {
+                android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
+                onError(null)
+            }
+        }
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -334,27 +353,44 @@ private fun CameraContent(
             CaptureButton(
                 enabled = state.captureEnabled,
                 onClick = {
+                    val capDocId = state.doc?.id
+                    Log.d(TAG, "Capture tap: docId=$capDocId, enabled=${state.captureEnabled}")
+                    if (capDocId == null) {
+                        Log.w(TAG, "Capture aborted: no doc in state")
+                        onError(captureErrorMsg)
+                        return@CaptureButton
+                    }
                     onCapturingChanged(true)
-                    val docId = state.doc?.id ?: return@CaptureButton
-                    val file = File(context.cacheDir, "snapdoc_capture_${docId}_${System.currentTimeMillis()}.jpg")
-                    val output = ImageCapture.OutputFileOptions.Builder(file).build()
-                    controller.takePicture(
-                        output,
-                        mainExecutor,
-                        object : ImageCapture.OnImageSavedCallback {
-                            override fun onImageSaved(results: ImageCapture.OutputFileResults) {
-                                onCapturingChanged(false)
-                                val uri = results.savedUri ?: Uri.fromFile(file)
-                                onCaptured(docId, uri.toString())
-                            }
-
-                            override fun onError(exception: ImageCaptureException) {
-                                Log.e(TAG, "Capture failed", exception)
-                                onCapturingChanged(false)
-                                onError(captureErrorMsg)
-                            }
-                        },
+                    val file = File(
+                        context.cacheDir,
+                        "snapdoc_capture_${capDocId}_${System.currentTimeMillis()}.jpg",
                     )
+                    val output = ImageCapture.OutputFileOptions.Builder(file).build()
+                    try {
+                        Log.d(TAG, "takePicture → $file")
+                        controller.takePicture(
+                            output,
+                            mainExecutor,
+                            object : ImageCapture.OnImageSavedCallback {
+                                override fun onImageSaved(results: ImageCapture.OutputFileResults) {
+                                    val uri = results.savedUri ?: Uri.fromFile(file)
+                                    Log.d(TAG, "Capture OK → $uri")
+                                    onCapturingChanged(false)
+                                    onCaptured(capDocId, uri.toString())
+                                }
+
+                                override fun onError(exception: ImageCaptureException) {
+                                    Log.e(TAG, "Capture failed", exception)
+                                    onCapturingChanged(false)
+                                    onError(captureErrorMsg)
+                                }
+                            },
+                        )
+                    } catch (t: Throwable) {
+                        Log.e(TAG, "takePicture threw", t)
+                        onCapturingChanged(false)
+                        onError(captureErrorMsg)
+                    }
                 },
             )
             FlipButton(onClick = onToggleLens)

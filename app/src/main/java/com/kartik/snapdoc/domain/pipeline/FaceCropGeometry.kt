@@ -16,6 +16,18 @@ sealed interface CropRectResult {
 
 object FaceCropGeometry {
 
+    /**
+     * ML Kit's face bounding box covers roughly eyebrows-to-chin, NOT the full
+     * head (crown-to-chin). Document specs measure head height as crown-to-chin,
+     * so we have to scale the face box up before mapping it into the spec.
+     *
+     * In typical adult-portrait proportions the face box is ~70% of the full
+     * head — the upper ~30% is hair and the crown above the eyebrows. Using
+     * the raw face box without this correction produced crops where the head
+     * filled ~95% of the frame and the hair got chopped off the top.
+     */
+    private const val FACE_BOX_TO_HEAD_RATIO = 0.70f
+
     fun computeCropRect(
         faceBoxHeightPx: Float,
         eyeX: Float,
@@ -30,12 +42,16 @@ object FaceCropGeometry {
         val eyeLinePercent =
             (spec.face.eyeLineFromTopPercentMin + spec.face.eyeLineFromTopPercentMax) / 2f / 100f
 
-        val outHeight = faceBoxHeightPx / headHeightPercent
+        // Estimate the full head height (crown-to-chin) from the face box.
+        val estimatedHeadHeightPx = faceBoxHeightPx / FACE_BOX_TO_HEAD_RATIO
+        val outHeight = estimatedHeadHeightPx / headHeightPercent
         val outWidth = outHeight * targetAspect
 
-        if (outWidth > sourceWidth || outHeight > sourceHeight) {
-            return CropRectResult.FaceTooClose
-        }
+        // No bounds check here: if the computed rect overflows the source,
+        // FaceCropper.padWithBackground extends the canvas with the sampled
+        // corner colour. The previous hard-reject (FaceTooClose) was firing on
+        // any reasonably close shot — the live FaceGuidanceAnalyzer is the
+        // right place to nudge the user back, not a failure at the crop stage.
 
         val top = eyeY - outHeight * eyeLinePercent
         val left = eyeX - outWidth / 2f

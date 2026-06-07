@@ -1,6 +1,7 @@
 package com.kartik.snapdoc.ui.screens.processing
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,7 @@ import com.kartik.snapdoc.domain.pipeline.ProcessingOutcome
 import com.kartik.snapdoc.domain.pipeline.ProcessingStage
 import com.kartik.snapdoc.ui.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +38,11 @@ class ProcessingViewModel @Inject constructor(
     private val args = savedStateHandle.toRoute<Routes.Processing>()
     val docId: String = args.docId
     val imageUri: String = args.imageUri
-    private val decodedImageUri: String = imageUri
+    // Be defensive about double-encoded URIs from typed-route round-trips.
+    // If the value contains an unencoded scheme like "file:" we trust it as-is;
+    // otherwise we Uri.decode once so "file%3A%2F%2F%2F..." is still parseable.
+    private val decodedImageUri: String =
+        if (imageUri.contains(":/")) imageUri else Uri.decode(imageUri)
 
     private val _state = MutableStateFlow(ProcessingUiState())
     val state: StateFlow<ProcessingUiState> = _state.asStateFlow()
@@ -46,9 +52,18 @@ class ProcessingViewModel @Inject constructor(
     private val _events = Channel<ProcessingEvent>(capacity = Channel.UNLIMITED)
     val events: Flow<ProcessingEvent> = _events.receiveAsFlow()
 
+    private var processJob: Job? = null
+
     init {
+        // Skip the singleton PhotoProcessor's *current* stage value on subscribe
+        // (which may be `Done` from a previous run on this same singleton) and
+        // only react to fresh emissions while this VM's process() is running.
         viewModelScope.launch {
             processor.stage.collect { stage ->
+                // Don't let a stale "Done" from a previous run flip us into the
+                // success state before our own process() has even started.
+                if (_state.value.error != null) return@collect
+                if (processJob?.isActive != true && stage == ProcessingStage.Done) return@collect
                 _state.update { it.copy(stage = stage, progress = stage.fraction()) }
             }
         }
@@ -69,13 +84,25 @@ class ProcessingViewModel @Inject constructor(
     }
 
     private fun start() {
-        viewModelScope.launch {
+        // Don't double-start if a previous job is still in flight.
+        processJob?.cancel()
+        processJob = viewModelScope.launch {
             val spec = repo.byId(docId)
             if (spec == null) {
+                Log.w(TAG, "Processing aborted: unknown docId=$docId")
                 _state.update { it.copy(error = PipelineFailureReason.UnknownDocument) }
                 return@launch
             }
-            when (val outcome = processor.process(Uri.parse(decodedImageUri), spec)) {
+            val parsedUri = runCatching { Uri.parse(decodedImageUri) }.getOrNull()
+            if (parsedUri == null) {
+                Log.w(TAG, "Processing aborted: unparseable imageUri=$imageUri")
+                _state.update {
+                    it.copy(error = PipelineFailureReason.SourceUnreadable)
+                }
+                return@launch
+            }
+            Log.d(TAG, "Start processing docId=$docId uri=$parsedUri")
+            when (val outcome = processor.process(parsedUri, spec)) {
                 is ProcessingOutcome.Success -> {
                     val uri = outcome.entry.processedUri.toString()
                     _state.update {
@@ -88,6 +115,7 @@ class ProcessingViewModel @Inject constructor(
                     _events.trySend(ProcessingEvent.Done(docId, uri))
                 }
                 is ProcessingOutcome.Failure -> {
+                    Log.w(TAG, "Processing failed: ${outcome.reason}")
                     _state.update { it.copy(error = outcome.reason) }
                 }
             }
@@ -98,5 +126,9 @@ class ProcessingViewModel @Inject constructor(
         val all = ProcessingStage.entries
         val idx = all.indexOf(this).coerceAtLeast(0)
         return (idx + 1f) / all.size
+    }
+
+    private companion object {
+        const val TAG = "ProcessingVM"
     }
 }

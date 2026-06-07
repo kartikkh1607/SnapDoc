@@ -33,9 +33,38 @@ class FaceCropper @Inject constructor() : Closeable {
             .build(),
     )
 
-    suspend fun cropToSpec(composited: Bitmap, spec: DocumentSpec): CropResult {
-        val face = detect(composited) ?: return CropResult.Failure(PipelineFailureReason.NoFaceDetected)
+    /**
+     * Detects the largest face in [bitmap], or returns null if none was found.
+     * Exposed publicly so callers (PhotoProcessor) can run detection on the
+     * untouched source bitmap rather than the post-segmentation composite —
+     * segmentation can introduce edge artifacts that defeat face detection.
+     */
+    suspend fun detect(bitmap: Bitmap): Face? = suspendCancellableCoroutine { cont ->
+        val input = InputImage.fromBitmap(bitmap, 0)
+        detector.process(input)
+            .addOnSuccessListener { faces ->
+                cont.resume(faces.maxByOrNull { it.boundingBox.height() })
+            }
+            .addOnFailureListener { cont.resumeWithException(it) }
+    }
 
+    /**
+     * Crop [composited] to the spec using a pre-detected [face]. This overload
+     * exists so face detection can run on the unmodified source bitmap while
+     * the actual crop still happens on the background-replaced composite.
+     */
+    suspend fun cropToSpec(composited: Bitmap, face: Face, spec: DocumentSpec): CropResult {
+        return cropFromFace(composited, face, spec)
+    }
+
+    suspend fun cropToSpec(composited: Bitmap, spec: DocumentSpec): CropResult {
+        // Backwards-compatible entry point: detect against the composite. New
+        // callers should use the overload that accepts a pre-detected Face.
+        val face = detect(composited) ?: return CropResult.Failure(PipelineFailureReason.NoFaceDetected)
+        return cropFromFace(composited, face, spec)
+    }
+
+    private fun cropFromFace(composited: Bitmap, face: Face, spec: DocumentSpec): CropResult {
         val faceBox = face.boundingBox
         val leftEye = face.getLandmark(FaceLandmark.LEFT_EYE)?.position
         val rightEye = face.getLandmark(FaceLandmark.RIGHT_EYE)?.position
@@ -82,15 +111,6 @@ class FaceCropper @Inject constructor() : Closeable {
         val cropped = Bitmap.createBitmap(canvasSrc, adjLeft, adjTop, cropW, cropH)
         if (needsPad && canvasSrc !== composited) canvasSrc.recycle()
         return CropResult.Success(cropped)
-    }
-
-    private suspend fun detect(bitmap: Bitmap): Face? = suspendCancellableCoroutine { cont ->
-        val input = InputImage.fromBitmap(bitmap, 0)
-        detector.process(input)
-            .addOnSuccessListener { faces ->
-                cont.resume(faces.maxByOrNull { it.boundingBox.height() })
-            }
-            .addOnFailureListener { cont.resumeWithException(it) }
     }
 
     private fun padWithBackground(source: Bitmap, left: Int, top: Int, right: Int, bottom: Int): Bitmap {

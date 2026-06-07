@@ -12,9 +12,11 @@ import org.junit.Test
 class FaceCropGeometryTest {
 
     @Test
-    fun `output rect height is faceBox height divided by mid head-height percent`() {
-        // Spec wants the head to occupy 70-80% of the photo height (mid = 75%).
-        // A face box that's 300px tall should produce a 400px-tall photo.
+    fun `output rect height accounts for face-box-to-head ratio and mid head-height percent`() {
+        // Spec wants the head to occupy 70-80% of the photo height (mid 75%).
+        // ML Kit's face box is only ~70% of the full crown-to-chin head, so the
+        // estimated head height is faceBox / 0.70. A 300px face box → 428.57px
+        // estimated head → 571.43px output (head fills 75% of that).
         val spec = passportLike(headMin = 70, headMax = 80, eyeMin = 50, eyeMax = 60)
 
         val result = FaceCropGeometry.computeCropRect(
@@ -27,7 +29,7 @@ class FaceCropGeometryTest {
         )
 
         val rect = (result as CropRectResult.Ok).rect
-        assertThat(rect.height).isWithin(0.01f).of(400f)
+        assertThat(rect.height).isWithin(0.01f).of(300f / 0.70f / 0.75f)
     }
 
     @Test
@@ -88,9 +90,11 @@ class FaceCropGeometryTest {
     }
 
     @Test
-    fun `returns FaceTooClose when output rect exceeds the source bitmap`() {
-        // Big face box on a small source: output height would be ~1333px,
-        // larger than the 1000px-tall source.
+    fun `returns Ok even when output rect exceeds the source bitmap so the caller can pad`() {
+        // Big face box on a small source: output height would be ~1905px,
+        // larger than the 1000px-tall source. The geometry no longer rejects
+        // this — FaceCropper.padWithBackground extends the canvas instead, so
+        // a close-up shot still produces a photo rather than a hard failure.
         val spec = passportLike(headMin = 70, headMax = 80)
 
         val result = FaceCropGeometry.computeCropRect(
@@ -102,7 +106,8 @@ class FaceCropGeometryTest {
             sourceHeight = 1000,
         )
 
-        assertThat(result).isEqualTo(CropRectResult.FaceTooClose)
+        val rect = (result as CropRectResult.Ok).rect
+        assertThat(rect.height).isGreaterThan(1000f)
     }
 
     @Test

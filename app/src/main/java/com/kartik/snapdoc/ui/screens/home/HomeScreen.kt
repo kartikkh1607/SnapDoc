@@ -1,8 +1,14 @@
 package com.kartik.snapdoc.ui.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -24,23 +31,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material.icons.outlined.Wallet
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -48,24 +54,21 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.delay
 import com.kartik.snapdoc.data.specs.model.DocumentSpec
 import com.kartik.snapdoc.R
-import com.kartik.snapdoc.ui.ads.MaxBannerAd
 import com.kartik.snapdoc.ui.components.DocKind
 import com.kartik.snapdoc.ui.components.DocPreview
 import com.kartik.snapdoc.ui.components.HomeShimmerSkeleton
+import com.kartik.snapdoc.ui.components.SectionEntry
+import com.kartik.snapdoc.ui.components.pressScale
 import com.kartik.snapdoc.ui.theme.Amber
-import com.kartik.snapdoc.ui.theme.AmberDark
-import com.kartik.snapdoc.ui.theme.AmberSoft
 import com.kartik.snapdoc.ui.theme.ErrorRed
-import com.kartik.snapdoc.ui.theme.Hairline2
 import com.kartik.snapdoc.ui.theme.Ink3
-import com.kartik.snapdoc.ui.theme.Ink4
 import com.kartik.snapdoc.ui.theme.Primary
 import com.kartik.snapdoc.ui.theme.PrimaryDark
-import com.kartik.snapdoc.ui.theme.PrimaryFaint
 import com.kartik.snapdoc.ui.theme.PrimarySoft
 import com.kartik.snapdoc.ui.theme.Success
 import com.kartik.snapdoc.ui.theme.s1
@@ -101,33 +104,40 @@ private fun HomeContent(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(top = 44.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+            .statusBarsPadding()
+            .padding(top = 8.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        PersonalisedHeader(
-            initials = state.profile.initials,
-            firstName = firstName,
-            onSettingsClick = onSettingsClick,
-        )
-        ContinueHero(
-            onClick = { state.documents.firstOrNull()?.let { onDocClick(it.id) } },
-        )
-        StatsRow()
-        SmartReminder()
-        SearchBar()
-        CategoryChips(
-            categories = listOf(null to stringResource(R.string.home_category_all)) +
-                state.categories.map { it.id to it.displayName },
-            selected = state.selectedCategoryId,
-            onSelect = onCategorySelect,
-        )
-        SuggestedHeader(firstName = firstName)
-        if (state.loading) {
-            HomeShimmerSkeleton()
-        } else {
-            DocumentGrid(documents = state.documents, onDocClick = onDocClick)
+        SectionEntry(index = 0) {
+            PersonalisedHeader(
+                initials = state.profile.initials,
+                firstName = firstName,
+                onSettingsClick = onSettingsClick,
+            )
         }
-        MaxBannerAd(modifier = Modifier.padding(top = 12.dp))
+        SectionEntry(index = 1) {
+            ContinueHero(
+                onClick = { state.documents.firstOrNull()?.let { onDocClick(it.id) } },
+            )
+        }
+        SectionEntry(index = 2) {
+            CategoryChips(
+                categories = listOf(null to stringResource(R.string.home_category_all)) +
+                    state.categories.map { it.id to it.displayName },
+                selected = state.selectedCategoryId,
+                onSelect = onCategorySelect,
+            )
+        }
+        SectionEntry(index = 3) {
+            SuggestedHeader(firstName = firstName)
+        }
+        SectionEntry(index = 4) {
+            if (state.loading) {
+                HomeShimmerSkeleton()
+            } else {
+                DocumentGrid(documents = state.documents, onDocClick = onDocClick)
+            }
+        }
     }
 }
 
@@ -204,13 +214,21 @@ private fun AvatarTile(initials: String) {
 @Composable
 private fun NotificationBell(onClick: () -> Unit) {
     val label = stringResource(R.string.home_cd_notifications)
+    val interaction = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .size(40.dp)
+            .pressScale(interaction)
             .s1(14.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(role = Role.Button, onClickLabel = label, onClick = onClick),
+            .clickable(
+                interactionSource = interaction,
+                indication = LocalIndication.current,
+                role = Role.Button,
+                onClickLabel = label,
+                onClick = onClick,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -235,10 +253,12 @@ private fun NotificationBell(onClick: () -> Unit) {
 
 @Composable
 private fun ContinueHero(onClick: () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = Gutter)
+            .pressScale(interaction)
             .sGreen(22.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(
@@ -249,8 +269,10 @@ private fun ContinueHero(onClick: () -> Unit) {
                 ),
             )
             .clickable(
+                interactionSource = interaction,
+                indication = LocalIndication.current,
                 role = Role.Button,
-                onClickLabel = "Continue Aadhaar photo",
+                onClickLabel = stringResource(R.string.home_continue_title),
                 onClick = onClick,
             )
             .padding(14.dp),
@@ -324,176 +346,6 @@ private fun ContinueHero(onClick: () -> Unit) {
 }
 
 @Composable
-private fun StatsRow() {
-    val items = listOf(
-        Triple(
-            stringResource(R.string.home_stat_photos_value),
-            stringResource(R.string.home_stat_photos_label),
-            Icons.Outlined.Image,
-        ),
-        Triple(
-            stringResource(R.string.home_stat_saved_value),
-            stringResource(R.string.home_stat_saved_label),
-            Icons.Outlined.Wallet,
-        ),
-        Triple(
-            stringResource(R.string.home_stat_approved_value),
-            stringResource(R.string.home_stat_approved_label),
-            Icons.Outlined.Shield,
-        ),
-    )
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Gutter),
-    ) {
-        items.forEach { (value, label, icon) ->
-            StatCell(
-                value = value,
-                label = label,
-                icon = icon,
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
-
-@Composable
-private fun StatCell(value: String, label: String, icon: ImageVector, modifier: Modifier = Modifier) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
-            .s1(14.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(RoundedCornerShape(9.dp))
-                .background(PrimaryFaint),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Primary,
-                modifier = Modifier.size(14.dp),
-            )
-        }
-        Column {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.2).sp,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = Ink3,
-            )
-        }
-    }
-}
-
-@Composable
-private fun SmartReminder() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Gutter)
-            .clip(RoundedCornerShape(14.dp))
-            .background(AmberSoft)
-            .border(1.dp, AmberDark.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
-            .padding(start = 10.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
-    ) {
-        Box(
-            modifier = Modifier
-                .size(30.dp)
-                .clip(RoundedCornerShape(9.dp))
-                .background(Amber),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Notifications,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(15.dp),
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.home_reminder_title),
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = AmberDark,
-            )
-            Text(
-                text = stringResource(R.string.home_reminder_subtitle),
-                style = MaterialTheme.typography.labelSmall,
-                color = AmberDark.copy(alpha = 0.85f),
-            )
-        }
-        Text(
-            text = stringResource(R.string.home_reminder_cta),
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-            color = AmberDark,
-        )
-    }
-}
-
-@Composable
-private fun SearchBar() {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Gutter)
-            .height(46.dp)
-            .s1(14.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 14.dp),
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.Search,
-            contentDescription = null,
-            tint = Ink4,
-            modifier = Modifier.size(18.dp),
-        )
-        Text(
-            text = stringResource(R.string.home_search_placeholder),
-            color = Ink4,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f),
-        )
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(Hairline2)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.home_search_shortcut),
-                color = Ink3,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.4.sp,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
 private fun CategoryChips(
     categories: List<Pair<String?, String>>,
     selected: String?,
@@ -504,14 +356,26 @@ private fun CategoryChips(
         contentPadding = PaddingValues(horizontal = Gutter),
     ) {
         items(categories) { (id, name) ->
-            val active = selected == id || (id == null && selected == null && name == "All")
+            val active = selected == id
+            val activeBg = MaterialTheme.colorScheme.onSurface
+            val inactiveBg = MaterialTheme.colorScheme.surface
+            val activeFg = Color.White
+            val inactiveFg = MaterialTheme.colorScheme.onSurface
+            val bg by animateColorAsState(
+                targetValue = if (active) activeBg else inactiveBg,
+                animationSpec = tween(220),
+                label = "chip-bg",
+            )
+            val fg by animateColorAsState(
+                targetValue = if (active) activeFg else inactiveFg,
+                animationSpec = tween(220),
+                label = "chip-fg",
+            )
             Box(
                 modifier = Modifier
+                    .s1(99.dp)
                     .clip(RoundedCornerShape(99.dp))
-                    .let { mod ->
-                        if (active) mod.background(MaterialTheme.colorScheme.onSurface)
-                        else mod.s1(99.dp).background(MaterialTheme.colorScheme.surface)
-                    }
+                    .background(bg)
                     .selectable(
                         selected = active,
                         role = Role.Tab,
@@ -522,7 +386,7 @@ private fun CategoryChips(
                 Text(
                     text = name,
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = if (active) Color.White else MaterialTheme.colorScheme.onSurface,
+                    color = fg,
                 )
             }
         }
@@ -565,12 +429,16 @@ private fun DocumentGrid(documents: List<DocumentSpec>, onDocClick: (String) -> 
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 row.forEachIndexed { colIdx, doc ->
                     val featured = rowIdx == 0 && colIdx == 0
-                    DocCardLarge(
-                        doc = doc,
-                        featured = featured,
-                        onClick = { onDocClick(doc.id) },
+                    GridItemStagger(
+                        index = rowIdx * 2 + colIdx,
                         modifier = Modifier.weight(1f),
-                    )
+                    ) {
+                        DocCardLarge(
+                            doc = doc,
+                            featured = featured,
+                            onClick = { onDocClick(doc.id) },
+                        )
+                    }
                 }
                 if (row.size < 2) Spacer(modifier = Modifier.weight(1f))
             }
@@ -585,12 +453,20 @@ private fun DocCardLarge(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val interaction = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
+            .pressScale(interaction)
             .s1(18.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(MaterialTheme.colorScheme.surface)
-            .clickable(role = Role.Button, onClickLabel = doc.displayName, onClick = onClick)
+            .clickable(
+                interactionSource = interaction,
+                indication = LocalIndication.current,
+                role = Role.Button,
+                onClickLabel = doc.displayName,
+                onClick = onClick,
+            )
             .height(132.dp)
             .padding(12.dp),
     ) {
@@ -607,7 +483,11 @@ private fun DocCardLarge(
                 maxLines = 1,
             )
             Text(
-                text = "${doc.dimensions.widthMm.toInt()}Ã—${doc.dimensions.heightMm.toInt()} mm",
+                text = stringResource(
+                    R.string.home_doc_card_size,
+                    doc.dimensions.widthMm.toInt(),
+                    doc.dimensions.heightMm.toInt(),
+                ),
                 style = MaterialTheme.typography.labelMedium,
                 color = Ink3,
             )
@@ -631,6 +511,26 @@ private fun DocCardLarge(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun GridItemStagger(
+    index: Int,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(index * 55L)
+        visible = true
+    }
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = fadeIn(tween(280)) + slideInVertically(tween(300)) { it / 4 },
+    ) {
+        content()
     }
 }
 

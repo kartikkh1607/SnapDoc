@@ -56,22 +56,54 @@ class PhotoProcessor @Inject constructor(
             val source = decodeOriented(sourceUri)
                 ?: return@withContext ProcessingOutcome.Failure(PipelineFailureReason.SourceUnreadable)
 
+            // Detect on the untouched source. Running detection on the post-
+            // segmentation composite (the previous behavior) caused ML Kit to
+            // miss faces because mask edges can subtly distort facial geometry.
+            // Doing it here also lets us fail fast before the expensive
+            // segmentation step when no face is in frame.
+            val face = faceCropper.detect(source)
+            if (face == null) {
+                source.recycle()
+                return@withContext ProcessingOutcome.Failure(PipelineFailureReason.NoFaceDetected)
+            }
+
             _stage.value = ProcessingStage.RemovingBackground
             ensureActive()
-            val removed = backgroundRemover.remove(source)
+            // Segmentation can fail (ML Kit init issue, weird lighting, etc.).
+            // If it does, we don't lose the whole photo — fall back to the
+            // original source bitmap so the user still gets a cropped portrait.
+            val removed = runCatching { backgroundRemover.remove(source) }
+                .onFailure { android.util.Log.w(TAG, "Selfie segmentation failed", it) }
+                .getOrNull()
 
             _stage.value = ProcessingStage.ApplyingBackground
             ensureActive()
-            val composited = backgroundCompositor.composite(removed, spec.background)
-            if (composited !== source) source.recycle()
+            val composited = if (removed != null) {
+                runCatching { backgroundCompositor.composite(removed, spec.background) }
+                    .onFailure { android.util.Log.w(TAG, "Background composite failed", it) }
+                    .getOrNull()
+            } else null
+
+            // Trust the composite if we got one. The previous secondary
+            // face-detect check was rejecting valid composites just because
+            // ML Kit's face model gets confused by uniform backgrounds,
+            // which forced every photo into the no-bg-replacement fallback.
+            val cropBase = if (composited != null) {
+                if (composited !== source) source.recycle()
+                composited
+            } else {
+                source
+            }
 
             _stage.value = ProcessingStage.Cropping
             ensureActive()
-            val cropResult = faceCropper.cropToSpec(composited, spec)
+            // Face coords from `face` are valid for cropBase — both source and
+            // composite share the same dimensions.
+            val cropResult = faceCropper.cropToSpec(cropBase, face, spec)
             val cropped = when (cropResult) {
-                is CropResult.Success -> cropResult.bitmap.also { if (it !== composited) composited.recycle() }
+                is CropResult.Success -> cropResult.bitmap.also { if (it !== cropBase) cropBase.recycle() }
                 is CropResult.Failure -> {
-                    composited.recycle()
+                    cropBase.recycle()
                     return@withContext ProcessingOutcome.Failure(cropResult.reason)
                 }
             }
@@ -184,6 +216,7 @@ class PhotoProcessor @Inject constructor(
     }
 
     private companion object {
+        const val TAG = "PhotoProcessor"
         // Caps decoded input at ~4096px longest side to keep peak ARGB_8888 allocation
         // under ~67MB even from 50MP camera shots.
         const val MAX_INPUT_DIMENSION_PX = 4096
